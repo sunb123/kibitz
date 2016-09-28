@@ -1,0 +1,154 @@
+<!-- TODO: Replace table to table component when https://github.com/angular/material/issues/796 will closed -->
+<style>
+.item-select select {
+  margin: 10px 10px 10px 10px;
+
+  padding: 10px 10px 10px 10px;
+//  display: block;
+  width: 50%;
+  height: 100%;
+}
+
+label {
+  display: inline-block;
+  width: 90px;
+  text-align: right;
+}
+</style>
+
+<div ncy-breadcrumb></div>
+
+<div ng-if="vm.hasRecommenders">
+
+    <div class="table-responsive-vertical md-whiteframe-z1">
+        <table id="table" class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>URL</th>
+    <!--             <th>Progress</th>
+     -->        </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn" ui-sref="home.recsys({'model': data, 'id': data.id})" ng-click="vm.showSimpleToast(data.name)">
+                <td data-title="ID">{{$index + 1}}</td>
+                <td data-title="Name">{{data.name}}</td>
+                <td data-title="Status"><span id="recsys-status" class="label" ng-class="{'label-success': data.status == 'active', 'label-warning': data.status == 'paused'}" style="text-transform: capitalize">{{data.status}}</span></td>
+                <td data-title="URL Link"><a ng-href="{{data.url_name}}">www.example.com/{{data.url_name}}</a></td>
+    <!--             <td data-title="Progress">
+                    <md-progress-linear class="table-progress {{data.class}}"
+                                        md-mode="determinate"
+                                        value={{data.progress}}>
+                    </md-progress-linear>
+                </td> -->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+<!--     <button type="button" class="btn btn-success"><i class="material-icons">add_box</i>Create New Recommender</button>
+ -->
+</div>
+
+
+<div ng-if="!vm.hasRecommenders">
+No recommenders
+</div>
+
+
+
+<!-- <button ng-click="vm.listrepos()">GET REPOS</button>
+ -->
+
+<button type="button" class="create-recsys-btn btn btn-success btn-lg" data-toggle="modal" data-target="#myModal"><i class="material-icons">add_box</i>Create New Recommender</button>
+
+<button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="vm.notAuthenticated" ng-click="vm.auth()">Authenticate Datahub</button>
+
+<!-- <div ng-include="'app/views/partials/recsysCreationTemplate.html'">
+ -->
+
+
+ <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel">Create New Recommender</h4>
+      </div>
+      <div class="modal-body" style="height: 570px">
+
+        <div class="tabbable"> <!-- Only required for left/right tabs -->
+              <ul class="nav nav-tabs" style="cursor:pointer">
+              <li class="active"><a ng-click="vm.changeTab(0)" data-toggle="tab">Upload CSV</a></li>
+              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Select Repo (datahub)</a></li>
+              </ul>
+
+
+              <div class="tab-content">
+                <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
+                    <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
+                        <form>
+                        <div>
+                              <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
+                        </div>
+                        <div>
+                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
+                        </div>
+                        </form>
+
+                        <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Must include headers for Title and Description.</h4>
+                        <input type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
+                        <button type="button" class="btn btn-primary" ng-click="uploadCSV(file)" style="font-size: 20px;">Upload</button>
+                    </div>
+                </div>
+
+                <div ng-show="vm.whichTab == 1" class="tab-pane active" id="tab2">
+                    <div class="item-select" style="padding: 10px 10px 10px 0px">
+                        <form>
+                        <div>
+                              <label>Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
+                        </div>
+                        <div>
+                              <label>URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
+                        </div>
+
+                        <div>
+                              <label>Repository:</label><select ng-model="selectedRepo" ng-options="repo.name for repo in repos track by repo.name"></select>
+                        </div>
+                        <div>
+                              <label>Item Table:</label><select ng-model="selectedTable" ng-options="table.name for table in tables track by table.name"></select>
+                        </div>
+                        <div>
+                              <label>Primary Key:</label><select ng-model="selectedPrimaryKey" ng-options="column as column.name for column in columns"></select>
+                        </div>
+                        <div>
+                              <label>Title:</label><select ng-model="selectedTitle" ng-options="column as column.name for column in columns"></select>
+                        </div>
+                        <div>
+                              <label>Description:</label><select ng-model="selectedDescription" ng-options="column as column.name for column in columns"></select>
+                        </div>
+                        <div>
+                              <label>Image Link:</label><select ng-model="selectedImageLink" ng-options="column as column.name for column in columns"></select>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+              </div>
+        </div>
+
+
+
+
+
+      </div>
+      <div class="modal-footer" ng-show="vm.whichTab == 1">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Create Recommender</button>
+      </div>
+    </div>
+  </div>
+</div>

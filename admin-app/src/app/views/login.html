@@ -1,0 +1,98 @@
+<div class="row">
+
+
+<!-- TODO: clean up login and signup -->
+
+
+<!--   <iframe ng-src="{{currentProjectUrl}}"> </iframe>
+ -->
+
+<!--   <div class="col-md-4 col-md-offset-4">
+    <h1>Login</h1>
+
+    <div class="well">
+      <form role="form" ng-submit="vm.login()">
+        <div class="alert alert-danger" ng-show="error" ng-bind="error"></div>
+
+        <div class="form-group">
+          <label for="login__email">Email or Username</label>
+          <input type="text" class="form-control" id="login__email__username" ng-model="vm.emailUsername" placeholder="ex. john@example.com or john37" />
+        </div>
+
+        <div class="form-group">
+          <label for="login__password">Password</label>
+          <input type="password" class="form-control" id="login__password" ng-model="vm.password" placeholder="ex. thisisnotgoogleplus" />
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <hr class="col-md-4 col-md-offset-4" style="display:inline-block; background-color:black">
+
+  <div class="col-md-4 col-md-offset-4">
+    <h3>Login through Datahub</h3>
+
+    <button class="btn btn-primary" style="display:block">Datahub</button>
+  </div> -->
+
+   <div class="main-content">
+
+        <!-- You only need this form and the form-login.css -->
+
+        <form class="form-login" ng-submit="vm.login()">
+
+            <div class="form-log-in-with-email">
+
+                <div class="form-white-background">
+
+                    <div class="form-title-row">
+                        <h1>Log in</h1>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Username</span>
+                            <input type="text" name="username" ng-model="vm.username">
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Password</span>
+                            <input type="password" name="password" ng-model="vm.password">
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <button type="submit">Log in</button>
+                    </div>
+
+                </div>
+
+                <a href="#" class="form-forgotten-password">Forgotten password &middot;</a>
+                <a ui-sref="home.signup" class="form-create-an-account">Create an account &rarr;</a>
+
+            </div>
+
+            <div class="form-sign-in-with-social">
+
+                <div class="form-row form-title-row">
+                    <span class="form-title">Sign in with</span>
+                </div>
+
+                <a href="{{vm.loginUrl}}" class="form-datahub-button">Datahub</a>
+                A powerful tool for managing all your data
+
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+</div>

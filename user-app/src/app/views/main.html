@@ -1,0 +1,67 @@
+<div layout="column" flex>
+  <div class="mytoolbar">
+    <md-toolbar class="col-md-offset-1 col-md-10" layout="row" layout-align="start center">
+      <section> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
+        <h3 style="cursor: pointer; cursor: hand; font-size: 150%; text-transform: uppercase; margin: 0px 10px 0px 10px">
+          <a class="clearhref" ui-sref="home.items" >{{vm.recsysTitle}}</a>
+        </h3>
+      </section>
+
+      <section>
+        <form class="search-group" style="width:500px">
+          <div class="input-group">
+
+            <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()">
+         <md-item-template>
+          <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
+        </md-item-template>
+            </md-autocomplete>
+
+          </div>
+        </form>
+      </section>
+
+      <span flex></span>
+
+      <section>
+        <md-menu ng-if="loggedIn">
+            <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+                <span>{{username}}</span>
+                <i class="material-icons">keyboard_arrow_down</i>
+            </md-button>
+            <md-menu-content width="3">
+                <md-menu-item><md-button ng-click="$mdCloseMenu()" ui-sref="home.profile">Profile</md-button></md-menu-item>
+                <md-menu-item><md-button ng-click="vm.logout();$mdCloseMenu()">Log Out</md-button></md-menu-item>
+            </md-menu-content>
+        </md-menu>
+        <div layout="row" ng-if="!loggedIn">
+          <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.signup">
+              <span>Sign Up</span>
+          </md-button>
+          <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.login">
+              <span>Log In</span>
+          </md-button>
+        </div>
+
+      </section>
+    </md-toolbar>
+  </div>
+
+  <md-progress-linear md-mode="indeterminate" ng-show="showSearchProgress" style="width: 125%"></md-progress-linear>
+
+  <div ng-if="addTabs()" layout="row" layout-align="center center">
+    <md-tabs style="width: 380px" md-selected="tabIndex">
+      <md-tab label="Home" md-on-select="tabSwitch(tabIndex)"></md-tab>
+      <md-tab label="Popular" md-on-select="tabSwitch(tabIndex)"></md-tab>
+      <md-tab label="My Rated Items" md-on-select="tabSwitch(tabIndex)"></md-tab>
+    </md-tabs>
+  </div>
+      
+
+  <md-content flex id="maincontent" class="md-padding page-content" style="overflow-y:scroll;">
+      <div class="col-md-offset-1 col-md-10" ui-view></div>
+  </md-content>
+
+
+
+</div>

@@ -1,0 +1,63 @@
+<md-sidenav ng-show="loggedIn" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left"
+            class="md-whiteframe-z2 md-sidenav-left">
+  <md-toolbar md-theme="custom" class="md-hue-1 md-whiteframe-z2">
+    <md-button layout="row" layout-align="center center" class="md-toolbar-tools" ui-sref="home.table"
+               > <!-- TODO: change url to home page href="{{vm.kibitz_home_location}}" -->
+      <h1>Kibitz</h1>
+    </md-button>
+  </md-toolbar>
+
+      <md-button ng-repeat-start="item in vm.menuItems" layout="column" layout-align="center center"
+                 flex class="capitalize" ng-click="vm.selectItem(item)"
+                 ui-sref-active="md-warn" ui-sref="{{item.sref}}">
+          <div hide-sm hide-md class="md-tile-content">
+              <i class="material-icons md-36">{{item.icon}}</i>
+          </div>
+          <div class="md-tile-content">
+              {{item.name}}
+          </div>
+      </md-button>
+      <md-divider ng-repeat-end></md-divider>
+</md-sidenav>
+
+
+<div layout="column" flex style="background-color: #999999">
+<!--     <div ng-show="!loggedIn" style="margin: 0px 200px 0px 200px">
+ -->      <md-toolbar layout="row" layout-align="start center" style="background-color: #999999"> <!-- 8c8c8c-->
+
+          <section layout-align="start center">
+              <md-button class="md-toolbar-tools" ng-show="!loggedIn" ui-sref="home.table"
+                         href=""> <!-- TODO: change url to home page -->
+                <h1>Kibitz</h1>
+              </md-button>
+          </section>
+
+          <section layout-align="start center" layout-fill flex></section>
+
+          <section layout-align="end center">
+              <md-menu md-offset="0 20" ng-if="loggedIn">
+                  <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+                      <span>{{vm.username}}</span>
+                      <i class="material-icons">keyboard_arrow_down</i>
+                  </md-button>
+                  <md-menu-content width="3">
+                      <md-menu-item><md-button ng-click="vm.logout()">Log out</md-button></md-menu-item>
+                  </md-menu-content>
+              </md-menu>
+
+              <div layout="row" ng-if="!loggedIn">
+                <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.signup">
+                    <span>Sign Up</span>
+                </md-button>
+                <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.login">
+                    <span>Log In</span>
+                </md-button>
+              </div>
+          </section>
+      </md-toolbar>
+<!--     </div>
+ -->
+    <md-content flex class="md-padding page-content" style="overflow-y: scroll;">
+        <div ui-view></div>
+    </md-content>
+</div>

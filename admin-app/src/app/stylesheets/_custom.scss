@@ -1,0 +1,710 @@
+// COLORS
+$main-bg-color: #ECECEC;
+$text-color: #7A7A7A;
+$accent-color: rgb(0, 150, 136);
+$warning-color: #E75753;
+
+
+// VARIABLES
+$left-sidenav-width: 135px;
+$widget-height: 310px;
+$font-weight-bold: 600;
+$font-size-large: 22px;
+
+// LOGIN FORM
+html{
+    background-color: #f3f3f3;
+}
+
+.form-login{
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+
+    font: bold 14px sans-serif;
+    text-align: center;
+}
+
+.form-log-in-with-email{
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 130px;
+    text-align: center;
+}
+
+.form-log-in-with-email .form-white-background{
+    width: 570px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 60px 80px;
+    margin-bottom: 32px;
+}
+
+.form-log-in-with-email .form-row{
+    text-align: left;
+    margin-bottom: 23px;
+}
+
+.form-log-in-with-email .form-title-row{
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.form-log-in-with-email h1{
+    display: inline-block;
+    box-sizing: border-box;
+    color:  #4c565e;
+    font-size: 24px;
+    padding: 0 30px 15px;
+    border-bottom: 2px solid #6caee0;
+    margin:0;
+}
+
+.form-log-in-with-email .form-row > label span{
+    display: inline-block;
+    box-sizing: border-box;
+    color:  #5f5f5f;
+    width: 125px;
+    text-align: right;
+    padding-right: 25px;
+}
+
+.form-log-in-with-email input{
+    color:  #5f5f5f;
+    box-sizing: border-box;
+    width: 230px;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+    padding: 12px 18px;
+    border: 1px solid #dbdbdb;
+}
+
+.form-log-in-with-email button{
+    display: block;
+    border-radius: 2px;
+    background-color:  #6caee0;
+    color: #ffffff;
+    font-weight: bold;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+    padding: 15px 35px;
+    border: 0;
+    margin: 55px auto 0;
+    cursor: pointer;
+}
+
+.form-log-in-with-email .form-forgotten-password,
+.form-log-in-with-email .form-create-an-account{
+    text-decoration: none;
+    padding: 4px 8px;
+    font-weight: normal;
+}
+
+.form-log-in-with-email .form-forgotten-password{
+    color:  #4e9eda;
+}
+
+.form-log-in-with-email .form-create-an-account{
+    color:  #7b9d62;
+    background-color: #d6f0c3;
+}
+
+.form-log-in-with-email:after{
+    content: 'OR';
+    position: absolute;
+    bottom: 267px;
+    right: -100px;
+
+    border-radius: 50%;
+    background-color: #edeca5;
+    width: 50px;
+    height: 50px;
+    color: #93923b;
+    font-size: 17px;
+    line-height: 50px;
+}
+
+.form-sign-in-with-social{
+    display: inline-block;
+    max-width: 180px;
+    box-sizing: border-box;
+    vertical-align: top;
+    text-align: center;
+    margin-top: 100px;
+}
+
+/*.form-sign-in-with-social .form-title-row{
+    margin-bottom: 50px;
+    font-size: 10px;
+}
+
+.form-sign-in-with-social .form-title{
+    box-sizing: border-box;
+    color:  #4c565e;
+    font-size: 10px;
+    padding: 15px 20px;
+    border-bottom: 2px solid #6caee0;
+}*/
+
+.form-sign-in-with-social .form-datahub-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(222, 110, 60, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+.form-sign-in-with-social .form-facebook-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(75, 136, 194, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+.form-sign-in-with-social .form-twitter-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(123, 195, 226, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+/*  Making the form responsive. Remove these media queries
+    if you don't need the form to work on mobile devices. */
+
+@media (max-width: 900px) {
+
+    .form-login{
+        margin: 20px auto;
+    }
+
+    .form-log-in-with-email{
+        position: relative;
+        display: block;
+        margin: 0 0 50px;
+    }
+
+    .form-log-in-with-email .form-white-background{
+        margin: 0 auto 32px;
+    }
+
+    .form-log-in-with-email:after{
+        bottom: -80px;
+        left: 50%;
+        margin-left: -25px;
+    }
+
+    .form-sign-in-with-social{
+        margin-top: 60px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .form-log-in-with-email .form-white-background{
+        width: 300px;
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+
+    .form-log-in-with-email .form-row > label span{
+        display: block;
+        text-align: left;
+        padding: 0 0 10px;
+    }
+
+    .form-log-in-with-email .form-email,
+    .form-log-in-with-email .form-password{
+        display: block;
+        margin: 0 auto;
+    }
+
+    .form-log-in-with-email:after{
+        bottom: -80px;
+        left: 50%;
+        margin-left: -25px;
+    }
+
+    .form-log-in-with-email .form-forgotten-password,
+    .form-log-in-with-email .form-create-an-account{
+        display: block;
+        margin: 5px auto;
+        max-width: 180px;
+    }
+
+}
+
+// SIGNUP FORM
+  html{
+    background-color: #f3f3f3;
+}
+
+.form-register{
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+
+    font: bold 14px sans-serif;
+    text-align: center;
+}
+
+.form-register-with-email{
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 130px;
+    text-align: center;
+}
+
+.form-register-with-email .form-white-background{
+    width: 570px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 60px 80px;
+    margin-bottom: 35px;
+}
+
+.form-register-with-email .form-row{
+    text-align: left;
+    margin-bottom: 23px;
+}
+
+.form-register-with-email .form-title-row{
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.form-register-with-email h1{
+    display: inline-block;
+    box-sizing: border-box;
+    color:  #4c565e;
+    font-size: 24px;
+    padding: 0 20px 15px;
+    border-bottom: 2px solid #6caee0;
+    margin: 0;
+}
+
+.form-register-with-email .form-row > label span{
+    display: inline-block;
+    box-sizing: border-box;
+    color:  #5f5f5f;
+    width: 125px;
+    text-align: right;
+    padding-right: 25px;
+}
+
+.form-register-with-email input{
+    color:  #5f5f5f;
+    box-sizing: border-box;
+    width: 230px;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+    padding: 12px 18px;
+    border: 1px solid #dbdbdb;
+}
+
+.form-register-with-email .form-checkbox input{
+    margin-left: 128px;
+    margin-right: 10px;
+    width: auto;
+    vertical-align: top;
+}
+
+.form-register-with-email .form-row .form-checkbox span{
+    font-size: 12px;
+    font-weight: normal;
+    display: inline-block;
+    text-align: left;
+    width: 220px;
+    margin: 0;
+}
+
+.form-register-with-email .form-checkbox span a{
+    text-decoration: none;
+    color:  #6caee0;
+}
+
+.form-register-with-email button{
+    display: block;
+    border-radius: 2px;
+    background-color:  #6caee0;
+    color: #ffffff;
+    font-weight: bold;
+    box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, 0.08);
+    padding: 15px 35px;
+    border: 0;
+    margin: 55px auto 0;
+    cursor: pointer;
+}
+
+.form-register-with-email .form-log-in-with-existing{
+    text-decoration: none;
+    padding: 4px 8px;
+    font-weight: normal;
+    color: #7b9d62;
+    background-color: #d6f0c3;
+}
+
+.form-register-with-email:after{
+    content: 'OR';
+    position: absolute;
+    bottom: 330px;
+    right: -100px;
+
+    border-radius: 50%;
+    background-color: #edeca5;
+    width: 50px;
+    height: 50px;
+    color: #93923b;
+    font-size: 17px;
+    line-height: 50px;
+}
+
+.form-sign-in-with-social{
+    display: inline-block;
+    max-width: 181px;
+    box-sizing: border-box;
+    vertical-align: top;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.form-sign-in-with-social .form-title-row{
+    margin-bottom: 50px;
+}
+
+.form-sign-in-with-social .form-title{
+    box-sizing: border-box;
+    color:  #4c565e;
+    font-size: 20px;
+    padding: 15px 20px;
+    border-bottom: 2px solid #6caee0;
+}
+
+.form-sign-in-with-social .form-datahub-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(222, 110, 60, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+.form-sign-in-with-social .form-facebook-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(75, 136, 194, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+.form-sign-in-with-social .form-twitter-button{
+    color:  #ffffff;
+    display: block;
+    width: 145px;
+    height: 40px;
+    font-size: 12px;
+    line-height: 40px;
+    background-color:  rgba(123, 195, 226, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    margin: 8px auto;
+    text-decoration: none;
+}
+
+/*  Making the form responsive. Remove these media queries
+    if you don't need the form to work on mobile devices. */
+
+@media (max-width: 900px) {
+
+    .form-register{
+        margin: 20px auto;
+    }
+
+    .form-register-with-email{
+        position: relative;
+        display: block;
+        margin: 0;
+    }
+
+    .form-register-with-email .form-white-background{
+        margin: 0 auto 32px;
+    }
+
+    .form-register-with-email:after{
+        bottom: -80px;
+        left: 50%;
+        margin-left: -25px;
+    }
+
+    .form-sign-in-with-social {
+        margin-top: 105px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .form-register-with-email .form-white-background{
+        width: 300px;
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+
+    .form-register-with-email .form-row > label span{
+        display: block;
+        text-align: left;
+        padding: 0 0 10px;
+    }
+
+    .form-register-with-email input{
+        display: block;
+        margin: 0 auto;
+    }
+
+    .form-register-with-email .form-checkbox input{
+        display: inline-block;
+        margin-left: 0;
+    }
+
+    .form-register-with-email .form-checkbox span{
+        width: 200px !important;
+    }
+
+    .form-register-with-email:after{
+        bottom: -80px;
+        left: 50%;
+        margin-left: -25px;
+    }
+}
+////////////////////
+
+.item-select label {
+  width: 160px
+}
+
+md-toast.md-success-toast-theme .md-toast-content {
+    background-color: #2ECC40;
+}
+
+md-toast.md-error-toast-theme .md-toast-content {
+    background-color: #d9534f;
+}
+
+.create-recsys-btn {
+    color:  #ffffff;
+    //display: block;
+    //width: 145px;
+    //height: 40px;
+    //font-size: 12px;
+    //line-height: 40px;
+    background-color:  rgba(222, 110, 60, 0.9);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 2px;
+    //margin: 8px auto;
+    text-decoration: none;
+}
+
+iframe {
+    position:absolute;
+    margin: auto;
+    //left: 0px;
+    width: 100%;
+    top: 0px;
+    height: 100%;
+}
+
+#recsys-status {
+  display: inline-block;
+  width: 60px;
+}
+
+// LAYOUT
+body {
+  color: $text-color;
+}
+
+.toolbar-button {
+  min-width: 20px;
+}
+
+.share-label {
+  vert-align: middle;
+  margin-left: 10px;
+}
+
+.page-content {
+  background-color: $main-bg-color;
+}
+
+.widget-progress {
+  width: 95% !important;
+  margin-left: 10px;
+}
+
+// UTILS
+.capitalize {
+  text-transform: capitalize;
+}
+
+.img-circle {
+  height: 50px;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+
+// COMPONENTS
+.messages {
+  position: relative;
+
+  &-content {
+    height: 100vh;
+  }
+}
+
+.notifications-label {
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  position: absolute;
+  font-size: 12px;
+  top: 2px;
+  right: 2px;
+  background-color: $warning-color;
+}
+
+// panel-widget
+.panel-widget {
+  background-color: white;
+
+  &-toolbar {
+    box-shadow: none;
+    margin: 0;
+  }
+
+  &-tittle {
+    color: $text-color;
+  }
+}
+
+.options {
+  -webkit-transition:all linear 0.5s;
+  transition:all linear 0.5s;
+}
+
+.options.ng-hide {
+  opacity:0;
+}
+
+.fixed-height-widget {
+  height: $widget-height;
+}
+
+// charts
+.donut-chart-title{
+  text-align: center;
+}
+
+.custom-tooltip {
+  font-size: $font-size-large;
+  color: $text-color;
+  text-align: center;
+}
+
+
+// OVERRIDES
+// angular material overrides
+md-radio-group {
+  border: none;
+}
+
+md-icon {
+  height: auto;
+}
+
+md-sidenav.md-locked-open.md-sidenav-left {
+  width: $left-sidenav-width;
+  min-width: $left-sidenav-width;
+  max-width: $left-sidenav-width;
+}
+
+a.md-button.md-warn.md-raised, a.md-button.md-warn.md-fab, .md-button.md-warn.md-raised, .md-button.md-warn.md-fab {
+  color: white;
+}
+
+md-radio-button.md-accent.md-checked .md-label span {
+  color: $accent-color;
+}
+
+.md-toolbar-tools h1 {
+  font-size: $font-size-large;
+}
+
+
+md-backdrop.md-sidenav-backdrop {
+  position: fixed;
+}
+
+// libs overrides
+.material-icons {
+  vertical-align: middle;
+}
+
+.material-icons.md-18 { font-size: 18px; }
+.material-icons.md-24 { font-size: 24px; }
+.material-icons.md-36 { font-size: 36px; }
+.material-icons.md-48 { font-size: 48px; }
+
+.nvd3.nv-pie .nv-pie-title {
+  fill: rgb(68, 68, 68);
+  font-weight: $font-weight-bold;
+  font-size: $font-size-large !important;
+}
+
+.nvtooltip {
+  background-color: transparent;
+  border: none;
+  font-weight: $font-weight-bold;
+}
+
+.orange .md-bar2 {
+  background-color: orange;
+}
+
+.orange .md-container {
+  background-color: rgb(255, 236, 201)
+}

@@ -1,0 +1,154 @@
+<style type="text/css">
+.container {
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    padding: 20px;
+    top: 20px;
+    -webkit-box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
+}
+</style>
+
+<div ncy-breadcrumb></div>
+
+<div class="container col-md-8 col-md-offset-2"> <!-- find better bottom margin  style="margin-bottom: 10px"-->
+
+	<div>
+	    <h1 style="display: inline-block; margin: 10px 0px 10px 0px">Settings</h1>
+
+    	<div class="btn-group" role="group" aria-label="css" style="margin: 10px 0px 10px 0px; display: inline-block; float:right;">
+	        <button class="btn btn-default" ng-class="{active: vm.tabSetting == 'general'}" ng-click="vm.generalTab(); vm.setAsActive('general')" style="outline:none">General</button>
+	        <button class="btn btn-default" ng-class="{active: vm.tabSetting == 'advanced'}" ng-click="vm.advancedTab(); vm.setAsActive('advanced')" style="outline:none">Advanced</button>
+	    </div>
+	</div>
+
+	<form ng-submit="vm.submit()" ng-show="vm.isGeneralTab()" novalidate>
+
+	    <formly-form model="vm.recsys" fields="vm.recsysFields" form="vm.recsysForm">
+	        <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysForm.$invalid">Submit</button>
+	    </formly-form>
+	</form>
+
+<!-- 		Customize user site logo
+		Customize top navbar color
+		Customize content page background color
+
+		Image aspect ratio.
+
+		Image, video links -->
+
+	<form ng-show="vm.isAdvancedTab()" ng-submit="vm.cssUpload(1, vm.cssText)" style="margin-bottom: 30px">
+
+		<h4>CSS Edit</h4>
+		<textarea ng-model="vm.cssText" style="height:600px; width: 80%; display: block"></textarea>
+
+    <h4>CSS Link</h4>
+    <input ng-model="vm.cssLink" type="text" name="" style="width:80%">
+
+    <button type="submit" class="btn btn-primary" style="display: block; margin: 10px 0px 10px 0px">Submit</button>
+
+  </form>
+<!--
+	<form>
+		Include extra item fields in item description. (author, gender, age, date, etc.)
+	</form> -->
+</div>
+
+
+
+
+
+<div class="container col-md-8 col-md-offset-2" ng-show="vm.isGeneralTab()">
+	<button ng-if="!paused" type="button" class="btn btn-warning" data-toggle="modal" data-target="#pauseModal">Pause Recommender</button>
+	<button ng-if="paused" type="button" class="btn btn-success" data-toggle="modal" data-target="#startModal">Start Recommender</button>
+	<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Recommender</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="cssResetModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to reset to the original CSS? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
+        <button type="button" class="btn btn-danger">Reset CSS</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="deleteModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the recommender? This cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
+        <button type="button" class="btn btn-danger">Delete Forever</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="startModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to start the recommender? Your application will be deloyed automatically.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
+        <button type="button" class="btn btn-success">Start Recommender</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="pauseModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to pause the recommender? Your application will become inaccessible.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
+        <button type="button" class="btn btn-warning">Pause Recommender</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
