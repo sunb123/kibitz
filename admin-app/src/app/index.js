@@ -7,8 +7,8 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
   .constant('config', {
     home_url: 'http://localhost:3000', // TODO: change to app location
     server_url: 'http://localhost:8000/api/v1', // TODO: change to server location
-    dh_login_url: 'https://datahub.csail.mit.edu/account/login?redirect_url='+home_url,
-    dh_signup_url: 'https://datahub.csail.mit.edu/account/register?redirect_url='+home_url,
+    dh_login_url: 'https://datahub.csail.mit.edu/account/login?redirect_url='+'http://localhost:3000',
+    dh_signup_url: 'https://datahub.csail.mit.edu/account/register?redirect_url='+'http://localhost:3000',
     buildURL: function(path, params) {
         var base_url = 'https://datahub.csail.mit.edu';
         var query = '';
