@@ -1,0 +1,78 @@
+.book {
+    background-color:red;
+}
+
+
+.popover-title {
+  word-break: break-all;
+}
+
+md-card img {
+  max-width: 280px;
+  max-height: 210px;
+  height:auto;
+}
+
+.card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: auto; //80px;
+    height: auto; //70px;
+}
+
+.coloredRatings {
+    color: red;
+}
+
+.item-card {
+    width: 280px;
+    height: auto; // 400px;
+}
+
+.item-img {
+    padding:0px 0px 0px 0px;
+}
+
+.item-title-text {
+    max-width: 225px;
+}
+
+.item-title {
+    word-wrap: break-word;
+}
+
+.item-popover {
+    cursor:pointer;
+    text-decoration:underline;
+}
+
+
+
+////////
+// for design 1: no popovers
+
+.card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: auto; //80px;
+    height: auto; //70px;
+}
+
+.coloredRatings {
+    color: red;
+}
+
+.item-card {
+    width: 280px;
+    height: auto; // 400px;
+}
+
+item {
+    padding: 0px 50px 0px 50px;
+}

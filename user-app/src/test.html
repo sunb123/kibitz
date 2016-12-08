@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+ <head>
+    <link rel="stylesheet" href="./assets/mavo.css" />
+ </head>
+
+<!-- <style>
+    .movie .bad { background: #fee; }
+    .movie .ok { background: #ffe; }
+    .movie .good { background: #efd; }
+</style> -->
+
+
+<body>
+
+<div data-mavo>
+
+<meter property="rating" min="1" value="3" max="5"></meter>
+<time property="birthday" datetime="2014-06-01"></time>
+<img property="avatar" src="http://i.imgur.com/LPeWcag.png" />
+
+</div>
+
+<!-- <section data-mavo="empty" autoedit>
+    <h1>Empty handling</h1>
+    <span property="span"></span>
+    <img src="" property="image">
+    <address property="address"></address>
+</section>
+
+<div data-store class="[iff(rating < 3, bad, iff(rating > 3, good, ok))]">
+    <label>Rating:
+        <input property="rating" type="range" min="1" max="5" />
+    </label>
+
+    <p style="display: [iff(rating == 1, block,  none)]">Wow, you hated that movie!</p>
+    <p style="display: [iff(rating > 3, block,  none)]">Glad you liked it!</p>
+</div> -->
+
+
+<script src="./assets/mavo.min.js"></script>
+
+</body>
+
+</html>
