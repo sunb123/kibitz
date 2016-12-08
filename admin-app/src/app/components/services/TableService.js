@@ -3,23 +3,22 @@
 
   angular.module('app')
         .service('tableService', [
-        '$q', '$http', '$cookies',
+        '$q', '$http', '$cookies', 'config',
       tableService
   ]);
 
-  function tableService($q, $http, $cookies){
-    var protocol = "http://"
-    var base_url = "localhost:8000/api/v1/"
-
+  function tableService($q, $http, $cookies, config){
     function buildURL(path, params) {
+        var base_url = config.server_url;
         var query = '';
         if (params !== undefined && Object.keys(params).length > 0) {
             query = '?' + $.param(params);
         }
-        return protocol+ base_url + path + query;
+        return base_url + path + query;
     }
 
     var params = {
+      // TODO: change
       'username' : $cookies.get('username'),
       'sessionid': $cookies.get('sessionid'),
     }
@@ -28,7 +27,7 @@
         var deferred = $q.defer();
 
         $http({
-          url: buildURL('css/'+recsys_id+'/', params),
+          url: buildURL('/css/'+recsys_id+'/', params),
           method: 'GET',
         }).then(function successCallback(response) {
             console.log(response)
@@ -45,7 +44,7 @@
         var data = $.extend({cssText:cssText}, params)
 
         $http({
-          url: buildURL('css/'+recsys_id+'/'),
+          url: buildURL('/css/'+recsys_id+'/'),
           method: 'PUT',
           data: data,
         }).then(function successCallback(response) {
@@ -62,9 +61,8 @@
         var deferred = $q.defer();
 
         $http({
-          url: buildURL('recsys/'),
+          url: buildURL('/recsys/'),
           method: 'GET',
-          data: params,
         }).then(function successCallback(response) {
             console.log(response)
             if (response.data['error_type'] != null) {
@@ -82,9 +80,8 @@
         var deferred = $q.defer();
 
         $http({
-          url: buildURL('recsys/'+recsys_id+'/'),
+          url: buildURL('/recsys/'+recsys_id+'/'),
           method: 'GET',
-          data: params,
         }).then(function successCallback(response) {
             console.log(response.data.rows[0])
             deferred.resolve(response.data.rows[0])
@@ -101,7 +98,7 @@
         params['params'] = data
 
         $http({
-          url: buildURL('recsys/'+recsys_id+'/'),
+          url: buildURL('/recsys/'+recsys_id+'/'),
           method: 'PUT',
           data: params,
         }).then(function successCallback(response) {
@@ -125,7 +122,7 @@
         // $.extend(params, data)
 
         $http({
-          url: buildURL('recsys/'),
+          url: buildURL('/recsys/'),
           method: 'POST',
           data: params,
         }).then(function successCallback(response) {
@@ -142,7 +139,7 @@
         var deferred = $q.defer();
 
         $http({
-          url: buildURL('recsys/'+recsys_id+'/'),
+          url: buildURL('/recsys/'+recsys_id+'/'),
           method: 'DELETE',
           data: params,
         }).then(function successCallback(response) {
@@ -158,13 +155,8 @@
     var getRepoList = function(base_repo) {
         var deferred = $q.defer();
 
-        var params = {
-          'username': $cookies.get('username'),
-          'sessionid': $cookies.get('sessionid'),
-          'base_repo': base_repo, // account user name
-        }
         $http({
-          url: buildURL('repo-table/'),
+          url: buildURL('/repo-table/'),
           method: 'GET',
         }).then(function successCallback(response) {
             console.log(response)
@@ -180,13 +172,10 @@
         var deferred = $q.defer();
 
         var params = {
-          // 'username': $cookies.get('username'),
-          // 'sessionid': $cookies.get('sessionid'),
-          // 'repo_base': repo_base,
           'repo': repo,
         }
         $http({
-          url: buildURL('repo-table/', params),
+          url: buildURL('/repo-table/', params),
           method: 'GET',
         }).then(function successCallback(response) {
             console.log(response)
@@ -202,16 +191,12 @@
         var deferred = $q.defer();
 
         var params = {
-          // 'username': $cookies.get('username'),
-          // 'sessionid': $cookies.get('sessionid'),
-          // 'repo_base': repo_base,
           'repo': repo,
           'table': table,
         }
-        console.log( buildURL('repo-table/', params) )
 
         $http({
-          url: buildURL('repo-table/', params),
+          url: buildURL('/repo-table/', params),
           method: 'GET',
         }).then(function successCallback(response) {
             console.log(response)
@@ -221,6 +206,36 @@
         });
 
         return deferred.promise
+    }
+
+    function repoListToOptions(repoList) {
+        var options = []
+        var option;
+        for (var i in repoList) {
+            option = {'name':repoList[i].repo_name, 'value':repoList[i].repo_name}
+            options.push(option)
+        }
+        return options
+    }
+
+    function tableListToOptions(tableList) {
+        var options = [];
+        var option;
+        for (var i in tableList) {
+            option = {'name':tableList[i].table_name, 'value':tableList[i].table_name}
+            options.push(option)
+        }
+        return options
+    }
+
+    function columnListToOptions(columnList) {
+        var options = [];
+        var option;
+        for (var i in columnList) {
+            option = {'name':columnList[i].column_name, 'value':columnList[i].column_name}
+            options.push(option)
+        }
+        return options
     }
 
     return {
@@ -238,6 +253,10 @@
       getRepoList: getRepoList,
       getTableList: getTableList,
       getTableColumns: getTableColumns,
+
+      repoListToOptions: repoListToOptions,
+      tableListToOptions: tableListToOptions,
+      columnListToOptions: columnListToOptions,
 
     };
   }

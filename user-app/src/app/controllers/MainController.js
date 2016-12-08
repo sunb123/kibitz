@@ -2,7 +2,8 @@
   angular
        .module('app')
        .controller('MainController', [
-          'navService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout',
+          'navService', 'loginService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout', '$http', '$cookies',
+          'config',
           MainController
        ])
        .directive('ngEnter', function() {
@@ -21,16 +22,49 @@
         };
 });
 
-  function MainController(navService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout) {
+  function MainController(navService, loginService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout, $http, $cookies, config) {
     var vm = this;
 
-    // TODO: call to get recsys rows is public.
+    vm.recsys_name = window.location.href.split(config.app_home_url+'/')[1]
+    console.log(vm.recsys_name)
 
-    $scope.username = "brian" // TODO: get current username
-    vm.recsysTitle = "Kibitz" // TODO: read from recsys object
-    vm.maxRatingValue = 5
-    // Recsys params here
-    //
+    // TODO: get recsys row: GET item display layout
+
+    //console.log($cookies.getAll())
+
+    $http({
+      method: 'GET',
+      url: config.server_url+'/recsys/0/'+'?recsys_url='+'books',
+    }).then(function(resp){
+      vm.recsys = resp.data.rows[0]
+      vm.recsys_id = vm.recsys.id
+      vm.recsysTitle = vm.recsys.name
+      vm.maxRatingValue = vm.recsys.max_rating
+
+      if (!loginService.loggedIn()) {
+        $state.go('home.login')
+        $scope.loggedIn = false;
+        return
+      } else {
+        $scope.loggedIn = true;
+      }
+
+      $http({
+        method: 'GET',
+        url: config.server_url+'/item/'+'?recsys_id='+vm.recsys_id,
+      }).then(function(resp){
+        vm.wholeTable
+      }, function(resp){
+        console.log(resp)
+      })
+
+    }, function(resp){
+      console.log(resp)
+    })
+
+
+    vm.username = $cookies.get('myusername') // TODO: get current username
+
 
 
     vm.isGridView = true
@@ -131,78 +165,37 @@
 
     vm.logout = function() {
       $scope.loggedIn = false;
+      $state.go('home.login');
+
+      $http({
+        url: config.server_url + '/auth/logout/',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        data: {
+          'username': $cookies.get('myusername'),
+          'sessionid': $cookies.get('mysessionid'),
+        },
+      }).then(function successCallback(response) {
+        console.log(response)
+        if (response.data != 'error') {
+          $cookies.remove('myusername')
+          $cookies.remove('mysessionid')
+        }
+      }, function errorCallback(response) {
+
+      });
+
     }
 
-    vm.show_login_form = function () {
-      var popup = window.open('http://datahub.csail.mit.edu/account/login?redirect_url=' + vm.home_location,'newwindow', config='height=600,width=600,' +
-        'toolbar=no, menubar=no, scrollbars=no, resizable=no,' + 'location=no, directories=no, status=no');
+    $scope.changeSearchType = function(type) {
+      vm.searchType = type
+      $('#search-type').text(type)
+    }
 
-      //Create a trigger for location changes
-      var intIntervalTime = 100;
-      var curPage = this;
-
-      // This will be the method that we use to check
-      // changes in the window location.
-      var fnCheckLocation = function(){
-        // Check to see if the location has changed.
-        // alert(popup.location.href)
-          if (popup.location === null) {
-              popup.close();
-              clearInterval(id);
-          }
-
-          if (popup.location.href.indexOf("auth_user") > -1) {
-            var href = popup.location.href;
-            var splits = href.split("=");
-            sessionStorage.setItem("username", href.split("=")[splits.length - 1]);
-            setCookie("username", href.split("=")[splits.length - 1]);
-            popup.close();
-            clearInterval(id);
-
-            document.location.href = "#/items";
-            $scope.loggedIn = true;
-          }
-      }
-      var id = setInterval( fnCheckLocation, intIntervalTime );
-
-
-
-    };
-
-    function setCookie(cname, cvalue, exdays) {
-      if (exdays !== null) {
-        var d = new Date();
-        d.setTime(d.getTime() + (exdays*24*60*60*1000));
-        var expires = "expires="+d.toUTCString();
-        document.cookie = cname + "=" + cvalue + "; " + expires;
-      } else {
-        document.cookie = cname + "=" + cvalue + "; ";
-      }
-    };
-
-    var getCookie = function(cname) {
-      var name = cname + "=";
-      var ca = document.cookie.split(';');
-      for(var i=0; i<ca.length; i++) {
-          var c = ca[i];
-          while (c.charAt(0)===' ') c = c.substring(1);
-          if (c.indexOf(name) !== -1) return c.substring(name.length,c.length);
-      }
-      return "";
-    };
-
-    var eraseCookie = function (name) {
-        setCookie(name,"");
-    };
-
-    var process_login = function(username) {
-        swap("login_message", "login_panel");
-        client.createNewUser(client_key, username);   // TODO: insert API call to create user
-        userId = client.retrieveUserId(client_key, username);
-        setCookie("userId", userId);
-        sessionStorage.setItem("userId", userId);
-        document.location = ".";
-    };
+    $scope.item_types = ['Title', 'Author', 'Genre', 'Period']
   }
 
 })();

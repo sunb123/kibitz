@@ -1,4 +1,15 @@
 <!-- TODO: Replace table to table component when https://github.com/angular/material/issues/796 will closed -->
+<style>
+    meter {
+        margin: 0px 5px 0px 5px;
+    }
+</style>
+
+<!-- <div data-mavo>
+  <meter property="rating" min="1" value="3" max="5"></meter>
+  <img property="avatar" src="http://i.imgur.com/LPeWcag.png" />
+</div> -->
+
 
 <div class="btn-group" role="group" style="float:right">
     <button class="btn btn-default" ng-click="vm.changeToGridView()">
@@ -9,37 +20,45 @@
     </button>
 </div>
 
+
+
 <!-- add back vm.loggedIn && check -->
 
-<div ng-if=" vm.hasRecommendations() && vm.isGridView" style="margin-top:50px; background-color:white" ng-cloak>
+<div ng-if=" vm.hasRecommendations() && vm.isGridView" style="margin-top:50px; background-color:white" ng-cloak> <!-- WITH IMAGES -->
     <div infinite-scroll="vm.pagingFunction()" infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
         <div class="table-responsive-vertical md-whiteframe-z1">
             <h3 style="padding: 15px 15px 15px 15px">Recommended For You</h3>
-             <div class='md-padding' layout="row" layout-align="center center" layout-wrap ng-if="vm.tabState == 0">
-                <item mytitle="{{data.title}}" description="{{data.description}}" rating="data.rating" myimage="{{data.image}}" gridview="true" ng-repeat="data in vm.tableData track by $index" style="padding: 0px 50px 50px 50px"></item>
+
+             <div cg-busy="{promise:itemPromise, message:'Loading'}" class='md-padding' layout="row" layout-align="center center" layout-wrap>
+
+                <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data[vm.rating_field]" myimage="{{data[vm.image_link_field]}}" itemid="data.id" gridview="true" ng-repeat="data in vm.tableData track by $index"></item>
             </div>
-            <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList()" ng-if="vm.tabState == 0"> <!-- show if not all items displayed -->
+            <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList()"> <!-- show if not all items displayed -->
                 <button ng-click="vm.pagingFunction()" class="btn btn-default" style="margin: 15px 15px 15px 15px">Load More</button>
             </div>
         </div>
     </div>
 </div>
 
-<div ng-if="vm.hasRecommendations() && !vm.isGridView" style="margin-top:50px; background-color:white;" ng-cloak>
+<div ng-if="vm.hasRecommendations() && !vm.isGridView" style="margin-top:50px; background-color:white;" ng-cloak> <!-- NO IMAGES, ONLY TEXT -->
     <div infinite-scroll="vm.pagingFunction()" infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
 
         <div class="table-responsive-vertical md-whiteframe-z1">
             <h3 style="padding: 15px 15px 15px 15px">Recommended For You</h3>
-            <table id="table" class="table table-hover table-bordered" ng-if="vm.tabState == 0">
+            <table id="table" class="table table-hover table-bordered">
                 <tbody>
-                <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn">
-                    <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data.title | limitTo:40}}</span></td>
-                    <td data-title="Rating" style="width:150px">
-                        <span uib-rating ng-model="data.rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="$parent.sendRating(rating)"></span>
-                        <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">{{overStar}}</span>
-                    </td>
-                    <td data-title="Description">{{data.description | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
-                </tr>
+
+                     <div cg-busy="{promise:itemPromise, message:'Loading'}" class='md-padding' layout="row" layout-align="center center" layout-wrap>
+                        <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn">
+                            <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:40}}</span></td>
+                            <td data-title="Rating" style="width:150px">
+                                <span uib-rating ng-model="data[vm.rating_field]" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data.id, rating, recsys_id)"></span>
+                                <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">{{overStar}}</span>
+                            </td>
+                            <td data-title="Description">{{data[vm.description_field] | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
+                        </tr>
+                    </div>
+
                 </tbody>
             </table>
             <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList()">
@@ -58,6 +77,26 @@
 </div> -->
 
 <div ng-if="!vm.hasRecommendations() && !vm.loggedIn">
-    No Recommendations Yet!
-    All Items
+    <div infinite-scroll="vm.pagingFunction()" infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
+
+    <div class="table-responsive-vertical md-whiteframe-z1">
+        <h3 style="padding: 15px 15px 15px 15px">All Items</h3>
+        <table id="table" class="table table-hover table-bordered">
+            <tbody>
+            <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn">
+                <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data.title | limitTo:40}}</span></td>
+                <td data-title="Rating" style="width:150px">
+                    <span uib-rating ng-model="data[vm.rating_field]" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data.id, rating, recsys_id)"></span>
+                    <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">{{overStar}}</span>
+                </td>
+                <td data-title="Description">{{data.description | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
+            </tr>
+            </tbody>
+        </table>
+        <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList()">
+            <button ng-click="vm.pagingFunction()" class="btn btn-default" style="margin: 15px 15px 15px 15px">Load More</button>
+        </div>
+    </div>
+
+</div>
 </div>

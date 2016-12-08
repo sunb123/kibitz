@@ -54,9 +54,14 @@ class LoginView(views.APIView):
         password = request.data.get('password', None)
         recsys_id = request.data.get('recsys_id', 0)
 
+        print username, password, recsys_id
+
         user = getUserBy('username', username, recsys_id=recsys_id)
+
+        print user, 'user'
+
         if user != None:
-            if user.get('password') == None:
+            if user.get('password') == None or user.get('password') == '':
                 return Response({
                     'status': 'Unauthorized',
                     'message': 'User login with Datahub only.'
@@ -131,8 +136,8 @@ class ProfileCodeLoginView(views.APIView): # login mehtod only for admin users.
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EndUserLogin(views.APIView):
-    pass
+# class EndUserLogin(views.APIView):
+#     pass
 
-class EndUserLogout(views.APIView):
-    pass
+# class EndUserLogout(views.APIView):
+#     pass

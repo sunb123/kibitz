@@ -1,28 +1,50 @@
 <div class="row">
-  <div class="col-md-4 col-md-offset-4">
-    <h1>Sign Up</h1>
 
-    <div class="well">
-      <form role="form" ng-submit="vm.signup()">
-        <div class="form-group">
-          <label for="register__email">Email</label>
-          <input type="email" class="form-control" id="register__email" ng-model="vm.email" placeholder="ex. john@notgoogle.com" />
-        </div>
+   <div class="main-content">
 
-        <div class="form-group">
-          <label for="register__username">Username</label>
-          <input type="text" class="form-control" id="register__username" ng-model="vm.username" placeholder="ex. john" />
-        </div>
+        <form class="form-register" ng-submit="vm.signup()">
 
-        <div class="form-group">
-          <label for="register__password">Password</label>
-          <input type="password" class="form-control" id="register__password" ng-model="vm.password" placeholder="ex. thisisnotgoogleplus" />
-        </div>
+            <div class="form-register-with-email">
 
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-      </form>
+                <div class="form-white-background">
+
+                    <div class="form-title-row">
+                        <h1>Create an account</h1>
+                    </div>
+
+                    <div class="form-row">
+                        <label>
+                            <span>Username</span>
+                            <input type="text" name="username" ng-model="vm.username">
+                        </label>
+                    </div>
+
+<!--                     <div class="form-row">
+                        <label>
+                            <span>Email</span>
+                            <input type="email" name="email" ng-model="vm.email">
+                        </label>
+                    </div> -->
+
+                    <div class="form-row">
+                        <label>
+                            <span>Password</span>
+                            <input type="password" name="password" ng-model="vm.password">
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <button type="submit">Register</button>
+                    </div>
+
+                </div>
+
+                <a ui-sref="home.login" class="form-log-in-with-existing">Already have an account? Login here &rarr;</a>
+
+            </div>
+
+        </form>
+
     </div>
-  </div>
+
 </div>

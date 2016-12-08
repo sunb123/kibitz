@@ -1,5 +1,6 @@
 import requests
 import subprocess
+import sys
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -9,33 +10,27 @@ from rest_framework.response import Response
 from recsys.models import Recsys
 from recsys.serializers import RecsysSerializer
 
-from app.user_methods import makeRequest, getUserIdFromUsername, is_logged_in
+from app.user_methods import makeRequest, getUserIdFromUsername, is_logged_in_admin, is_logged_in_user
 from recsys.methods import checkRecsysParams
 
 class RecsysViewSet(viewsets.ViewSet):
-    """
-    Example empty viewset demonstrating the standard
-    actions that will be handled by a router class.
-
-    If you're using format suffixes, make sure to also include
-    the `format=None` keyword argument for each action.
-    """
     #lookup_field = 'username'
     queryset = Recsys.objects.all()
     serializer_class = RecsysSerializer
 
-    @is_logged_in
+    @is_logged_in_admin
     def list(self, request): # GET
         r = None
-        username, sessionid = request.data.get('username'), request.data.get('sessionid')
+        username, sessionid = request.COOKIES.get('username'), request.COOKIES.get('sessionid')
         print username, sessionid
-        owner_id = getUserIdFromUsername('bob')#request.user)
+        owner_id = getUserIdFromUsername(username)
+        print owner_id
         query = "select * from kibitz.recsys where owner_id='{}' order by id asc;".format(owner_id)
         api_url = '/api/v1/query/test321/kibitz'
         r = makeRequest('POST', api_url, 'master', query=query)
         return HttpResponse(r)
 
-    @is_logged_in
+    @is_logged_in_admin
     def create(self, request): # POST
         print("got create")
         if request.data.get('file') != None:
@@ -43,6 +38,8 @@ class RecsysViewSet(viewsets.ViewSet):
 
 
         # TODO: check recsys name and url unique
+
+
         access_token = masterAccessToken()
         recsys_params = tuple([param for param in request.data])
         # TODO: ensure those (ordered) and only those recsys params
@@ -64,23 +61,36 @@ class RecsysViewSet(viewsets.ViewSet):
         r = makeRequest('POST', api_url, request.user, data={'table_name': 'ratings'})
 
         # deploy app
-        subprocess.call( ['./scripts/deploy.sh -n {}'.format(request.data('url')) ])
+        # subprocess.call( ['../scripts/deploy.sh -n {}'.format(request.data('url')) ])
 
+        # p = subprocess.Popen([sys.executable, ''],
+        #                             stdout=subprocess.PIPE,
+        #                             stderr=subprocess.STDOUT)
+
+        subprocess.Popen(['../scripts/deploy.sh', '', 'file'])
 
         return HttpResponse("recsys create")
 
-    @is_logged_in
+    #@is_logged_in_admin
     def retrieve(self, request, pk=None): # GET with pk
         # TODO: get recsys pk from recsys name and user name.
         # get user row from user name, get owner_id
-        print("got retrieve", pk)
-        owner_id = 1
-        query = "select * from kibitz.recsys where id='{}';".format(pk)
+        #print("got retrieve", pk)
+
+        recsys_name = request.query_params.get('recsys_name')
+        recsys_url = request.query_params.get('recsys_url')
+        if recsys_name != None:
+            query = "select * from kibitz.recsys where name='{}';".format(recsys_name)
+        elif recsys_url != None:
+            query = "select * from kibitz.recsys where url_name='{}';".format(recsys_url)
+        else:
+            query = "select * from kibitz.recsys where id='{}';".format(pk)
+
         api_url = '/api/v1/query/test321/kibitz'
         r = makeRequest('POST', api_url, 'master', query=query)
         return HttpResponse(r)
 
-    @is_logged_in
+    @is_logged_in_admin
     def update(self, request, pk=None): # PUT with pk
         print("got update")
         # TODO: check that current admin user is recsys' owner
@@ -102,7 +112,7 @@ class RecsysViewSet(viewsets.ViewSet):
     # def partial_update(self, request, pk=None): # PATCH with pk
     #     return HttpResponse("recsys partial update")
 
-    @is_logged_in
+    @is_logged_in_admin
     def destroy(self, request, pk=None): # DELETE with pk
         print("got destroy")
         # TODO: delete script, delete recsys object.

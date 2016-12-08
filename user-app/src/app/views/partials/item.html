@@ -1,15 +1,79 @@
-<md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch ng-cloak style="width: 250px;height: 330px;" data-original-title="{{mytitle | limitTo:100}}" data-toggle="popover" data-content="{{description | limitTo:500}}" data-trigger="hover">
+<md-card class="item-card" ng-cloak>
 
-  <img ng-src="{{myimage}}" class="md-card-image" alt="image caption" style="padding:9px 7px 0px 7px;" ng-cloak>
+  <md-menu md-position-mode="target-right target">
+<img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption" ng-click="$mdOpenMenu()" ng-cloak>
+      <md-menu-content width="3">
+          <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
+          <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+      </md-menu-content>
+  </md-menu>
 
-  <md-card-title style="word-wrap: break-word">
-    <md-card-title-text style="max-width: 225px">
-      <span class="md-headline card-title trim-info">{{mytitle | cut:true:30:'...'}}</span>
+<span data-toggle="popover" data-original-title="Description" data-content="{{description | limitTo:500}}" data-trigger="hover">
+  <md-card-title class="item-title">
+    <md-card-title-text class="item-title-text">
+      <span class="md-headline card-title trim-info">{{mytitle}}</span>
       <span class="md-subhead">
-	      <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="$parent.hoveringOver(value); focus = true" on-leave="focus = null" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="$parent.sendRating(rating)"></span>
-	      <span class="label" ng-class="{'label-danger': $parent.overStar<=1, 'label-warning': $parent.overStar>=2 && $parent.overStar<=3, 'label-success': $parent.overStar>=4}" ng-show="focus">Rate {{$parent.overStar}}</span>
+
+        <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="$parent.hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="$parent.sendRating(itemid, rating, $parent.recsys_id)" ng-class="{coloredRatings: $parent.showingRated || focus == true}" state-on="$parent.mytemplate" state-off="'glyphicon-ok-circle'"></span>
+        {{ $parent.showingRated || focus == true ? null : rating}}
+        <span class="label" ng-class="{'label-danger': $parent.overStar<=1, 'label-warning': $parent.overStar>=2 && $parent.overStar<=3, 'label-success': $parent.overStar>=4}" ng-show="focus">Rate {{$parent.overStar}}</span>
+
       </span>
+
     </md-card-title-text>
   </md-card-title>
 
+  <md-card-content>
+    <md-card-actions><span ng-bind-html="$parent.item_details"></span></md-card-actions>
+
+<!--     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions> -->
+
+  </md-card-content>
+
+</span>
+
 </md-card>
+
+
+
+
+
+<!-- DESIGN 2: with popovers -->
+
+<!-- <md-card class="item-card" ng-cloak>
+
+  <img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption" data-toggle="popover" data-original-title="{{mytitle | limitTo:100}}" data-content="{{description | limitTo:500}}" data-trigger="hover" ng-cloak>
+
+  <md-card-title class="item-title">
+    <md-card-title-text class="item-title-text">
+      <span class="md-headline card-title trim-info">{{mytitle | cut:true:40:'...'}}</span>
+      <span class="md-subhead">
+
+        <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="$parent.hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="$parent.sendRating(itemid, rating, $parent.recsys_id)" ng-class="{coloredRatings: $parent.showingRated || focus == true}" state-on="'glyphicon-ok-sign'" state-off="'glyphicon-ok-circle'"></span>
+        {{ $parent.showingRated || focus == true ? null : rating}}
+        <span class="label" ng-class="{'label-danger': $parent.overStar<=1, 'label-warning': $parent.overStar>=2 && $parent.overStar<=3, 'label-success': $parent.overStar>=4}" ng-show="focus">Rate {{$parent.overStar}}</span>
+
+      </span>
+
+    </md-card-title-text>
+  </md-card-title>
+
+  <md-card-content>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{$parent.item_details}}" data-html="true">Item Details</md-card-actions>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions>
+
+    <md-card-actions>
+      <md-menu>
+          <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+              <i class="material-icons" ng-click="">more_vert</i>
+          </md-button>
+          <md-menu-content width="3">
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+          </md-menu-content>
+      </md-menu>
+    </md-card-actions>
+
+  </md-card-content>
+
+</md-card> -->

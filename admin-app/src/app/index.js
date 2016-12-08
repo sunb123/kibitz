@@ -1,7 +1,29 @@
 'use strict';
 
-angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch',
-  'ngSanitize', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'ngToast'])
+angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dndLists',
+  'ngSanitize', 'ui.bootstrap', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'ngToast',
+  'slickCarousel', 'color.picker'])
+
+  .constant('config', {
+    home_url: 'http://localhost:3000', // TODO: change to app location
+    server_url: 'http://localhost:8000/api/v1', // TODO: change to server location
+    dh_login_url: 'https://datahub.csail.mit.edu/account/login?redirect_url='+home_url,
+    dh_signup_url: 'https://datahub.csail.mit.edu/account/register?redirect_url='+home_url,
+    buildURL: function(path, params) {
+        var base_url = 'https://datahub.csail.mit.edu';
+        var query = '';
+        if (params !== undefined && Object.keys(params).length > 0) {
+            query = '?' + $.param(params);
+        }
+        return base_url + path + query;
+    },
+  })
+
+  .config(function($mdThemingProvider) {
+    //themes are still defined in config, but the css is not generated
+    $mdThemingProvider.theme('success-toast');
+    $mdThemingProvider.theme('error-toast');
+  })
 
   .config(function($breadcrumbProvider) {
     $breadcrumbProvider.setOptions({
@@ -145,5 +167,5 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch',
       'A700': '#E75753'
     });
 
-    $mdIconProvider.icon('user', 'assets/images/user.svg', 64);
+    // $mdIconProvider.icon('user', 'assets/images/user.svg', 64);
   });

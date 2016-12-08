@@ -23,13 +23,13 @@ urlpatterns = [
     url(r'^api/v1/', include(accounts_router.urls)),
 
     url(r'^api/v1/end-user/$', EndUserView.as_view(), name='end-user'),
-    url(r'^api/v1/end-users/(?P<pk>[^/]+)/$', EndUserView.as_view(), name='end-user-detail'),
+    url(r'^api/v1/end-user/(?P<pk>[^/]+)/$', EndUserView.as_view(), name='end-user-detail'),
 
     url(r'^api/v1/admin-user/$', AdminUserView.as_view(), name='admin-user'),
     url(r'^api/v1/admin-user/(?P<pk>[^/]+)/$', AdminUserView.as_view(), name='admin-user-detail'),
 
     url(r'^api/v1/item/$', ItemView.as_view(), name='items'),
-    url(r'^api/v1/items/(?P<pk>[^/]+)/$', ItemView.as_view(), name='items'),
+    url(r'^api/v1/item/(?P<pk>[^/]+)/$', ItemView.as_view(), name='items'),
 
     url(r'^api/v1/rating/$', RatingView.as_view(), name='ratings'),
     url(r'^api/v1/rating/(?P<pk>[^/]+)/$', RatingView.as_view(), name='ratings'),

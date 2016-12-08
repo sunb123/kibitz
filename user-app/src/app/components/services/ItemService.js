@@ -8,10 +8,15 @@
   ]);
 
   function itemService($q, $http){
+    var protocol = "http://"
+    var base_url = protocol+"localhost:8000/api/v1/"
 
     // TODO: make call with recsys id.
     var getAllItems = function(recsys_id) {
-
+      $http({
+        method: 'GET',
+        url: '',
+      })
     }
 
     var getUserRatedItems = function(username, recsys_id) {

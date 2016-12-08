@@ -7,17 +7,90 @@
     -webkit-box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
     box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
 }
+/**
+ * For the correct positioning of the placeholder element, the dnd-list and
+ * it's children must have position: relative
+ */
+.simpleDemo ul[dnd-list],
+.simpleDemo ul[dnd-list] > li {
+  position: relative;
+}
+
+/**
+ * The dnd-list should always have a min-height,
+ * otherwise you can't drop to it once it's empty
+ */
+.simpleDemo ul[dnd-list] {
+    min-height: 42px;
+    padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+.simpleDemo ul[dnd-list] .dndDraggingSource {
+    display: none;
+}
+
+/**
+ * An element with .dndPlaceholder class will be
+ * added to the dnd-list while the user is dragging
+ * over it.
+ */
+.simpleDemo ul[dnd-list] .dndPlaceholder {
+    display: block;
+    background-color: #ddd;
+    min-height: 42px;
+}
+
+/**
+ * The dnd-lists's child elements currently MUST have
+ * position: relative. Otherwise we can not determine
+ * whether the mouse pointer is in the upper or lower
+ * half of the element we are dragging over. In other
+ * browsers we can use event.offsetY for this.
+ */
+.simpleDemo ul[dnd-list] li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+}
+
+.simpleDemo {
+  margin-top: 20px;
+}
+
+.simpleDemo ul {
+  margin-bottom: 0px;
+}
+
+/**
+ * Show selected elements in green
+ */
+.simpleDemo ul[dnd-list] li.selected {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
 </style>
 
 <div ncy-breadcrumb></div>
 
-<div class="container col-md-8 col-md-offset-2"> <!-- find better bottom margin  style="margin-bottom: 10px"-->
+
+<div class="container col-md-8 col-md-offset-2" style="margin-bottom:50px"> <!-- find better bottom margin  style="margin-bottom: 10px"-->
 
 	<div>
 	    <h1 style="display: inline-block; margin: 10px 0px 10px 0px">Settings</h1>
 
     	<div class="btn-group" role="group" aria-label="css" style="margin: 10px 0px 10px 0px; display: inline-block; float:right;">
 	        <button class="btn btn-default" ng-class="{active: vm.tabSetting == 'general'}" ng-click="vm.generalTab(); vm.setAsActive('general')" style="outline:none">General</button>
+          <button class="btn btn-default" ng-class="{active: vm.tabSetting == 'template'}" ng-click="vm.templateTab(); vm.setAsActive('template')" style="outline:none">Templates</button>
 	        <button class="btn btn-default" ng-class="{active: vm.tabSetting == 'advanced'}" ng-click="vm.advancedTab(); vm.setAsActive('advanced')" style="outline:none">Advanced</button>
 	    </div>
 	</div>
@@ -29,6 +102,180 @@
 	    </formly-form>
 	</form>
 
+
+
+
+
+
+
+
+
+
+
+<!-- <span id="item-card-demo">
+<md-card style="height: 400px" ng-cloak>
+
+  <img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption" data-toggle="popover" data-original-title="{{mytitle | limitTo:100}}" data-content="{{description | limitTo:500}}" data-trigger="hover" ng-cloak>
+  <md-card-title class="item-title">
+    <md-card-title-text class="item-title-text">
+      <span class="md-headline card-title trim-info"></span>
+      <span class="md-subhead">
+
+        <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="$parent.hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="$parent.sendRating(itemid, rating, $parent.recsys_id)" ng-class="{coloredRatings: $parent.showingRated || focus == true}" state-on="stateOnRatingIcon" state-off="stateOffRatingIcon"></span>
+        {{ $parent.showingRated || focus == true ? null : rating}}
+        <span class="label" ng-class="{'label-danger': $parent.overStar<=1, 'label-warning': $parent.overStar>=2 && $parent.overStar<=3, 'label-success': $parent.overStar>=4}" ng-show="focus">Rate {{$parent.overStar}}</span>
+
+      </span>
+
+    </md-card-title-text>
+  </md-card-title>
+
+  <md-card-content>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{$parent.item_details}}" data-html="true">Item Details</md-card-actions>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions>
+
+    <md-card-actions>
+      <md-menu>
+          <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+              <i class="material-icons" ng-click="">more_vert</i>
+          </md-button>
+          <md-menu-content width="3">
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+          </md-menu-content>
+      </md-menu>
+    </md-card-actions>
+
+  </md-card-content>
+
+</md-card>
+
+</span> -->
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="template" ng-if="vm.isTemplateTab()">
+
+  <table>
+    <tr>
+      <td>
+      <h3 style="text-align:left">Select Template</h3>
+
+  <div class="block" style="background-color: #3498db;margin:auto 0 auto 0;width:400px;height:550px">
+        <script type="text/ng-template" id="tpl.html">
+            <h3>{{ i.label }}</h3>
+        </script>
+
+        <script type="text/ng-template" id="tpl2.html">
+            <h2 class="content-title">Single Item {{i}} </h2>
+            <h3>{{ i }}</h3>
+        </script>
+
+        <slick class="slider blue content" style="margin:auto;display:inline-block;" settings="slickConfig" ng-if="slickConfig1Loaded" dots="true">
+<!--             <div ng-repeat="i in number1 track by $index">
+ -->
+                    <div>
+                      <div class="" ng-include="'tpl3.html'"></div>
+                    </div>
+                    <div>
+                      <div class="" ng-include="'tpl4.html'"></div>
+                    </div>
+<!--             </div>
+ -->        </slick>
+  </div>
+    </td>
+
+    <td style="padding: 0px auto auto auto;">
+       <div style="margin: 0px 0px 30px 30px;width:300px;float:right;display:inline-block">
+      <h3>Customize</h3>
+
+      <form ng-submit="vm.submitTemplateSettings()">
+        <formly-form model="vm.recsys" fields="vm.recsysFieldsTemplate" form="vm.recsysFormTemplate">
+            <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysFormTemplate.$invalid">Preview</button>
+        </formly-form>
+      </form>
+  </div>
+
+  </td>
+
+
+  </tr>
+</table>
+
+
+
+<!--   <div class="row">
+      <form ng-submit="vm.submitTemplateSettings()" style="margin-bottom: 30px;width:200px">
+        <formly-form model="vm.recsys" fields="vm.recsysFieldsTemplate" form="vm.recsysFormTemplate">
+            <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysFormTemplate.$invalid">Preview</button>
+        </formly-form>
+      </form>
+
+  </div> -->
+
+<!--   <div class="row">
+    Item Display
+  </div> -->
+
+
+  <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysFormTemplate.$invalid" style="margin-top:10px">Submit</button>
+
+
+
+  <div class="simpleDemo row">
+      <div ng-repeat="(listName, list) in models.lists" class="col-md-6">
+          <div class="panel panel-info">
+              <div class="panel-heading">
+                  <h3 class="panel-title" ng-if="listName == 'A'">Selected Fields to Display</h3>
+                  <h3 class="panel-title" ng-if="listName == 'B'">Unused</h3>
+              </div>
+
+              <ul dnd-list="list">
+                  <!-- The dnd-draggable directive makes an element draggable and will
+                       transfer the object that was assigned to it. If an element was
+                       dragged away, you have to remove it from the original list
+                       yourself using the dnd-moved attribute -->
+                  <li ng-repeat="item in list"
+                      dnd-draggable="item"
+                      dnd-moved="list.splice($index, 1)"
+                      dnd-effect-allowed="move"
+                      dnd-selected="models.selected = item"
+                      ng-class="{'selected': models.selected === item}"
+                      >
+                      {{item.label}}
+                  </li>
+              </ul>
+
+          </div>
+      </div>
+  </div>
+
+
+
+<button class="btn btn-primary">Submit</button>
+
+
+</div>
+
+
+<!-- <div gridster="gridsterOpts">
+    <ul>
+        <li style="background-color:green" gridster-item="item" ng-repeat="item in customItems">
+          {{ item.name }}
+        </li>
+    </ul>
+</div> -->
+
+
 <!-- 		Customize user site logo
 		Customize top navbar color
 		Customize content page background color
@@ -37,32 +284,41 @@
 
 		Image, video links -->
 
-	<form ng-show="vm.isAdvancedTab()" ng-submit="vm.cssUpload(1, vm.cssText)" style="margin-bottom: 30px">
-
-		<h4>CSS Edit</h4>
+	<form ng-submit="vm.submit()" ng-show="vm.isAdvancedTab()" style="margin-bottom: 30px">  <!-- ng-submit="vm.cssUpload(1, vm.cssText)" -->
+      <formly-form model="vm.recsys" fields="vm.recsysFieldsAdv" form="vm.recsysFormAdv">
+          <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysFormAdv.$invalid">Submit</button>
+      </formly-form>
+<!-- 		<h4>CSS Edit</h4>
 		<textarea ng-model="vm.cssText" style="height:600px; width: 80%; display: block"></textarea>
 
     <h4>CSS Link</h4>
     <input ng-model="vm.cssLink" type="text" name="" style="width:80%">
 
     <button type="submit" class="btn btn-primary" style="display: block; margin: 10px 0px 10px 0px">Submit</button>
-
+ -->
   </form>
 <!--
 	<form>
 		Include extra item fields in item description. (author, gender, age, date, etc.)
 	</form> -->
+
+
+  <div ng-show="vm.isGeneralTab()">
+
+    <hr style="border-top: 1px solid darkgray">
+    <button ng-if="!paused" type="button" class="btn btn-warning" data-toggle="modal" data-target="#pauseModal">Pause Recommender</button>
+    <button ng-if="paused" type="button" class="btn btn-success" data-toggle="modal" data-target="#startModal">Start Recommender</button>
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Recommender</button>
+  </div>
+
 </div>
 
 
 
 
 
-<div class="container col-md-8 col-md-offset-2" ng-show="vm.isGeneralTab()">
-	<button ng-if="!paused" type="button" class="btn btn-warning" data-toggle="modal" data-target="#pauseModal">Pause Recommender</button>
-	<button ng-if="paused" type="button" class="btn btn-success" data-toggle="modal" data-target="#startModal">Start Recommender</button>
-	<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Recommender</button>
-</div>
+
+
 
 
 
@@ -152,3 +408,98 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+
+
+
+<script type="text/ng-template" id="tpl3.html">
+
+<md-card class="item-card" ng-cloak>
+
+  <img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption" data-toggle="popover" data-original-title="{{mytitle | limitTo:100}}" data-content="{{description | limitTo:500}}" data-trigger="hover" data-container=".template" ng-cloak>
+  <md-card-title class="item-title">
+    <md-card-title-text class="item-title-text">
+      <span class="md-headline card-title trim-info">{{mytitle}}</span>
+      <span class="md-subhead">
+
+        <span relink-event="rate">
+          <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="" ng-class="{coloredRatings: showingRated || focus == true}" state-on="stateOnRatingIcon" state-off="stateOffRatingIcon"></span>
+          {{ showingRated || focus == true ? null : rating}}
+          <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+        </span>
+
+      </span>
+
+    </md-card-title-text>
+  </md-card-title>
+
+  <md-card-content>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{item_details}}" data-html="true" data-container=".template">Item Details</md-card-actions>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{ratings_template}}" data-html="true" data-container=".template">Rating Details</md-card-actions>
+
+    <md-card-actions>
+      <md-menu>
+          <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+              <i class="material-icons" ng-click="">more_vert</i>
+          </md-button>
+          <md-menu-content width="3">
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
+              <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+          </md-menu-content>
+      </md-menu>
+    </md-card-actions>
+
+  </md-card-content>
+
+</md-card>
+
+
+</script>
+
+
+
+
+
+<script type="text/ng-template" id="tpl4.html">
+
+
+<md-card class="item-card" ng-cloak>
+
+  <md-menu md-position-mode="target-right target">
+<img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption" ng-click="$mdOpenMenu()" ng-cloak>
+      <md-menu-content width="3">
+          <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
+          <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+      </md-menu-content>
+  </md-menu>
+
+<span data-toggle="popover" data-original-title="Description" data-content="{{description | limitTo:500}}" data-trigger="hover" data-container=".template">
+  <md-card-title class="item-title">
+    <md-card-title-text class="item-title-text">
+      <span class="md-headline card-title trim-info">{{mytitle}}</span>
+      <span class="md-subhead">
+
+        <span relink-event="rate">
+          <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="" ng-class="{coloredRatings: showingRated || focus == true}" state-on="stateOnRatingIcon" state-off="stateOffRatingIcon"></span>
+          {{ showingRated || focus == true ? null : rating}}
+          <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && $parent.overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+        </span>
+
+      </span>
+
+    </md-card-title-text>
+  </md-card-title>
+
+  <md-card-content>
+    <md-card-actions><span ng-bind-html="item_details"></span></md-card-actions>
+
+<!--     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions> -->
+
+  </md-card-content>
+
+</span>
+
+</md-card>
+
+</script>

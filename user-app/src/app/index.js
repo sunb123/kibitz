@@ -1,7 +1,20 @@
 'use strict';
 
-angular.module('angularMaterialAdmin', ['ngAnimate', 'ngCookies', 'ngTouch',
-  'ngSanitize', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb' ])
+angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
+  'ngSanitize', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'cgBusy' ])
+
+  .constant('config', {
+    server_url: 'http://localhost:8000/api/v1', // TODO: change to server location
+    app_home_url: 'http://localhost:3001', // TODO: will be http://kibitz2.csail.mit.edu/
+    buildURL: function(path, params) {
+        var base_url = 'https://datahub.csail.mit.edu';
+        var query = '';
+        if (params !== undefined && Object.keys(params).length > 0) {
+            query = '?' + $.param(params);
+        }
+        return base_url + path + query;
+    },
+  })
 
   .config(function($breadcrumbProvider) {
     $breadcrumbProvider.setOptions({
@@ -10,8 +23,18 @@ angular.module('angularMaterialAdmin', ['ngAnimate', 'ngCookies', 'ngTouch',
     })
   })
 
+  .config(function($mdThemingProvider) {
+    //themes are still defined in config, but the css is not generated
+    $mdThemingProvider.theme('success-toast');
+    $mdThemingProvider.theme('error-toast');
+
+    $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
+  })
+
   .config(function ($stateProvider, $urlRouterProvider, $mdThemingProvider,
-                    $mdIconProvider) {
+                    $mdIconProvider, $httpProvider) {
+    $httpProvider.defaults.withCredentials = true;
+
     $stateProvider
       .state('home', {
         url: '',
@@ -26,6 +49,8 @@ angular.module('angularMaterialAdmin', ['ngAnimate', 'ngCookies', 'ngTouch',
       .state('home.login', {
         url: '/login',
         templateUrl: 'app/views/login.html',
+        controller: 'LoginController',
+        controllerAs: 'vm',
         data: {
           title: 'Login'
         }
@@ -33,6 +58,8 @@ angular.module('angularMaterialAdmin', ['ngAnimate', 'ngCookies', 'ngTouch',
       .state('home.signup', {
         url: '/signup',
         templateUrl: 'app/views/signup.html',
+        controller: 'SignupController',
+        controllerAs: 'vm',
         data: {
           title: 'Sign Up'
         }
@@ -79,7 +106,25 @@ angular.module('angularMaterialAdmin', ['ngAnimate', 'ngCookies', 'ngTouch',
         },
       });
 
-    $urlRouterProvider.otherwise('/items');
+    // $urlRouterProvider.otherwise('/items');
+
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) {
+            return parts.pop().split(";").shift();
+        } else {
+            return false
+        }
+    }
+
+    $urlRouterProvider.otherwise(function($injector, $location){
+      if (getCookie('myusername') && getCookie('mysessionid')) { // logged in
+        $location.path('/items')
+      } else {
+        $location.path('/login')
+      }
+    });
 
     $mdThemingProvider
       .theme('default')

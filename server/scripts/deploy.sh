@@ -26,10 +26,14 @@ while getopts n: FLAG; do
     esac
 done
 
-sudo cp -r ~/user-app /var/www/html/$APP_LOCATION
-cd /var/www/html/$APP_LOCATION
-sudo gulp build
+echo $APP_LOCATION
 
-sudo sed -i '13 a \\tAlias "/$APP_LOCATION" "/var/www/html/$APP_LOCATION"' /etc/apache2/sites-enabled/000-default.conf
+sudo cp ./scripts/deploy.sh ~/something.sh
 
-sudo service apache2 restart
+# sudo cp -r ~/user-app /var/www/html/$APP_LOCATION
+# cd /var/www/html/$APP_LOCATION
+# sudo gulp build
+
+# sudo sed -i '13 a \\tAlias "/$APP_LOCATION" "/var/www/html/$APP_LOCATION/dist"' /etc/apache2/sites-enabled/000-default.conf
+
+# sudo service apache2 restart

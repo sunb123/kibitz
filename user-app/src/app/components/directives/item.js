@@ -4,7 +4,7 @@ angular.module('app')
   .directive('item', function() {
 
   	return {
-  		scope: { mytitle: '@', description: '@', rating: '=', myimage: '@'},
+  		scope: { mytitle: '@', description: '@', rating: '=', myimage: '@', itemid: '='},
   		templateUrl: 'app/views/partials/item.html',
   	}
 

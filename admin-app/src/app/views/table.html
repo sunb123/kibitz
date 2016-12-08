@@ -64,7 +64,6 @@ No recommenders
 
 <button type="button" class="create-recsys-btn btn btn-success btn-lg" data-toggle="modal" data-target="#myModal"><i class="material-icons">add_box</i>Create New Recommender</button>
 
-<button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="vm.notAuthenticated" ng-click="vm.auth()">Authenticate Datahub</button>
 
 <!-- <div ng-include="'app/views/partials/recsysCreationTemplate.html'">
  -->
@@ -79,16 +78,32 @@ No recommenders
         </button>
         <h4 class="modal-title" id="myModalLabel">Create New Recommender</h4>
       </div>
-      <div class="modal-body" style="height: 570px">
+      <div class="modal-body" style="height: auto">
 
         <div class="tabbable"> <!-- Only required for left/right tabs -->
               <ul class="nav nav-tabs" style="cursor:pointer">
               <li class="active"><a ng-click="vm.changeTab(0)" data-toggle="tab">Upload CSV</a></li>
-              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Select Repo (datahub)</a></li>
+              <li><a ng-click="vm.changeTab(2)" data-toggle="tab">Vendhq</a></li>
+              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Datahub</a></li>
               </ul>
 
 
               <div class="tab-content">
+                <div ng-show="vm.whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
+                    <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
+                        <form>
+                        <div>
+                              <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
+                        </div>
+                        <div>
+                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
+                        </div>
+                        </form>
+
+                        VENDHQ
+                    </div>
+                </div>
+
                 <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
@@ -107,6 +122,9 @@ No recommenders
                 </div>
 
                 <div ng-show="vm.whichTab == 1" class="tab-pane active" id="tab2">
+
+                    <button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="vm.notAuthenticated" ng-click="vm.auth()" style="margin:15px auto 15px auto">Import Data From Datahub</button>
+
                     <div class="item-select" style="padding: 10px 10px 10px 0px">
                         <form>
                         <div>
@@ -123,7 +141,7 @@ No recommenders
                               <label>Item Table:</label><select ng-model="selectedTable" ng-options="table.name for table in tables track by table.name"></select>
                         </div>
                         <div>
-                              <label>Primary Key:</label><select ng-model="selectedPrimaryKey" ng-options="column as column.name for column in columns"></select>
+                              <label>Item ID:</label><select ng-model="selectedPrimaryKey" ng-options="column as column.name for column in columns"></select>
                         </div>
                         <div>
                               <label>Title:</label><select ng-model="selectedTitle" ng-options="column as column.name for column in columns"></select>
@@ -133,6 +151,9 @@ No recommenders
                         </div>
                         <div>
                               <label>Image Link:</label><select ng-model="selectedImageLink" ng-options="column as column.name for column in columns"></select>
+                        </div>
+                        <div>
+                              <label>Rating:</label><select ng-model="selectedRating" ng-options="column as column.name for column in columns"></select>
                         </div>
                         </form>
                     </div>
@@ -145,9 +166,9 @@ No recommenders
 
 
       </div>
-      <div class="modal-footer" ng-show="vm.whichTab == 1">
+      <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary">Create Recommender</button>
+        <button type="button" class="btn btn-primary" ng-click="vm.createRecsysFromParams()">Create Recommender</button>
       </div>
     </div>
   </div>

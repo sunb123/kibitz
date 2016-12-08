@@ -2,26 +2,17 @@
 
   angular
        .module('app')
-       .controller('SignupController', [
+       .controller('SignupController', [ 'config',
           'navService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$sce', '$window', 'ngToast', '$http',
           SignupController
        ]);
 
-  function SignupController(navService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $sce, $window, ngToast, $http) {
+  function SignupController(config, navService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $sce, $window, ngToast, $http) {
     var vm = this;
 
-    $scope.currentProjectUrl = $sce.trustAsResourceUrl('https://datahub.csail.mit.edu/account/register')
-
-    var admin_home_location = 'http://localhost:3000'
-    vm.signupUrl = 'https://datahub.csail.mit.edu/account/register?redirect_url=' + admin_home_location
-
-    $scope.checkLoggedIn = function(frame) {
-      console.log(frame.src)
-    }
+    vm.signupUrl = config.dh_signup_url
 
     vm.signup = function() {
-
-
       var params = {
         'username': vm.username,
         // 'email': vm.email,
@@ -29,7 +20,7 @@
       }
 
       $http({
-        url: 'http://localhost:8000/api/v1/admin-user/',
+        url: config.server_url+'/admin-user/',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
