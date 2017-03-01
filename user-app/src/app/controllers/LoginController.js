@@ -11,18 +11,6 @@
   function LoginController(navService, loginService, $mdSidenav, $mdBottomSheet, $mdToast, $log, $q, $state, $mdToast, $scope, $sce, $http, $cookies, $timeout, config) {
     var vm = this;
 
-    $scope.$parent.loggedIn = false
-
-    $http({
-      method: 'GET',
-      url: config.server_url+'/recsys/0/'+'?recsys_url='+'books',
-    }).then(function(resp){
-      vm.recsys = resp.data.rows[0]
-      vm.recsys_id = vm.recsys.id
-    }, function(resp){
-      console.log(resp)
-    })
-
     vm.login = function() {
 
       $http({
@@ -35,12 +23,11 @@
         data: {
           'username': vm.username,
           'password': vm.password,
-          'recsys_id': vm.recsys_id,
+          'recsys_id': $scope.$parent.recsys_id,
         },
       }).then(function successCallback(response) {
-          $cookies.put("myusername", response.data['username'])
-          $cookies.put("mysessionid", response.data['sessionid'])
-          window.location.href = config.app_home_url // NOTE: why does $state.go fail to load abstract ctrl?
+          $cookies.put("k_username", response.data['username'])
+          $state.go('home.items');
       }, function errorCallback(response) {
           console.log(response)
           $mdToast.show(

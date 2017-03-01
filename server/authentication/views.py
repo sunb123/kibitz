@@ -1,9 +1,12 @@
-import json
-import requests
+import json, requests
 
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
+# from django.views.decorators.csrf import csrf_exempt
+# from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from django.http import HttpResponse
 from rest_framework import permissions, status, views, viewsets
 from rest_framework.response import Response
 
@@ -16,92 +19,64 @@ from rest_framework.decorators import detail_route, list_route
 from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 
-from app.user_methods import getUserBy, createSessionForUser, createAdminUserRow
+from app.user_methods import createAdminUserObject, createAdminUser, createEndUser
 from app.user_methods import masterAccessToken, master_username, master_password, pw_client_id, pw_client_secret, \
 auth_client_id, auth_client_secret, base_url, redirect_uri
+from app.system_methods import createSessionForUser, lock_decorator
 
-class AccountViewSet(viewsets.ModelViewSet):
-    lookup_field = 'username'
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (permissions.AllowAny(),)
-
-        if self.request.method == 'POST':
-            return (permissions.AllowAny(),)
-
-        return (permissions.IsAuthenticated(), IsAccountOwner(),)
-
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            Account.objects.create_user(**serializer.validated_data)
-
-            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
-        return Response({
-            'status': 'Bad request',
-            'message': 'Account could not be created with received data.'
-        }, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(views.APIView):
 
     def post(self, request, format=None):
-        username = request.data.get('username', None)
-        #email = request.data.get('email', None)
-        password = request.data.get('password', None)
-        recsys_id = request.data.get('recsys_id', 0)
+        username = request.data.get('username')
+        password = request.data.get('password')
+        adminLogin = request.data.get('is_admin_login')
+        try:
+            if adminLogin:
+                user = Account.objects.filter(username=username, is_admin=True).first()
+                if not user:
+                    user = Account.objects.get(email=username, is_admin=True) # admin can use email as username
+            else:
+                user = Account.objects.get(username=username, is_admin=False)
+        except Account.DoesNotExist:
+            return Response({
+                'status': 'Unauthorized',
+                'message': 'User not found'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-        print username, password, recsys_id
+        if user.password == None or user.password == '':
+            return Response({
+                'status': 'Unauthorized',
+                'message': 'Login with Datahub only.'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-        user = getUserBy('username', username, recsys_id=recsys_id)
-
-        print user, 'user'
-
-        if user != None:
-            if user.get('password') == None or user.get('password') == '':
-                return Response({
-                    'status': 'Unauthorized',
-                    'message': 'User login with Datahub only.'
-                }, status=status.HTTP_401_UNAUTHORIZED)
-            elif user.get('password') != password:
-                return Response({
-                    'status': 'Unauthorized',
-                    'message': 'Password incorrect.'
-                }, status=status.HTTP_401_UNAUTHORIZED)
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
         else:
             return Response({
-                'status': 'Not found',
-                'message': 'No account with username was found.'
-            }, status=status.HTTP_404_NOT_FOUND)
+                'status': 'Unauthorized',
+                'message': 'Username or Password incorrect.'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-        ## Successfully logged in. Check for session or create session.
-        s = createSessionForUser(username, recsys_id=recsys_id)
-        return JsonResponse({'message':'logged in', 'sessionid':s.session_key, 'username':username})
+        return JsonResponse({'message':'logged in', 'username':username})
 
 class LogoutView(views.APIView):
 
+    # TODO: return error if not authenticated
     def post(self, request, format=None):
-        username = request.data.get('username', None)
-        sessionid = request.data.get('sessionid', None)
-
-        if sessionid != '' or sessionid != None:
-            s = CustomSession.objects.filter(pk=sessionid).first()
-            if s != None:
-                s.delete()
-                print 'deleted session'
-                return JsonResponse({"message":"logged out"})
-            else:
-                print 'no session found'
-                return JsonResponse({"message":"already logged out"})
+        if request.user.is_authenticated():
+            logout(request)
+            print "got logout", request.user, request.user.is_authenticated()
         else:
-            return JsonResponse({"message":"no sessioned id provided"})
+            print "user not authenticated"
+        return HttpResponse("logged out")
 
-class ProfileCodeLoginView(views.APIView): # login mehtod only for admin users.
+class ProfileCodeLoginView(views.APIView): # login method only for admin users.
 
+    @lock_decorator
     def post(self, request, format=None):
+        username = request.data.get('username')
         payload = {
             'code': request.data.get('profile_code'),
             'client_id': auth_client_id,
@@ -110,20 +85,22 @@ class ProfileCodeLoginView(views.APIView): # login mehtod only for admin users.
             'grant_type': 'authorization_code',
         }
         url = base_url + '/oauth2/token/'
-
         r = requests.post(url, data=payload)
         access_token = r.json().get('access_token')
+
         if r.status_code == 200 and access_token != None:
             resp = requests.get(base_url+'/api/v1/user',headers={'Authorization':'Bearer '+access_token})
-            username = resp.json().get('username')
-            user = getUserBy('username', username)
-            print user
-            if username != None:
-                s = createSessionForUser(username)
-                if user == None:
-                    resp = createAdminUserRow(username)
-                    print resp.content
-                return JsonResponse({'sessionid':s.session_key, 'username':username})
+            profile_username = resp.json().get('username')
+            if profile_username != None and profile_username == username:
+                user = Account.objects.filter(username=username).first()
+                if user == None: # signup by DH called
+                    user = createAdminUserObject(username)
+                elif not user.is_admin: # end user becomes an admin account. has corresponding DH account.
+                    user.is_admin = True
+                    user.save()
+                u = authenticate(username=username)
+                login(request, u)
+                return JsonResponse({'message':'logged in', 'username':username})
             else:
                 return Response({
                     'status': 'Bad request',
@@ -135,9 +112,67 @@ class ProfileCodeLoginView(views.APIView): # login mehtod only for admin users.
                 'message': 'Incorrect profile code.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+class AdminUserView(views.APIView):
 
-# class EndUserLogin(views.APIView):
-#     pass
+    def get(self, request, pk=None, format=None):
+        return HttpResponse("user get "+str(pk))
 
-# class EndUserLogout(views.APIView):
-#     pass
+    def post(self, request, pk=None, format=None): # create
+        data = request.data
+        user = False
+        if data.get('password') != None and data.get('username') != None and data.get('email') != None and data.get('password') != '' and data.get('username') != '' and data.get('email') != '':
+            user_params = [data.get('username'), data.get('email'), data.get('password')]
+            user = createAdminUser(*user_params) # create DH account
+        else:
+            return Response({
+                'status': 'Bad request',
+                'message': 'No username, email, or password given.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if user != False:
+            return HttpResponse("account created")
+        else:
+            return Response({
+                'status': 'Bad request',
+                'message': 'User already exists.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None, format=None): # update
+        return HttpResponse("user put")
+
+    def delete(self, request, pk=None, format=None):
+        return HttpResponse("user delete")
+
+class EndUserView(views.APIView):
+
+    def get(self, request, pk=None, format=None):
+        return HttpResponse("user get "+str(pk))
+
+    @lock_decorator
+    def post(self, request, pk=None, format=None):
+        data = request.data
+
+        if data.get('password') != None and data.get('password') != '' and data.get('username') != None and data.get('username') != '':
+            params = [data.get('username'), data.get('email',''), data.get('password')]
+            user = createEndUser(*params)
+        else:
+            return Response({
+                'status': 'Bad request',
+                'message': 'No username or password given.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if user != False:
+            return HttpResponse("account created")
+        else:
+            return Response({
+                'status': 'Bad request',
+                'message': 'User already exists.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return HttpResponse('failed. no username or password given.')
+
+    def put(self, request, pk=None, format=None):
+        return HttpResponse("user put")
+
+    def delete(self, request, pk=None, format=None):
+        return HttpResponse("user delete")

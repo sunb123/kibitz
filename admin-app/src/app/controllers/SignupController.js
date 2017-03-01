@@ -15,7 +15,7 @@
     vm.signup = function() {
       var params = {
         'username': vm.username,
-        // 'email': vm.email,
+        'email': vm.email,
         'password': vm.password,
       }
 

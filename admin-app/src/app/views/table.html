@@ -32,18 +32,20 @@ label {
      -->        </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn" ui-sref="home.recsys({'model': data, 'id': data.id})" ng-click="vm.showSimpleToast(data.name)">
-                <td data-title="ID">{{$index + 1}}</td>
-                <td data-title="Name">{{data.name}}</td>
-                <td data-title="Status"><span id="recsys-status" class="label" ng-class="{'label-success': data.status == 'active', 'label-warning': data.status == 'paused'}" style="text-transform: capitalize">{{data.status}}</span></td>
-                <td data-title="URL Link"><a ng-href="{{data.url_name}}">www.example.com/{{data.url_name}}</a></td>
-    <!--             <td data-title="Progress">
-                    <md-progress-linear class="table-progress {{data.class}}"
-                                        md-mode="determinate"
-                                        value={{data.progress}}>
-                    </md-progress-linear>
-                </td> -->
-            </tr>
+            <div cg-busy="{promise:$parent.itemPromise, message:'Loading', backdrop:false}">
+              <tr ng-repeat="data in tableData track by $index" ui-sref-active="md-warn" ui-sref="home.recsys({'model': data, 'id': data.pk})" ng-click="vm.showSimpleToast(data.fields.name)">
+                  <td data-title="ID">{{$index + 1}}</td>
+                  <td data-title="Name">{{data.fields.name}}</td>
+                  <td data-title="Status"><span id="recsys-status" class="label" ng-class="{'label-success': data.fields.status == 'active', 'label-warning': data.fields.status == 'paused'}" style="text-transform: capitalize">{{data.fields.status}}</span></td>
+                  <td data-title="URL Link"><a ng-href="{{data.fields.url_name}}">https://kibitz2.csail.mit.edu/{{data.fields.url_name}}</a></td>
+      <!--             <td data-title="Progress">
+                      <md-progress-linear class="table-progress {{data.class}}"
+                                          md-mode="determinate"
+                                          value={{data.progress}}>
+                      </md-progress-linear>
+                  </td> -->
+              </tr>
+            </div>
             </tbody>
         </table>
     </div>
@@ -83,59 +85,81 @@ No recommenders
         <div class="tabbable"> <!-- Only required for left/right tabs -->
               <ul class="nav nav-tabs" style="cursor:pointer">
               <li class="active"><a ng-click="vm.changeTab(0)" data-toggle="tab">Upload CSV</a></li>
-              <li><a ng-click="vm.changeTab(2)" data-toggle="tab">Vendhq</a></li>
-              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Datahub</a></li>
+<!--               <li><a ng-click="vm.changeTab(2)" data-toggle="tab">Vendhq</a></li>
+ -->              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Datahub</a></li>
               </ul>
 
-
-              <div class="tab-content">
-                <div ng-show="vm.whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
+                <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
                         <div>
                               <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
                         </div>
                         <div>
-                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
+                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required><span style="color: red" ng-if="errorMessage.status == 'url_error'">Error: {{ errorMessage.message }}</span>
+                        </div>
+                        </form>
+
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_fields'">Error: {{ errorMessage.message }}</div>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_headers'">Error: {{ errorMessage.message }}</div>
+                        <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Suggested to include and select headers for Title, Description, Image Link, and Universal Code (e.g., ISBN or UPC)</h4>
+                        <input id="csvFile" type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
+                        <button type="button" class="btn btn-primary" ng-click="readHeaders()" style="font-size: 20px;">Select CSV Headers</button>
+
+                        <div>
+                          <form ng-show="hasHeaders" style="margin-bottom: 30px;width:300px">
+                              <formly-form model="vm.headers" fields="vm.csvHeadersFields" form="vm.csvHeadersForm"></formly-form>
+<!--                               <div>
+                                    <label>Repository:</label><select ng-model="selectedRepo" ng-options="repo.name for repo in repos track by repo.name"></select>
+                              </div>
+                              <div>
+                                    <label>Item Table:</label><select ng-model="selectedTable" ng-options="table.name for table in tables track by table.name"></select>
+                              </div>
+                              <div>
+                                    <label>Item ID:</label><select ng-model="selectedPrimaryKey" ng-options="column as column.name for column in columns"></select>
+                              </div>
+                              <div>
+                                    <label>Title:</label><select ng-model="selectedTitle" ng-options="column as column.name for column in columns"></select>
+                              </div> -->
+                          </form>
+                        </div>
+                    </div>
+                </div>
+
+              <div class="tab-content">
+  <!--               <div ng-show="vm.whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
+                    <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
+                        <form>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
+                        <div>
+                              <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
+                        </div>
+                        <div>
+                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required><span style="color: red" ng-if="errorMessage.status == 'url_error'">Error: {{ errorMessage.message }}</span>
                         </div>
                         </form>
 
                         VENDHQ
                     </div>
-                </div>
-
-                <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
-                    <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
-                        <form>
-                        <div>
-                              <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
-                        </div>
-                        <div>
-                              <label style="width: 160px">URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
-                        </div>
-                        </form>
-
-                        <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Must include headers for Title and Description.</h4>
-                        <input type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
-                        <button type="button" class="btn btn-primary" ng-click="uploadCSV(file)" style="font-size: 20px;">Upload</button>
-                    </div>
-                </div>
+                </div> -->
 
                 <div ng-show="vm.whichTab == 1" class="tab-pane active" id="tab2">
 
-                    <button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="vm.notAuthenticated" ng-click="vm.auth()" style="margin:15px auto 15px auto">Import Data From Datahub</button>
+                    <button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="!isAuthenticated()" ng-click="vm.auth()" style="margin:15px auto 15px auto">Import Data From Datahub</button>
 
+                  <div ng-show="isAuthenticated()" cg-busy="{promise: $parent.reposPromise, message:'Loading Datahub repos', backdrop:false}">
                     <div class="item-select" style="padding: 10px 10px 10px 0px">
                         <form>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
                         <div>
                               <label>Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
                         </div>
                         <div>
-                              <label>URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required>
+                              <label>URL Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="urlName" required><span style="color: red" ng-if="errorMessage.status == 'url_error'">Error: {{ errorMessage.message }}</span>
                         </div>
-
                         <div>
-                              <label>Repository:</label><select ng-model="selectedRepo" ng-options="repo.name for repo in repos track by repo.name"></select>
+                              <label>Repository:</label><select ng-model="selectedRepo" ng-options="repo.name for repo in $parent.repos track by repo.name"></select>
                         </div>
                         <div>
                               <label>Item Table:</label><select ng-model="selectedTable" ng-options="table.name for table in tables track by table.name"></select>
@@ -150,25 +174,27 @@ No recommenders
                               <label>Description:</label><select ng-model="selectedDescription" ng-options="column as column.name for column in columns"></select>
                         </div>
                         <div>
-                              <label>Image Link:</label><select ng-model="selectedImageLink" ng-options="column as column.name for column in columns"></select>
+                              <label>Image Link:</label><select ng-model="selectedImageLink" ng-options="column as column.name for column in columns"></select>(Optional)
                         </div>
                         <div>
-                              <label>Rating:</label><select ng-model="selectedRating" ng-options="column as column.name for column in columns"></select>
+                              <label>Universal Code (e.g., ISBN or UPC):</label><select ng-model="selectedUnivCode" ng-options="column as column.name for column in columns"></select>(Optional)
                         </div>
                         </form>
                     </div>
+                  </div>
+
                 </div>
+
+
+
               </div>
         </div>
-
-
-
 
 
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" ng-click="vm.createRecsysFromParams()">Create Recommender</button>
+        <button type="button" class="btn btn-primary" ng-click="createRecommender()">Create Recommender</button>
       </div>
     </div>
   </div>

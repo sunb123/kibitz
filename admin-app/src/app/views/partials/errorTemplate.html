@@ -1,0 +1,19 @@
+<script type="text/ng-template" id="errorTemplate">
+    <div ng-if="options.templateOptions.getError()" class="panel panel-danger">
+
+      <div class="panel-heading px-nested-panel-heading clearfix">
+        <strong class="control-label"">
+          {{options.templateOptions.getError()}}
+        </strong>
+      </div>
+
+      <div class="panel-body px-nested-panel-body">
+        <formly-transclude></formly-transclude>
+      </div>
+
+    </div>
+
+    <div ng-if="!options.templateOptions.getError()">
+      <formly-transclude></formly-transclude>
+    </div>
+</script>

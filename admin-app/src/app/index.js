@@ -2,7 +2,7 @@
 
 angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dndLists',
   'ngSanitize', 'ui.bootstrap', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'ngToast',
-  'slickCarousel', 'color.picker'])
+  'slickCarousel', 'color.picker', 'cgBusy', 'checklist-model'])
 
   .constant('config', {
     home_url: 'http://localhost:3000', // TODO: change to app location
@@ -17,6 +17,7 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
         }
         return base_url + path + query;
     },
+    client_id: 'sphQrMCcfdIjker5ghseFx7vRfV2bcwBfqJVRKAe',
   })
 
   .config(function($mdThemingProvider) {
@@ -36,6 +37,13 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
                     $mdIconProvider, $httpProvider) {
 
     $httpProvider.defaults.withCredentials = true;
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+    $httpProvider.defaults.headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    }
 
     $stateProvider
       .state('home', {
@@ -121,7 +129,7 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
     }
 
     $urlRouterProvider.otherwise(function($injector, $location){
-      if (getCookie('username') && getCookie('sessionid')) { // logged in
+      if (getCookie('k_username')) { // logged in
         $location.path('/table')
       } else {
         $location.path('/login')
@@ -167,5 +175,37 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
       'A700': '#E75753'
     });
 
+    String.prototype.format = function () {
+            var args = [].slice.call(arguments);
+            return this.replace(/(\{\d+\})/g, function (a){
+                return args[+(a.substr(1,a.length-2))||0];
+            });
+    };
+
     // $mdIconProvider.icon('user', 'assets/images/user.svg', 64);
+
+
+    // $('body').on('click', function (e) {
+    //     $('[data-toggle="popover"]').each(function () {
+    //         //the 'is' for buttons that trigger popups
+    //         //the 'has' for icons within a button that triggers a popup
+    //         if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+    //             $(this).popover('hide');
+    //         }
+    //     });
+    // });
+
+
+    // $(document).on('click', function (e) {
+    //     $('[data-toggle="popover"],[data-original-title]').each(function () {
+    //         //the 'is' for buttons that trigger popups
+    //         //the 'has' for icons within a button that triggers a popup
+    //         if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+    //             (($(this).popover('hide').data('bs.popover')||{}).inState||{}).click = false  // fix for BS 3.3.6
+    //         }
+
+    //     });
+    // });
+
+
   });

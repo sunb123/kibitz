@@ -292,7 +292,7 @@ html{
 
 .form-register-with-email .form-title-row{
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
 }
 
 .form-register-with-email h1{
@@ -368,7 +368,7 @@ html{
 .form-register-with-email:after{
     content: 'OR';
     position: absolute;
-    bottom: 330px;
+    bottom: 340px;
     right: -100px;
 
     border-radius: 50%;
@@ -754,7 +754,7 @@ md-backdrop.md-sidenav-backdrop {
 .blue {
     background: #3498db;
     color: #fff;
-    text-align: center;
+    //text-align: center;
     width: 300px;
     height: 500px;
 }
@@ -767,11 +767,11 @@ md-backdrop.md-sidenav-backdrop {
     margin: 10px;
     padding: 2%;
     position: relative;
-    text-align: center;
+    //text-align: center;
 }
 
 .content .content-title {
-    text-align: center;
+    //text-align: center;
     line-height: 500px;
 /*    font-family: 'Pacifico';
 */}
@@ -805,7 +805,7 @@ md-backdrop.md-sidenav-backdrop {
 
 md-card img {
   max-width: 280px;
-  max-height: 210px;
+  max-height: 230px;
   width: 280px;
   height:auto;
 }
@@ -826,10 +826,12 @@ md-card img {
 
 .item-card {
     width: 280px;
-    height: auto; // 400px;
+    height: auto;
+    min-height: 450px;
 }
 
 .item-img {
+    height: auto;
     padding:0px 0px 0px 0px;
 }
 
@@ -848,7 +850,7 @@ md-card img {
 
 .popover {
     z-index: 9999;
-    position: fixed;
+    //position: fixed;
 }
 
 
@@ -905,5 +907,171 @@ meter::-webkit-meter-optimum-value {
 
 
 .block {
-    width:300px;
+    width:30f0px;
+}
+
+
+
+.md-subhead {
+    padding-right: 20px;
+    margin-right: 20px;
+    width: 260px;
+}
+
+/*.card-title {
+    padding-left: 0px;
+    margin-left: 0px;
+}*/
+
+.rating-icon-fixed {
+    color: red;
+}
+
+/*.item-title {
+    padding-left: 0px;
+    margin-left: 0px;
+}*/
+
+
+
+
+
+
+.container {
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    padding: 20px;
+    top: 20px;
+    -webkit-box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 2px 1px rgba(0,0,0,0.2);
+}
+
+
+
+
+
+/**
+ * For the correct positioning of the placeholder element, the dnd-list and
+ * it's children must have position: relative
+ */
+.simpleDemo ul[dnd-list],
+.simpleDemo ul[dnd-list] > li {
+  position: relative;
+}
+
+/**
+ * The dnd-list should always have a min-height,
+ * otherwise you can't drop to it once it's empty
+ */
+.simpleDemo ul[dnd-list] {
+    min-height: 42px;
+    padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+.simpleDemo ul[dnd-list] .dndDraggingSource {
+    display: none;
+}
+
+/**
+ * An element with .dndPlaceholder class will be
+ * added to the dnd-list while the user is dragging
+ * over it.
+ */
+.simpleDemo ul[dnd-list] .dndPlaceholder {
+    display: block;
+    background-color: #ddd;
+    min-height: 42px;
+}
+
+/**
+ * The dnd-lists's child elements currently MUST have
+ * position: relative. Otherwise we can not determine
+ * whether the mouse pointer is in the upper or lower
+ * half of the element we are dragging over. In other
+ * browsers we can use event.offsetY for this.
+ */
+.simpleDemo ul[dnd-list] li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+}
+
+.simpleDemo {
+  margin-top: 20px;
+}
+
+.simpleDemo ul {
+  margin-bottom: 0px;
+}
+
+/**
+ * Show selected elements in green
+ */
+.simpleDemo ul[dnd-list] li.selected {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.item-elem {
+    min-height: 42px;
+    //padding-left: 0px;
+
+    position: relative;
+    border: 1px solid #ddd;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+    -webkit-appearance: none;
+}
+
+
+/*input:checked {
+    height: 50px;
+    width: 50px;
+}*/
+
+/*input:checked {
+    font-size: 100px;
+    background-color: #dff0d8;
+    color: #3c763d;
+}*/
+
+
+
+meter {
+ -webkit-appearance: checkbox;
+}
+
+.edit-icon {
+    font-size: 40px;
+}
+
+[uib-popover-template-popup] .popover-content {
+    height: 400px;
+    overflow-y: auto;
+    z-index: 9999;
 }

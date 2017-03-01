@@ -19,43 +19,43 @@
 
     var params = {
       // TODO: change
-      'username' : $cookies.get('username'),
-      'sessionid': $cookies.get('sessionid'),
+      'username' : $cookies.get('k_admin_username'),
+      'sessionid': $cookies.get('k_admin_sessionid'),
     }
 
-    var getCSSFile = function(recsys_id) {
-        var deferred = $q.defer();
+    // var getCSSFile = function(recsys_id) {
+    //     var deferred = $q.defer();
 
-        $http({
-          url: buildURL('/css/'+recsys_id+'/', params),
-          method: 'GET',
-        }).then(function successCallback(response) {
-            console.log(response)
-            deferred.resolve(response.data)
-        }, function errorCallback(response) {
-            console.log(response)
-        });
+    //     $http({
+    //       url: buildURL('/css/'+recsys_id+'/', params),
+    //       method: 'GET',
+    //     }).then(function successCallback(response) {
+    //         console.log(response)
+    //         deferred.resolve(response.data)
+    //     }, function errorCallback(response) {
+    //         console.log(response)
+    //     });
 
-        return deferred.promise
-    }
+    //     return deferred.promise
+    // }
 
-    var updateCSSFile = function(recsys_id, cssText) {
-        var deferred = $q.defer();
-        var data = $.extend({cssText:cssText}, params)
+    // var updateCSSFile = function(recsys_id, cssText) {
+    //     var deferred = $q.defer();
+    //     var data = $.extend({cssText:cssText}, params)
 
-        $http({
-          url: buildURL('/css/'+recsys_id+'/'),
-          method: 'PUT',
-          data: data,
-        }).then(function successCallback(response) {
-            console.log(response)
-            deferred.resolve(response.data)
-        }, function errorCallback(response) {
-            console.log(response)
-        });
+    //     $http({
+    //       url: buildURL('/css/'+recsys_id+'/'),
+    //       method: 'PUT',
+    //       data: data,
+    //     }).then(function successCallback(response) {
+    //         console.log(response)
+    //         deferred.resolve(response.data)
+    //     }, function errorCallback(response) {
+    //         console.log(response)
+    //     });
 
-        return deferred.promise
-    }
+    //     return deferred.promise
+    // }
 
     var getAllRecsys = function() {
         var deferred = $q.defer();
@@ -68,9 +68,10 @@
             if (response.data['error_type'] != null) {
               console.log(data['error_type'], data['detail'])
             }
-            deferred.resolve(response.data['rows'])
+            deferred.resolve(response.data) // change since recsys is stored in pg DB
         }, function errorCallback(response) {
             console.log(response)
+            deferred.resolve([])
         });
 
         return deferred.promise
@@ -101,11 +102,18 @@
           url: buildURL('/recsys/'+recsys_id+'/'),
           method: 'PUT',
           data: params,
-        }).then(function successCallback(response) {
-            console.log(response)
-            deferred.resolve(response.data)
-        }, function errorCallback(response) {
-            console.log(response)
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $cookies.get('csrftoken'),
+          },
+        }).success(function successCallback(response) {
+            console.log("success", response)
+            deferred.resolve(response)
+        }).error(function errorCallback(response) {
+            response['my_url_error'] = true
+            console.log("error on update", response)
+            deferred.resolve(response)
         });
 
         return deferred.promise
@@ -115,8 +123,8 @@
         var deferred = $q.defer();
 
         var params = {
-          'username': $cookies.get('username'),
-          'sessionid': $cookies.get('sessionid'),
+          'username': $cookies.get('k_admin_username'),
+          'sessionid': $cookies.get('k_admin_sessionid'),
           'params': data,
         }
         // $.extend(params, data)
@@ -142,6 +150,11 @@
           url: buildURL('/recsys/'+recsys_id+'/'),
           method: 'DELETE',
           data: params,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $cookies.get('csrftoken'),
+          },
         }).then(function successCallback(response) {
             console.log(response)
             deferred.resolve(response.data)
@@ -159,7 +172,7 @@
           url: buildURL('/repo-table/'),
           method: 'GET',
         }).then(function successCallback(response) {
-            console.log(response)
+            console.log(response.data)
             deferred.resolve(response.data)
         }, function errorCallback(response) {
             console.log(response)
@@ -212,7 +225,8 @@
         var options = []
         var option;
         for (var i in repoList) {
-            option = {'name':repoList[i].repo_name, 'value':repoList[i].repo_name}
+            option = {'name':repoList[i].repo_name, 'value':repoList[i].repo_name, 'owner':repoList[i].owner
+            , 'tables': repoList[i].tables}
             options.push(option)
         }
         return options
@@ -222,7 +236,7 @@
         var options = [];
         var option;
         for (var i in tableList) {
-            option = {'name':tableList[i].table_name, 'value':tableList[i].table_name}
+            option = {'name':tableList[i].table_name, 'value':tableList[i].table_name, 'columns': tableList[i].columns}
             options.push(option)
         }
         return options
@@ -246,9 +260,10 @@
       getRecsys: getRecsys,
       updateRecsys: updateRecsys,
       createRecsys: createRecsys,
+      deleteRecsys: deleteRecsys,
 
-      getCSSFile: getCSSFile,
-      updateCSSFile: updateCSSFile,
+      // getCSSFile: getCSSFile,
+      // updateCSSFile: updateCSSFile,
 
       getRepoList: getRepoList,
       getTableList: getTableList,

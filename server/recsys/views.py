@@ -1,119 +1,184 @@
-import requests
-import subprocess
-import sys
-
+import requests, subprocess, sys, json
 from django.shortcuts import render
-from django.http import HttpResponse
-
-from rest_framework import viewsets
+from django.http import HttpResponse, JsonResponse
+from rest_framework import viewsets, status
 from rest_framework.response import Response
+from django.core import serializers
+# from django.contrib.auth.decorators import login_required
+
 from recsys.models import Recsys
 from recsys.serializers import RecsysSerializer
 
-from app.user_methods import makeRequest, getUserIdFromUsername, is_logged_in_admin, is_logged_in_user
-from recsys.methods import checkRecsysParams
+from app.user_methods import is_logged_in, is_admin
+from app.user_methods import makeRequest, makeGetRequest
+from recsys.methods import checkRecsysUrlUnique
+from app.global_vars import default_recsys_template
+from app.methods import getItemTableFormat
+from app.system_methods import lock_decorator
+
+from authentication.models import Account
+from recsys.models import Recsys
 
 class RecsysViewSet(viewsets.ViewSet):
-    #lookup_field = 'username'
     queryset = Recsys.objects.all()
     serializer_class = RecsysSerializer
 
-    @is_logged_in_admin
+    @is_logged_in
+    @is_admin
     def list(self, request): # GET
-        r = None
-        username, sessionid = request.COOKIES.get('username'), request.COOKIES.get('sessionid')
-        print username, sessionid
-        owner_id = getUserIdFromUsername(username)
-        print owner_id
-        query = "select * from kibitz.recsys where owner_id='{}' order by id asc;".format(owner_id)
-        api_url = '/api/v1/query/test321/kibitz'
-        r = makeRequest('POST', api_url, 'master', query=query)
-        return HttpResponse(r)
+        user_id = request.user.id
+        owner_id = Account.objects.get(id=user_id)
+        recsysList = Recsys.objects.filter(owner_id=owner_id)
+        return HttpResponse( serializers.serialize('json',recsysList) )
 
-    @is_logged_in_admin
-    def create(self, request): # POST
-        print("got create")
-        if request.data.get('file') != None:
-            return HttpResponse(request.data.get('file'))
+    @is_logged_in
+    @is_admin
+    def create(self, request): # POST - using datahub item table
+        data = request.data
+        username = request.user.username
+        urlName = data.get('url_name')
+        recommenderName = data.get('name','')
+        if recommenderName == '':
+            return HttpResponse("no recommender name. failed")
+        if not checkRecsysUrlUnique(urlName):
+            return Response({
+                'status': 'Bad request',
+                'message': 'Url already taken'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        user = Account.objects.get(username=username)
+        owner_id = user.id
+        repo_base = username
+        repo = data.get('repo_name')
+        item_table_name = data.get('item_table_name')
 
-        # TODO: check recsys name and url unique
+        # create recsys object
+        recsys = Recsys(name=recommenderName, url_name=urlName, repo_base=username, repo_name=urlName,
+            item_table_name=item_table_name)
+        recsys.primary_key_field = data.get('primary_key_field')
+        recsys.title_field = data.get('title_field')
+        recsys.description_field = data.get('description_field')
+        recsys.image_link_field = data.get('image_link_field')
+        recsys.universal_code_field = data.get('universal_code_field')
+        recsys.owner = user
+        recsys.status = 'paused'
+        recsys.template = json.dumps(default_recsys_template)
+        recsys.save()
+        print "recsys saved"
 
+        #########
 
-        access_token = masterAccessToken()
-        recsys_params = tuple([param for param in request.data])
-        # TODO: ensure those (ordered) and only those recsys params
-        queryRecsys = "insert into kibitz.recsys {};".format(recsys_params)
-        api_url = '/api/v1/query/test321/kibitz'
+        # check if there is overall rating field, if not then add it
+        # TODO: if don't require item id, need to add it
+        api_url = '/api/v1/repos/{}/{}/tables/{}'.format(repo_base, repo, item_table_name)
+        resp = makeGetRequest(api_url, owner_id)
+        print resp, "request return"
 
-        # TODO: check params. url unique, repo/table exist. match the owner id.
-        params = checkRecsysParams(request.data['recsys_params'], request.user)
+        columns = resp.json()['columns']
+        has_overall_rating = False
+        has_id = False # NOTE: currently must provide id field
+        for col in columns:
+            if col.get('column_name') == 'overall_rating': # NOTE: will override ratings
+                has_overall_rating = True
+        #     if col.get('column_name') == 'id':
+        #         has_id = True
+        # if not has_id:
+        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
+        #     query = "ALTER TABLE {}.{} ADD {} {}".format(repo, item_table_name, 'id', 'text')
+        #     r = makeRequest('POST', api_url, owner_id, query=query)
+        #     print r.content
+        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
+        #     query = "select (*) from {}.{};".format(master_repo, item_table_name)
+        #     r = makeRequest('POST', api_url, owner_id, query=query)
+        #     if r.status_code == 200:
+        #         count = r.json()['rows'][0]
+        #         queryID = "insert into {}.{} ( id ) values ".format(repo, item_table_name)
+        #         for i in xrange(count)""
+        #             queryID += "({}),".format(str(i))
+        #         r = makeRequest('POST', api_url, owner_id, query=queryID)
+        #         print r.content
+        if not has_overall_rating:
+            api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
+            query = "ALTER TABLE {}.{} ADD {} {}".format(repo, item_table_name, 'overall_rating', 'text')
+            r = makeRequest('POST', api_url, owner_id, query=query)
+            # print r.content
 
+        output = subprocess.check_output(['./scripts/deploy.sh', '-n', urlName])
 
+        return HttpResponse("recsys")
 
-        # create recsys object in master DH. preselect recsys repo and item table.
-        r = makeRequest('POST', api_url, 'master', query=query)
-
-        # create user, rating table
-        api_url = '/api/v1/repos/{}/{}'.format(params['repo'], params['table'])
-        queryRating = ''
-        r = makeRequest('POST', api_url, request.user, data={'table_name': 'users'})
-        r = makeRequest('POST', api_url, request.user, data={'table_name': 'ratings'})
-
-        # deploy app
-        # subprocess.call( ['../scripts/deploy.sh -n {}'.format(request.data('url')) ])
-
-        # p = subprocess.Popen([sys.executable, ''],
-        #                             stdout=subprocess.PIPE,
-        #                             stderr=subprocess.STDOUT)
-
-        subprocess.Popen(['../scripts/deploy.sh', '', 'file'])
-
-        return HttpResponse("recsys create")
-
-    #@is_logged_in_admin
+    #@is_logged_in
+    #@is_admin
     def retrieve(self, request, pk=None): # GET with pk
-        # TODO: get recsys pk from recsys name and user name.
-        # get user row from user name, get owner_id
-        #print("got retrieve", pk)
-
-        recsys_name = request.query_params.get('recsys_name')
+        user_id = request.user.id
         recsys_url = request.query_params.get('recsys_url')
-        if recsys_name != None:
-            query = "select * from kibitz.recsys where name='{}';".format(recsys_name)
-        elif recsys_url != None:
-            query = "select * from kibitz.recsys where url_name='{}';".format(recsys_url)
-        else:
-            query = "select * from kibitz.recsys where id='{}';".format(pk)
 
-        api_url = '/api/v1/query/test321/kibitz'
-        r = makeRequest('POST', api_url, 'master', query=query)
-        return HttpResponse(r)
+        recsys = None
+        if recsys_url != None:
+            recsys = Recsys.objects.filter(owner_id=user_id, url_name=recsys_url).first()
+        elif pk != None:
+            recsys = Recsys.objects.filter(owner_id=user_id, pk=pk).first()
 
-    @is_logged_in_admin
+        if recsys == None:
+            return Response({
+                'status': 'Bad request',
+                'message': 'Recsys not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        return HttpResponse( serializers.serialize('json', [recsys,]) )
+
+    @is_logged_in
+    @is_admin
     def update(self, request, pk=None): # PUT with pk
-        print("got update")
-        # TODO: check that current admin user is recsys' owner
-        params = request.data.get('params')
-        print params
-        print pk
-        if params != None:
-            query = "update kibitz.recsys set "
-            for param_type, param in params.iteritems():
-                query += "{}='{}', ".format(param_type, param)
-            query = query[:-2] + " where id='{}';".format(pk)
-            api_url = '/api/v1/query/test321/kibitz'
-            r = makeRequest('POST', api_url, 'master', query=query)
-            return HttpResponse(r)
-            # css linking
-            # regular param update
+        if pk == None:
+            return Response({
+                        'status': 'Bad request',
+                        'message': 'No recsys id provided'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+        username = request.user.username
+        user = Account.objects.get(username=username)
+        user_id = user.id
+        recsys = Recsys.objects.get(id=pk)
+        recsys_owner_id = recsys.owner_id
+        # current_url = recsys.url_name
+
+        if user_id != recsys_owner_id:
+            return Response({
+                        'status': 'Bad request',
+                        'message': 'Not the owner of recsys'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            params = request.data.get('params')
+            if params != None:
+                # if not checkRecsysUrlUnique(params.get('url_name')) and current_url != params.get('url_name'):
+                #     return Response({
+                #         'status': 'Bad request',
+                #         'message': 'Url already taken'
+                #     }, status=status.HTTP_400_BAD_REQUEST)
+
+                for param_type, param in params.iteritems():
+                    if param_type != 'url_name':
+                        if param_type == 'owner':
+                            setattr(recsys, 'owner_id', param)
+                        else:
+                            setattr(recsys, param_type, param)
+                recsys.save()
+                return HttpResponse("recsys updated")
+
         return HttpResponse("no recsys update")
 
     # def partial_update(self, request, pk=None): # PATCH with pk
     #     return HttpResponse("recsys partial update")
 
-    @is_logged_in_admin
+    @is_logged_in
+    @is_admin
     def destroy(self, request, pk=None): # DELETE with pk
-        print("got destroy")
-        # TODO: delete script, delete recsys object.
-        return HttpResponse("recsys destroy")
+        recsys = Recsys.objects.get(id=pk)
+        urlName = recsys.url_name
+        if recsys.owner_id == request.user.id:
+            #output = subprocess.check_output(['./scripts/delete.sh', '-n', urlName])
+            recsys.delete()
+            return HttpResponse("recsys destroyed")
+        else:
+            return HttpResponse("not recsys owner")

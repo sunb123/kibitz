@@ -33,7 +33,8 @@ angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
 
   .config(function ($stateProvider, $urlRouterProvider, $mdThemingProvider,
                     $mdIconProvider, $httpProvider) {
-    $httpProvider.defaults.withCredentials = true;
+
+    $httpProvider.defaults.withCredentials = true; // NOTE: adds cookies
 
     $stateProvider
       .state('home', {
@@ -119,7 +120,7 @@ angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
     }
 
     $urlRouterProvider.otherwise(function($injector, $location){
-      if (getCookie('myusername') && getCookie('mysessionid')) { // logged in
+      if (getCookie('k_username')) { // logged in
         $location.path('/items')
       } else {
         $location.path('/login')

@@ -55,7 +55,7 @@
 
                     <div class="form-row">
                         <label>
-                            <span>Username</span>
+                            <span>Username - Email</span>
                             <input type="text" name="username" ng-model="vm.username">
                         </label>
                     </div>
@@ -73,8 +73,8 @@
 
                 </div>
 
-                <a href="#" class="form-forgotten-password">Forgotten password &middot;</a>
-                <a ui-sref="home.signup" class="form-create-an-account">Create an account &rarr;</a>
+<!--                 <a href="#" class="form-forgotten-password">Forgotten password &middot;</a>
+ -->                <a ui-sref="home.signup" class="form-create-an-account">Create an account &rarr;</a>
 
             </div>
 
@@ -84,7 +84,7 @@
                     <span class="form-title">Sign in with</span>
                 </div>
 
-                <a href="{{vm.loginUrl}}" class="form-datahub-button">Datahub</a>
+                <a href="" ng-click="vm.datahubLogin()" class="form-datahub-button">Datahub</a>
                 A powerful tool for managing all your data
 
 
@@ -96,3 +96,25 @@
 
 
 </div>
+
+
+
+<div class="modal fade" id="authModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <iframe src="{{authUrl}}"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
+        <button type="button" class="btn btn-warning">Pause Recommender</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

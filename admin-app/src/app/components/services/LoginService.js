@@ -11,7 +11,7 @@
 
     return {
       loggedIn : function() {
-        if ($cookies.get('username') && $cookies.get('sessionid')) {
+        if ($cookies.get('k_username')) {
             return true
         } else {
             return false

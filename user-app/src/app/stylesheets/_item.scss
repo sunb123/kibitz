@@ -8,8 +8,8 @@
 }
 
 md-card img {
-  max-width: 280px;
-  max-height: 210px;
+  max-width: auto; //280px;
+  max-height: auto; //210px;
   height:auto;
 }
 
@@ -23,21 +23,27 @@ md-card img {
     height: auto; //70px;
 }
 
+.md-subhead {
+    height: 47px;
+}
+
 .coloredRatings {
     color: red;
 }
 
 .item-card {
-    width: 280px;
+    width: auto; // 280px;
     height: auto; // 400px;
 }
 
 .item-img {
+    //width: 280px;
+    //height: 400px;
     padding:0px 0px 0px 0px;
 }
 
 .item-title-text {
-    max-width: 225px;
+    //max-width: 225px;
 }
 
 .item-title {
@@ -69,10 +75,17 @@ md-card img {
 }
 
 .item-card {
-    width: 280px;
+    max-width: 280px;
     height: auto; // 400px;
 }
 
 item {
-    padding: 0px 50px 0px 50px;
+    padding: 0px 20px 0px 20px;
+}
+
+
+.item-card img {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }

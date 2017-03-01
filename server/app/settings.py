@@ -12,9 +12,9 @@ SECRET_KEY = '$6(x*g_2g9l_*g8peb-@anl5^*8q!1w)k&e&2!i)t6$s8kia94'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', True)
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
-APPEND_SLASH = True # should set this
+APPEND_SLASH = False # should set this
 
 # Application definition
 
@@ -31,6 +31,8 @@ INSTALLED_APPS = (
     'compressor',
     'authentication',
     'recsys',
+    'app',
+    'distributedlock',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -48,17 +50,46 @@ ROOT_URLCONF = 'app.urls'
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
-import dj_database_url
+# import dj_database_url
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+#     )
+# }
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'kibitz',
+        'USER': 'master',
+        'PASSWORD': 'master',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         'USER': '',
+#         'PASSWORD': '',
+#         'ATOMIC_REQUESTS': True,
+#         'OPTIONS': {
+#             'timeout': 10,
+#         }
+#     }
+# }
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'cache_table',
+#     }
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
@@ -133,6 +164,9 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+       'rest_framework.permissions.AllowAny',
     )
 }
 
@@ -144,11 +178,16 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'authentication.Account'
 
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
+                            'authentication.models.MyBackend',)
 
 # CORS settings. https://github.com/ottoyiu/django-cors-headers
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000' # TODO: set to app location
-    'http://localhost:3001' # TODO: set to app location
+    'localhost:3000' # TODO: set to app location
+    'localhost:3001' # TODO: set to app location
+    'localhost:3002'
+    'kibitz2.csail.mit.edu'
 )
 
 CORS_ALLOW_CREDENTIALS = True
+

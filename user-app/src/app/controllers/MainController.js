@@ -1,97 +1,89 @@
 (function(){
   angular
-       .module('app')
-       .controller('MainController', [
-          'navService', 'loginService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout', '$http', '$cookies',
-          'config',
-          MainController
-       ])
-       .directive('ngEnter', function() {
-        return function(scope, element, attrs) {
-            element.bind("keydown keypress", function(event) {
-                if(event.which === 13) {
-                  scope.$eval(function(){
-                          var autoChild = document.getElementById('searchbox').firstElementChild;
-                          var el = angular.element(autoChild);
-                          el.scope().$mdAutocompleteCtrl.hidden = true;
-                          scope.$eval(attrs.ngEnter);
-                  });
-                  event.preventDefault();
+      .module('app')
+      .controller('MainController', [
+         'navService', 'loginService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout', '$http', '$cookies',
+         'config',
+         MainController
+      ])
+      .directive('ngEnter', function() {
+       return function(scope, element, attrs) {
+           element.bind("keydown keypress", function(event) {
+               if(event.which === 13) {
+                 scope.$eval(function(){
+                         var autoChild = document.getElementById('searchbox').firstElementChild;
+                         var el = angular.element(autoChild);
+                         el.scope().$mdAutocompleteCtrl.hidden = true;
+                         scope.$eval(attrs.ngEnter);
+                 });
+                 event.preventDefault();
                 }
             });
         };
-});
+      });
 
   function MainController(navService, loginService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout, $http, $cookies, config) {
     var vm = this;
 
-    vm.recsys_name = window.location.href.split(config.app_home_url+'/')[1]
-    console.log(vm.recsys_name)
+    vm.recsys_url = window.location.href.split(config.app_home_url+'/')[1]
+    console.log(vm.recsys_url)
+    vm.recsys_url = 'books' // TODO: change to get url from browser
 
-    // TODO: get recsys row: GET item display layout
-
-    //console.log($cookies.getAll())
+    $scope.recsysDeferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: config.server_url+'/recsys/0/'+'?recsys_url='+'books',
+      url: config.server_url+'/recsys-params/'+'?recsys_url='+vm.recsys_url,
     }).then(function(resp){
-      vm.recsys = resp.data.rows[0]
+      console.log(resp)
+      vm.recsys = resp.data
       vm.recsys_id = vm.recsys.id
+      $scope.recsys_id = vm.recsys_id
       vm.recsysTitle = vm.recsys.name
-      vm.maxRatingValue = vm.recsys.max_rating
 
-      if (!loginService.loggedIn()) {
-        $state.go('home.login')
-        $scope.loggedIn = false;
-        return
-      } else {
-        $scope.loggedIn = true;
-      }
+      $scope.template = JSON.parse(vm.recsys.template)
+      console.log($scope.template)
 
-      $http({
-        method: 'GET',
-        url: config.server_url+'/item/'+'?recsys_id='+vm.recsys_id,
-      }).then(function(resp){
-        vm.wholeTable
-      }, function(resp){
-        console.log(resp)
-      })
+      $scope.recsysDeferred.resolve(vm.recsys)
 
     }, function(resp){
       console.log(resp)
     })
 
-
-    vm.username = $cookies.get('myusername') // TODO: get current username
-
-
+    vm.username = function() {
+      return $cookies.get('k_username')
+    }
 
     vm.isGridView = true
     vm.home_location = window.location.href;
-    $scope.loggedIn = true;
-    $scope.tabNumber = 0;
     vm.searchText = "";
 
+    $scope.loggedIn = loginService.loggedIn;
+    $scope.tabNumber = 0;
     $scope.showSearchProgress = false;
 
+    var displayingSearched = false;
+
     $scope.addTabs = function() {
-      if ($state.current.name == 'home.login' || $state.current.name == 'home.signup') {
+      if ($state.current.name == 'home.login' || $state.current.name == 'home.signup' || displayingSearched) {
         return false
       } else {
         return true
       }
     }
 
-    $scope.itemSearch = function () {
-
+    $scope.itemSearch = function () { // get items
       console.log("item search")
 
-      $scope.showSearchProgress = true;
-      $timeout(function() { // updates ng-repeat for items list
-        // anything you want can go here and will safely be run on the next digest.
-        $scope.$digest()
+      if (vm.searchText == "") {
+        displayingSearched = false
+      } else {
+        displayingSearched = true
+      }
 
+      $scope.showSearchProgress = true;
+      $timeout(function() {
+        $scope.$digest()
       },0)
 
       $timeout(function() {
@@ -112,23 +104,11 @@
           sessionStorage.setItem(vm.searchText, true)
         }
       }
-      // $timeout(function() { // updates ng-repeat for items list
-      //   // anything you want can go here and will safely be run on the next digest.
-      //   $scope.$digest()
-      // },10000)
 
     }
 
-    $scope.tabSwitch = function(tabIndex) {
-      console.log($state.current.name)
-      $scope.tabNumber = tabIndex
-      $scope.$broadcast('tabSwitch', tabIndex)
-    }
-
-    vm.querySearch = function(searchString) {
+    vm.querySearch = function(searchString) { // get previous search queries
       if (searchString !== '' && sessionStorage.getItem('previousSearchCount') !== 0) {
-        // console.log(Object.keys(sessionStorage).filter(function(item) { return parseInt(item) <= 10 && parseInt(item) >= 0 && item != 'previousSearchCount'; }))
-
 
         var previousSearches = Object.keys(sessionStorage)
           .filter(function(item) { return parseInt(item) <= 10 && parseInt(item) >= 0 && item != 'previousSearchCount'; })
@@ -157,45 +137,56 @@
       };
     }
 
+    $scope.tabSwitch = function(tabIndex) {
+      console.log($state.current.name)
+      $scope.tabNumber = tabIndex
+      $scope.$broadcast('tabSwitch', tabIndex)
+      if ($scope.tabNumber != 0) {
+        displayingSearched = false
+      }
+    }
 
-    // TODO: search over item title, description text. search all items.
 
-    // TODO: popular, sort by highest and most rated items
-    // TODO: list of my rated items
+    // // TODO: drop down to filter on different categories
+    // $scope.changeSearchType = function(type) {
+    //   vm.searchType = type
+    //   $('#search-type').text(type)
+    // }
+    // $scope.item_types = ['Title', 'Author', 'Genre', 'Period']
 
     vm.logout = function() {
-      $scope.loggedIn = false;
-      $state.go('home.login');
-
       $http({
         url: config.server_url + '/auth/logout/',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $cookies.get('csrftoken'),
         },
         method: 'POST',
         data: {
-          'username': $cookies.get('myusername'),
-          'sessionid': $cookies.get('mysessionid'),
+          'username': $cookies.get('k_username'),
         },
       }).then(function successCallback(response) {
         console.log(response)
         if (response.data != 'error') {
-          $cookies.remove('myusername')
-          $cookies.remove('mysessionid')
+          $state.go('home.login');
+          $cookies.remove('k_username')
+          $cookies.remove('csrftoken')
         }
       }, function errorCallback(response) {
-
+        console.log(response)
       });
-
     }
 
-    $scope.changeSearchType = function(type) {
-      vm.searchType = type
-      $('#search-type').text(type)
+    vm.amazon_ratings = function() {
+      // TODO:
+      // popup for amazon ratings, run script
+      // get data output
+      // create user ratings for each ammazon item/rating
+      //
     }
 
-    $scope.item_types = ['Title', 'Author', 'Genre', 'Period']
+
   }
 
 })();

@@ -39,7 +39,7 @@ html{
     background-color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
     padding: 60px 80px;
-    margin-bottom: 32px;
+    margin-bottom: 35px;
 }
 
 .form-log-in-with-email .form-row{
@@ -292,7 +292,7 @@ html{
 
 .form-register-with-email .form-title-row{
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
 }
 
 .form-register-with-email h1{
@@ -510,6 +510,26 @@ html{
 }
 ////////////////////
 
+/*
+@media screen and (max-width: 1000px) {
+
+    .mytoolbar {
+        background-color: black;
+    }
+
+}*/
+
+.mytoolbar {
+    background-color: #558C89; //#3b5998;
+}
+
+/*@media screen and (max-width: 2000px) {
+
+    .mytoolbar {
+        background-color: #558C89; //#3b5998;
+    }
+
+}*/
 
 meter {
   width: 150px;
@@ -683,13 +703,15 @@ md-radio-button.md-accent.md-checked .md-label span {
   background-color: rgb(117,117,117);
 }*/
 
-button.md-button:not([disabled]):hover { // you suck angular
-    background-color: #898989;
+.search-button {
+    color: black;
+    height:40px;
 }
 
-.mytoolbar {
-    background-color: #3b5998;
+button.md-button:not([disabled]):hover { // why??
+    background-color: #4b7c79; //#355088;
 }
+
 
 md-tabs {
     //background-color: black;
@@ -774,4 +796,9 @@ md-backdrop.md-sidenav-backdrop {
 
 .orange .md-container {
   background-color: rgb(255, 236, 201)
+}
+
+
+meter {
+ -webkit-appearance: checkbox;
 }

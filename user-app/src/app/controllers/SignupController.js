@@ -10,27 +10,14 @@
   function SignupController(navService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $sce, $window, $http, config) {
     var vm = this;
 
-    $http({
-      method: 'GET',
-      url: config.server_url+'/recsys/0/'+'?recsys_url='+'books',
-    }).then(function(resp){
-      vm.recsys = resp.data.rows[0]
-      vm.recsys_id = vm.recsys.id
-    }, function(resp){
-      console.log(resp)
-    })
-
     vm.signup = function() {
-
-
       var params = {
         'username': vm.username,
         // 'email': vm.email,
         'password': vm.password,
-        'recsys_id': vm.recsys_id,
+        'recsys_id': $scope.$parent.recsys_id,
       }
-
-      console.log(params)
+      //console.log(params)
 
       $http({
         url: config.server_url+'/end-user/',
@@ -49,15 +36,12 @@
               .theme('success-toast')
               .hideDelay(3000)
           )
+          $state.go('home.login')
       }, function errorCallback(response) {
           console.log(response)
-          console.log('error details:', response.data['detail'])
-          // $scope.form.username.$error.serverMessage = message
-          // $scope.form.email.$error.serverMessage = message
-          // $scope.form.password.$error.serverMessage = message
           $mdToast.show(
             $mdToast.simple()
-              .textContent("Signup Error")
+              .textContent("Signup Error: "+response.data['message'])
               .position('bottom right')
               .theme('error-toast')
               .hideDelay(6000)

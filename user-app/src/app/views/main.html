@@ -1,19 +1,18 @@
 <div layout="column" flex>
   <div class="mytoolbar">
-    <md-toolbar class="col-md-offset-1 col-md-10" layout="row" layout-align="start center" style="background-color: #3b5998">
+    <md-toolbar class="col-md-offset-1 col-md-10" layout="row" layout-align="start center" style="background-color: #558C89">
 
-      <section> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
+      <section class="hide-xs"> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
         <h3 class="logo">
           <a class="clearhref" ui-sref="home.items" >{{vm.recsysTitle}}</a>
         </h3>
       </section>
 
       <section>
-        <form ng-if="loggedIn" class="search-group" style="width:500px">
+        <form class="search-group" style="width:auto">
           <div class="input-group">
-
-            <div class="input-group-btn">
-              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px">
+<!--             <div class="input-group-btn">
+               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px">
                 <span id="search-type">All</span><i class="material-icons" style="width:15px">arrow_drop_down</i>
               </button>
               <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
@@ -26,45 +25,46 @@
                 <li role="presentation" class="divider"></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Other</a></li>
               </ul>
-            </div>
-
-            <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()">
-
-                <md-item-template>
-                  <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
-                </md-item-template>
-
-            </md-autocomplete>
-
-            <div class="input-group-btn">
-              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px">
-                <i class="material-icons">search</i>
-              </button>
-            </div>
+            </div> -->
+            <span ng-show="loggedIn()">
+              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()">
+                  <md-item-template>
+                    <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                  </md-item-template>
+              </md-autocomplete>
+            </span>
 
           </div>
         </form>
 
       </section>
 
+<!--       <section class="hide-xs" ng-if="loggedIn()">
+            <button type="button" class="btn btn-secondary search-button">
+              <i class="material-icons">search</i>
+            </button>
+      </section> -->
+
       <span flex></span>
 
-      <md-button ng-if="loggedIn">
-        Import Ratings
-      </md-button>
+      <section>
+          <md-button ng-if="loggedIn()">
+            Import Ratings
+          </md-button>
+      </section>
+
 
       <section>
-        <md-menu ng-if="loggedIn">
+        <md-menu ng-if="loggedIn()">
             <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
-                <span>{{vm.username}}</span>
+                <span>{{vm.username()}}</span>
                 <i class="material-icons">keyboard_arrow_down</i>
             </md-button>
             <md-menu-content width="3">
-                <md-menu-item><md-button ng-click="$mdCloseMenu()" ui-sref="home.profile">Profile</md-button></md-menu-item>
                 <md-menu-item><md-button ng-click="vm.logout();$mdCloseMenu()">Log Out</md-button></md-menu-item>
             </md-menu-content>
         </md-menu>
-        <div layout="row" ng-if="!loggedIn">
+        <div layout="row" ng-if="!loggedIn()">
           <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.signup">
               <span>Sign Up</span>
           </md-button>
@@ -82,8 +82,8 @@
   <div ng-if="addTabs()" layout="row" layout-align="center center">
     <md-tabs style="width: 380px;" md-selected="tabIndex">
       <md-tab label="Home" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
-      <md-tab label="Popular" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
-      <md-tab label="My Items" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
+      <md-tab label="Trending" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
+      <md-tab label="Rated Items" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
     </md-tabs>
   </div>
 

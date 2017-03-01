@@ -1,0 +1,57 @@
+<script type="text/ng-template" id="eachIconPopoverTemplateOn">
+
+    <div>
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in popularIconValues" ng-click="vm.changeRatingState($parent.$index, value, 'on')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <hr style="border-top: 1px solid #d5d5d5">
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in iconValues" ng-click="vm.changeRatingState($parent.$index, value, 'on')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+
+</script>
+
+<script type="text/ng-template" id="eachIconPopoverTemplateOff">
+
+    <div>
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in popularIconValues" ng-click="vm.changeRatingState($parent.$index, value, 'off')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <hr style="border-top: 1px solid #d5d5d5">
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in iconValues" ng-click="vm.changeRatingState($parent.$index, value, 'off')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+
+</script>
+
+
+
+<script type="text/ng-template" id="allIconPopoverTemplateOn">
+    <div>
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in popularIconValues" ng-click="vm.changeRatingState('all', value, 'on')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <hr style="border-top: 1px solid #d5d5d5">
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in iconValues" ng-click="vm.changeRatingState('all', value, 'on')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <!--       <div>
+        <label>Custom Icon Link (local url or remote url)</label>
+        <input type="text" ng-model="ratingStates[$index].icon_link" class="form-control">
+      </div> -->
+</script>
+
+<script type="text/ng-template" id="allIconPopoverTemplateOff">
+    <div>
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in popularIconValues" ng-click="vm.changeRatingState('all', value, 'off')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <hr style="border-top: 1px solid #d5d5d5">
+      <ul style="list-style-type:none;padding: 0px 0px 0px 0px;font-size:20px">
+        <li ng-repeat="value in iconValues" ng-click="vm.changeRatingState('all', value, 'off')" ng-class="value" style="padding-right: 7px"></li>
+      </ul>
+      <!--       <div>
+        <label>Custom Icon Link (local url or remote url)</label>
+        <input type="text" ng-model="ratingStates[$index].icon_link" class="form-control">
+      </div> -->
+</script>

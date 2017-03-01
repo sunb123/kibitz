@@ -10,7 +10,7 @@
   function varService($q, $http, $cookies){
 
     return {
-      server_location: 'http://localhost:8000', // http://128.52.184.30/
+      server_location: 'http://localhost:8000',
 
     };
 
