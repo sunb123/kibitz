@@ -28,7 +28,12 @@ gulp.task('inject', ['styles'], function () {
 
   var wiredepOptions = {
     directory: 'bower_components',
-    exclude: [/bootstrap\.css/, /foundation\.css/]
+    //exclude: [ /bootstrap\.css/, /foundation\.css/],
+    // overrides:{
+    //     "bootstrap":{
+    //       "main":["../bower_components/bootstrap/dist/css/bootstrap.min.css"]
+    // }}
+
   };
 
   return gulp.src(paths.src + '/*.html')

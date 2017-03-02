@@ -118,17 +118,17 @@
 
     vm.getOnClass = function(index) {
         if (index != null) {
-            return $scope.ratingStates[index].stateOn + ' edit-icon'
+            return $scope.ratingStates[index].stateOn
         } else {
-            return $scope.ratingStates[0].stateOn + ' edit-icon'
+            return $scope.ratingStates[0].stateOn
         }
     }
 
     vm.getOffClass = function(index) {
         if (index != null) {
-            return $scope.ratingStates[index].stateOff + ' edit-icon'
+            return $scope.ratingStates[index].stateOff
         } else {
-            return $scope.ratingStates[0].stateOff + ' edit-icon'
+            return $scope.ratingStates[0].stateOff
         }
     }
 
