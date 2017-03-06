@@ -158,6 +158,7 @@ class RepoTableView(views.APIView):
 class RecsysParamsView(views.APIView):
 
     def get(self, request, pk=None, format=None):
+	return HttpResponse('asd')
         recsys_url = request.query_params.get('recsys_url')
         recsys = Recsys.objects.get(url_name=recsys_url)
         selected_keys = ['id','name','url_name', 'status', 'template', 'primary_key_field', 'title_field', \

@@ -88,6 +88,8 @@ class ProfileCodeLoginView(views.APIView): # login method only for admin users.
         r = requests.post(url, data=payload)
         access_token = r.json().get('access_token')
 
+	print access_token
+
         if r.status_code == 200 and access_token != None:
             resp = requests.get(base_url+'/api/v1/user',headers={'Authorization':'Bearer '+access_token})
             profile_username = resp.json().get('username')

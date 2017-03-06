@@ -33,7 +33,7 @@ auth_client_id = 'sphQrMCcfdIjker5ghseFx7vRfV2bcwBfqJVRKAe'
 auth_client_secret = 'd2xGNJXRhM9e7jVPSng5tdk3zYv3jTgSRy4hdZiJ3oVAzyIV9TGXQEsQ1j78sDJdrsdyx2TMCaQpWHtjfKVnV8OBG0F5JVd0S5xTyPiYI2tluQXkDfHAIaG0EG0lOd3O'
 
 base_url = 'https://datahub.csail.mit.edu'
-redirect_uri = 'http://localhost:3000' # TODO: change to app location
+redirect_uri = 'http://kibitz2.csail.mit.edu/admin' #'http://localhost:3000' # TODO: change to app location
 
 ###########################
 ###########################

@@ -1,11 +1,11 @@
 'use strict';
 
 angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
-  'ngSanitize', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'cgBusy' ])
+  'ngSanitize', 'ui.router', 'ngMaterial', 'nvd3', 'app','formly','formlyBootstrap', 'ncy-angular-breadcrumb', 'infinite-scroll', 'cgBusy'])
 
   .constant('config', {
-    server_url: 'http://localhost:8000/api/v1', // TODO: change to server location
-    app_home_url: 'http://localhost:3001', // TODO: will be http://kibitz2.csail.mit.edu/
+    server_url: 'http://kibitz2.csail.mit.edu/api/v1', //'http://localhost:8000/api/v1', // TODO: change to server location
+    app_home_url: 'http://kibitz2.csail.mit.edu/user', //http://localhost:3001', // TODO: will be http://kibitz2.csail.mit.edu/
     buildURL: function(path, params) {
         var base_url = 'https://datahub.csail.mit.edu';
         var query = '';

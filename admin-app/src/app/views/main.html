@@ -1,4 +1,4 @@
-<md-sidenav ng-show="loggedIn" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left"
+<md-sidenav ng-show="loggedIn()" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left"
             class="md-whiteframe-z2 md-sidenav-left">
   <md-toolbar md-theme="custom" class="md-hue-1 md-whiteframe-z2">
     <md-button layout="row" layout-align="center center" class="md-toolbar-tools" ui-sref="home.table"
@@ -22,11 +22,11 @@
 
 
 <div layout="column" flex style="background-color: #999999">
-<!--     <div ng-show="!loggedIn" style="margin: 0px 200px 0px 200px">
+<!--     <div ng-show="!loggedIn()" style="margin: 0px 200px 0px 200px">
  -->      <md-toolbar layout="row" layout-align="start center" style="background-color: #999999"> <!-- 8c8c8c-->
 
           <section layout-align="start center">
-              <md-button class="md-toolbar-tools" ng-show="!loggedIn" ui-sref="home.table"
+              <md-button class="md-toolbar-tools" ng-show="!loggedIn()" ui-sref="home.table"
                          href=""> <!-- TODO: change url to home page -->
                 <h1>Kibitz</h1>
               </md-button>
@@ -35,7 +35,7 @@
           <section layout-align="start center" layout-fill flex></section>
 
           <section layout-align="end center">
-              <md-menu md-offset="0 20" ng-if="loggedIn">
+              <md-menu md-offset="0 20" ng-if="loggedIn()">
                   <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
                       <span>{{vm.username}}</span>
                       <i class="material-icons">keyboard_arrow_down</i>
@@ -45,7 +45,7 @@
                   </md-menu-content>
               </md-menu>
 
-              <div layout="row" ng-if="!loggedIn">
+              <div layout="row" ng-if="!loggedIn()">
                 <md-button class="toolbar-button" aria-label="Settings" ui-sref="home.signup">
                     <span>Sign Up</span>
                 </md-button>

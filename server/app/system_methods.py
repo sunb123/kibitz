@@ -6,7 +6,7 @@ from django.core.cache import cache
 from authentication.models import CustomSession, SessionStore
 import filelock
 
-lock_name = 'master_lock'
+lock_name = 'master_loc'
 
 @contextlib.contextmanager
 def cache_lock(key, attempts=20, expires=120):

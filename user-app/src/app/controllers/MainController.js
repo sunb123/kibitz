@@ -147,7 +147,7 @@
     }
 
 
-    // // TODO: drop down to filter on different categories
+    // drop down to filter on different categories
     // $scope.changeSearchType = function(type) {
     //   vm.searchType = type
     //   $('#search-type').text(type)

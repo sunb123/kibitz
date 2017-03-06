@@ -5,10 +5,10 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
   'slickCarousel', 'color.picker', 'cgBusy', 'checklist-model'])
 
   .constant('config', {
-    home_url: 'http://localhost:3000', // TODO: change to app location
-    server_url: 'http://localhost:8000/api/v1', // TODO: change to server location
-    dh_login_url: 'https://datahub.csail.mit.edu/account/login?redirect_url='+'http://localhost:3000',
-    dh_signup_url: 'https://datahub.csail.mit.edu/account/register?redirect_url='+'http://localhost:3000',
+    home_url: 'http://kibitz2.csail.mit.edu/admin', //'http://localhost:3000', // TODO: change to app location
+    server_url: 'http://kibitz2.csail.mit.edu/api/v1', //'http://localhost:8000/api/v1', // TODO: change to server location
+    dh_login_url: 'https://datahub.csail.mit.edu/account/login?redirect_url='+'http://kibitz2.csail.mit.edu/admin',
+    dh_signup_url: 'https://datahub.csail.mit.edu/account/register?redirect_url='+'http://kibitz2.csail.mit.edu/admin',
     buildURL: function(path, params) {
         var base_url = 'https://datahub.csail.mit.edu';
         var query = '';

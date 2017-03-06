@@ -13,13 +13,14 @@
     var vm = this;
     console.log("called main")
 
+    $scope.loggedIn = loginService.loggedIn
+
     if (!loginService.loggedIn()) {
       $state.go('home.login')
       console.log("not logged in")
       return
     } else {
       console.log("logged in")
-      $scope.loggedIn = true;
     }
 
     vm.kibitz_home_location = config.home_url
@@ -71,7 +72,6 @@
     },1000)
 
     vm.logout = function() {
-      $scope.loggedIn = false;
       $state.go('home.login');
 
       $http({
