@@ -14,6 +14,8 @@
     console.log("called main")
 
     $scope.loggedIn = loginService.loggedIn
+    vm.kibitz_home_location = config.home_url
+    vm.username = $cookies.get('k_username')
 
     if (!loginService.loggedIn()) {
       $state.go('home.login')
@@ -22,10 +24,6 @@
     } else {
       console.log("logged in")
     }
-
-    vm.kibitz_home_location = config.home_url
-
-    vm.username = $cookies.get('k_username')
 
     vm.menuItems = [];
     vm.selectItem = selectItem;

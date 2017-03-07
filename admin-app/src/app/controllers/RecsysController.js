@@ -9,7 +9,6 @@
        ])
 
     angular.module('app').run(function(formlyConfig) {
-
       var ngModelAttrs = {};
 
       function camelize(string) {
@@ -82,7 +81,7 @@
       $scope.$parent.loggedIn = true
     }
 
-	var vm = this;
+    var vm = this;
     vm.submit = onSubmit;
     $scope.showingAdvancedSettings = false;
     vm.tabSetting = 'general' // 'general' or 'advaned'

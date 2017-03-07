@@ -12,12 +12,11 @@
     var vm = this;
 
     if (!loginService.loggedIn()) {
-      $state.go('home.login');
-      console.log('go to login')
+      $state.go('home.login')
+      console.log("not logged in")
       return
     } else {
-      $scope.$parent.loggedIn = true
-      console.log("true")
+      console.log("logged in")
     }
 
     $scope.isAuthenticated = function() {
@@ -235,7 +234,7 @@
       };
 
       var authorization_url = config.buildURL('/oauth2/authorize/', params);
-
+      var server_url = config.server_url
       var popup = window.open(authorization_url,'newwindow', config='height=600,width=600,' +
       'toolbar=no, menubar=no, scrollbars=no, resizable=no,' + 'location=no, directories=no, status=no')
 
@@ -272,7 +271,7 @@
           }
       }
 
-      var id = setInterval(fnCheckLocation, 500);
+      var interval = setInterval(fnCheckLocation, 500);
     }
 
     vm.headers = {}
