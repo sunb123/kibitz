@@ -169,7 +169,7 @@ def createAdminUserObject(username, email=None, password=None, access_token=None
 def makeGetRequest(url, user_id):
     access_token = getAdminUserTokens(user_id) # NOTE: makes call to DH to get tokens
     if access_token == None or access_token == '':
-        return "FAIL no access token"
+        raise Exception("No access token")
     resp = requests.get(base_url+url,headers={'Authorization':'Bearer '+access_token})
     if resp.status_code == 401: # token expired.
         access_token = refreshAdminToken(user_id)
@@ -193,7 +193,7 @@ def makeRequest(method, url, user_id, query='', data={}, isMaster=False): # only
         access_token = getAdminUserTokens(user_id) # NOTE: makes call to DH to get tokens
         payload.update(data)
         if access_token == None or access_token == '': # NOTE: auth type user with no tokens
-            return "FAIL no access token"
+            raise Exception("No access token")
         resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload)
         if resp.status_code == 401: # token expired.
             access_token = refreshAdminToken(user_id)
