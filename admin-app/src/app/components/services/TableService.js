@@ -107,10 +107,10 @@
             'Content-Type': 'application/json',
             'X-CSRFToken': $cookies.get('csrftoken'),
           },
-        }).success(function successCallback(response) {
+        }).then(function successCallback(response) {
             console.log("success", response)
             deferred.resolve(response)
-        }).error(function errorCallback(response) {
+        }, function errorCallback(response) {
             response['my_url_error'] = true
             console.log("error on update", response)
             deferred.resolve(response)

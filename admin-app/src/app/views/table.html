@@ -37,7 +37,7 @@ label {
                   <td data-title="ID">{{$index + 1}}</td>
                   <td data-title="Name">{{data.fields.name}}</td>
                   <td data-title="Status"><span id="recsys-status" class="label" ng-class="{'label-success': data.fields.status == 'active', 'label-warning': data.fields.status == 'paused'}" style="text-transform: capitalize">{{data.fields.status}}</span></td>
-                  <td data-title="URL Link"><a ng-href="{{data.fields.url_name}}">https://kibitz2.csail.mit.edu/{{data.fields.url_name}}</a></td>
+                  <td data-title="URL Link"><a ng-href="http://kibitz2.csail.mit.edu/{{data.fields.url_name}}">http://kibitz2.csail.mit.edu/{{data.fields.url_name}}</a></td>
       <!--             <td data-title="Progress">
                       <md-progress-linear class="table-progress {{data.class}}"
                                           md-mode="determinate"
@@ -92,7 +92,7 @@ No recommenders
                 <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
-                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_field'">Error: {{ errorMessage.message }}</div>
                         <div>
                               <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
                         </div>
@@ -131,7 +131,7 @@ No recommenders
   <!--               <div ng-show="vm.whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
-                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_field'">Error: {{ errorMessage.message }}</div>
                         <div>
                               <label style="width: 160px">Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
                         </div>
@@ -151,7 +151,7 @@ No recommenders
                   <div ng-show="isAuthenticated()" cg-busy="{promise: $parent.reposPromise, message:'Loading Datahub repos', backdrop:false}">
                     <div class="item-select" style="padding: 10px 10px 10px 0px">
                         <form>
-                        <div style="color: red" ng-if="errorMessage.status == 'missing_name'">Error: {{ errorMessage.message }}</div>
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_field'">Error: {{ errorMessage.message }}</div>
                         <div>
                               <label>Recommender Name:</label><input style="margin:10px 10px 10px 10px;padding:5px 10px 5px 10px;" ng-model="recommenderName" required>
                         </div>

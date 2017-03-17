@@ -15,7 +15,7 @@ auth_client_id, auth_client_secret, base_url, redirect_uri, master_dh_query_url,
 from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, createEndUser, makeRequest, makeGetRequest
 from recsys.methods import checkRecsysUrlUnique
 
-from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format
+from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format, SPARK_HOME, SERVER_HOME
 from app.methods import getItemTableFormat, makeRating, updateItemRating
 from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery
 
@@ -106,15 +106,15 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
         recsys.primary_key_field = 'id'
         recsys.title_field = required_headers.get('title')
         recsys.description_field = required_headers.get('description')
-        recsys.image_link_field = required_headers.get('image')
-        recsys.universal_code_field = required_headers.get('univ_code')
+        recsys.image_link_field = required_headers.get('image','')
+        recsys.universal_code_field = required_headers.get('univ_code','')
         recsys.owner = user
         recsys.status = 'paused'
         recsys.template = json.dumps(default_recsys_template)
         recsys.save()
 
         # deploy app with recsys params
-        output = subprocess.check_output(['./scripts/deploy.sh', '-n', urlName])
+        output = subprocess.check_output([SERVER_HOME+'/scripts/deploy.sh', '-n', urlName])
 
         return HttpResponse(output)
 
@@ -129,6 +129,7 @@ class RepoTableView(views.APIView):
             user_id = user.id #user.get('id')
         else:
             user_id = None
+	print "user id", user_id
 
         data = {}
         api_url = '/api/v1/repos/{}'.format(username)
@@ -224,7 +225,7 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
 
             # STEP 4: Get recommended items
             if len(ratings) != 0:
-                output = subprocess.check_output(['/usr/local/spark/bin/spark-submit','./recommender.py', str(recsys_id), str(user.id), '100'])
+                output = subprocess.check_output([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user.id), '100'])
                 print "recommender out: ", output
 
                 rec_ratings = ast.literal_eval(output)
@@ -272,55 +273,54 @@ class RatingView(views.APIView):
     def delete(self, request, pk=None, format=None):
         pass
 
+class RecommendationView(views.APIView):
 
-# class RecommendationView(views.APIView):
+    @is_logged_in
+    def get(self, request, pk=None, format=None): # get recommended of logged in user
+        # get top items from recommendation
+        # print request.user.username
 
-#     @is_logged_in
-#     def get(self, request, pk=None, format=None): # get recommended of logged in user
-#         # get top items from recommendation
-#         # print request.user.username
+        # return HttpResponse("test get")
 
-#         # return HttpResponse("test get")
+        # from django.contrib.auth import authenticate, login, logout
+        # user = Account.objects.get(username='test')
+        # user.set_password('asd')
+        # user.save()
 
-#         # from django.contrib.auth import authenticate, login, logout
-#         # user = Account.objects.get(username='test')
-#         # user.set_password('asd')
-#         # user.save()
+        # user = authenticate(username='test', password='asd')
+        # print user.is_authenticated(), user.backend
 
-#         # user = authenticate(username='test', password='asd')
-#         # print user.is_authenticated(), user.backend
+        # return HttpResponse()
 
-#         # return HttpResponse()
+        username = request.user.username #request.COOKIES.get('k_username')
+        recsys_id = request.query_params.get('recsys_id')
+        user = Account.objects.get(username=username) # TODO: user filter if user doesn't exist
+        user_id = user.id
+        # user_id = getUserBy('username', username).get('id')
 
-#         username = request.user.username #request.COOKIES.get('k_username')
-#         recsys_id = request.query_params.get('recsys_id')
-#         user = Account.objects.get(username=username) # TODO: user filter if user doesn't exist
-#         user_id = user.id
-#         # user_id = getUserBy('username', username).get('id')
+        # print subprocess.check_output(['/usr/local/spark/bin/spark-submit','./recommender.py', str(recsys_id), str(user_id), '100'])
+        # output = 1
+        # print "recommender out: ", output
 
-#         # print subprocess.check_output(['/usr/local/spark/bin/spark-submit','./recommender.py', str(recsys_id), str(user_id), '100'])
-#         # output = 1
-#         # print "recommender out: ", output
+        process = subprocess.Popen([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user_id), '100'],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+        returncode = process.wait()
+        print('output returned {0}'.format(returncode))
+        #print(process.stdout.read())
+        p = process.stdout.read()
 
-#         process = subprocess.Popen(['/usr/local/spark/bin/spark-submit','./recommender.py', str(recsys_id), str(user_id), '100'],
-#                            stdout=subprocess.PIPE,
-#                            stderr=subprocess.STDOUT)
-#         returncode = process.wait()
-#         print('output returned {0}'.format(returncode))
-#         #print(process.stdout.read())
-#         p = process.stdout.read()
+        return HttpResponse(p)
 
-#         return HttpResponse(p)
+    def post(self, request, pk=None, format=None):
+        #data = json.loads(request.body)
+        return HttpResponse("something post")
 
-#     def post(self, request, pk=None, format=None):
-#         #data = json.loads(request.body)
-#         return HttpResponse("something post")
+    def put(self, request, pk=None, format=None):
+        pass
 
-#     def put(self, request, pk=None, format=None):
-#         pass
-
-#     def delete(self, request, pk=None, format=None):
-#         pass
+    def delete(self, request, pk=None, format=None):
+        pass
 
 
 class WidgetTestView(views.APIView):

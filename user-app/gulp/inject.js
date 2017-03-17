@@ -29,6 +29,35 @@ gulp.task('inject', ['styles'], function () {
   var wiredepOptions = {
     directory: 'bower_components',
     //exclude: [/bootstrap\.css/, /foundation\.css/]
+    overrides:{
+	"bootstrap": {
+	  "main": [
+	    "dist/css/bootstrap.css",
+	    "dist/js/bootstrap.js",
+	    "dist/fonts/glyphicons-halflings-regular.eot",
+	    "dist/fonts/glyphicons-halflings-regular.svg",
+	    "dist/fonts/glyphicons-halflings-regular.ttf",
+	    "dist/fonts/glyphicons-halflings-regular.woff",
+	    "dist/fonts/glyphicons-halflings-regular.woff2",
+	    "less/bootstrap.less"
+	  ],
+	},
+
+        "font-awesome":{
+           "main": [
+             "css/font-awesome.min.css",
+             "less/font-awesome.less",
+             "scss/font-awesome.scss",
+             "fonts/FontAwesome.otf",
+             "fonts/fontawesome-webfont.eot",
+             "fonts/fontawesome-webfont.svg",
+             "fonts/fontawesome-webfont.ttf",
+             "fonts/fontawesome-webfont.woff",
+             "fonts/fontawesome-webfont.woff2"
+            ]
+        }
+    }
+
   };
 
   return gulp.src(paths.src + '/*.html')

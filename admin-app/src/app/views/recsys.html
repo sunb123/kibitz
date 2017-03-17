@@ -256,7 +256,7 @@
   <div ng-show="vm.isTab('general')">
     <hr style="border-top: 1px solid darkgray">
     <button ng-if="active()" type="button" class="btn btn-warning" data-toggle="modal" data-target="#pauseModal">Pause Recommender</button>
-    <button ng-if="paused()" type="button" class="btn btn-success" data-toggle="modal" data-target="#startModal">Start Recommender</button>
+    <button ng-if="paused()" type="button" class="btn btn-success" data-toggle="modal" data-target="#startModal">Activate Recommender</button>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Recommender</button>
   </div>
 
@@ -328,11 +328,11 @@
         <h4 class="modal-title">Modal title</h4>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to start the recommender? Your application will be deloyed automatically.</p>
+        <p>Are you sure you want to activate the recommender? Your application will be deloyed automatically.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Go Back</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal" ng-click="vm.startRecsys()">Start Recommender</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" ng-click="vm.startRecsys()">Activate Recommender</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -443,7 +443,7 @@
 
 
 
-<div ng-include="'./app/views/partials/editIconPopovers.html'"></div>
+<div ng-include="'app/views/partials/editIconPopovers.html'"></div>
 
 
 

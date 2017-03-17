@@ -279,7 +279,7 @@
         field = itemDetails[i]
         value = item[field]
         item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div> \
-      <div class='col-xs-8 display-value'>%s</div></div>".format(capitalize(field), value)
+      <div style='word-wrap: break-word' class='col-xs-8 display-value'>%s</div></div>".format(capitalize(field), value)
       }
       item_template += "</fieldset>"
       return item_template
@@ -290,7 +290,7 @@
     }
 
     function getStr(percent) {
-      var p = percent * 100
+      var p = Math.round(percent * 100)
       return p.toString() + '%'
     }
 

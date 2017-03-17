@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from rest_framework_nested import routers
 from authentication.views import LoginView, LogoutView, ProfileCodeLoginView, AdminUserView, EndUserView #, AccountViewSet
 from app.views import ItemView, RatingView, CSVUploadView, RepoTableView, AuthCodeToAccessTokenView, \
-WidgetTestView , RecsysParamsView # RecommendationView
+WidgetTestView , RecsysParamsView, RecommendationView
 from recsys.views import RecsysViewSet
 
 router = routers.SimpleRouter()
@@ -30,8 +30,8 @@ urlpatterns = [
     url(r'^api/v1/rating/$', RatingView.as_view(), name='ratings'),
     url(r'^api/v1/rating/(?P<pk>[^/]+)/$', RatingView.as_view(), name='ratings'),
 
-    # url(r'^api/v1/recommendation/$', RecommendationView.as_view(), name='recommendation'),
-    # url(r'^api/v1/recommendation/(?P<pk>[^/]+)/$', RecommendationView.as_view(), name='recommendation'),
+    url(r'^api/v1/recommendation/$', RecommendationView.as_view(), name='recommendation'),
+    url(r'^api/v1/recommendation/(?P<pk>[^/]+)/$', RecommendationView.as_view(), name='recommendation'),
 
     url(r'^api/v1/code-to-token/$', AuthCodeToAccessTokenView.as_view(), name='code-to-token'),
 

@@ -46,13 +46,22 @@
     }
 
     $scope.tableData = [];
+    $scope.tables = []
+    $scope.columns = []
+
+    $scope.selectedRepo = ''
+    $scope.selectedTable = ''
+    $scope.selectedPrimaryKey = ''
+    $scope.selectedTitle= ''
+    $scope.selectedDescription = ''
+    $scope.selectedImageLink = ''
+    $scope.selectedUnivCode = ''
 
     // get recsys list
     $scope.$parent.itemDeferred.promise.then(function(val) {
       $scope.tableData = [].concat($scope.$parent.recsysList)
       //console.log($scope.tableData)
     })
-
 
     $scope.$watch('$parent.recsysList', function(newVal, oldVal) {
       $scope.tableData = [].concat($scope.$parent.recsysList)
@@ -69,6 +78,29 @@
         return options
     }
 
+    function checkBasicParams() {
+        if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.recommenderName == undefined ||
+            $scope.urlName == '' || $scope.urlName == null || $scope.urlName == undefined) {
+          $scope.errorMessage.status = "missing_field"
+          $scope.errorMessage.message = "Missing recommender name or url"
+          return false
+        } 
+        return true
+    }
+
+    function checkRecsysParams() {
+        if ($scope.selectedRepo == '' || $scope.selectedRepo == null || $scope.selectedRepo == undefined ||
+            $scope.selectedTable == '' || $scope.selectedTable == null || $scope.selectedTable == undefined ||
+            $scope.selectedPrimaryKey == '' || $scope.selectedPrimaryKey == null || $scope.selectedPrimaryKey == undefined ||
+            $scope.selectedTitle == '' || $scope.selectedTitle == null || $scope.selectedTitle == undefined ||
+            $scope.selectedDescription == '' || $scope.selectedDescription == null || $scope.selectedDescription == undefined) {
+	  $scope.errorMessage.status = "missing_field"
+          $scope.errorMessage.message = "Missing recommender name or url"
+          return false
+        }
+	return true
+    }
+
     var fileHeaders;
     var reader = new FileReader();
     reader.onload = function(progressEvent){
@@ -83,10 +115,8 @@
     };
 
     $scope.readHeaders = function() {
-        if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.urlName == '' || $scope.urlName == null) {
-          $scope.errorMessage.status = "missing_name"
-          $scope.errorMessage.message = "Missing recommender name or url"
-          return
+	if (checkBasicParams() == false) {
+	  return
         }
 
         var myfile = $('#csvFile')[0].files[0]
@@ -106,9 +136,7 @@
     }
 
     $scope.uploadCSV = function() {
-        if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.urlName == '' || $scope.urlName == null) {
-          $scope.errorMessage.status = "missing_name"
-          $scope.errorMessage.message = "Missing recommender name or url"
+        if (checkBasicParams() == false) {
           return
         }
 
@@ -127,14 +155,17 @@
 
             Upload.upload({
                 url: config.server_url+'/csv/',
-                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName,
-                'url_name': $scope.urlName, 'required_headers':JSON.stringify(vm.headers)},
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': $cookies.get('csrftoken'),
+                },
+                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'required_headers':JSON.stringify(vm.headers)},
             }).then(function (response) {
                 console.log('Success ' + response.config.data.file.name + ' uploaded. Response: ' + response.data);
                 setErrorMessage('','')
                 $scope.showFieldSelection = true
                 $scope.$parent.loadRecsysList()
-
             }, function (response) {
                 console.log('Error status: ' + response.status);
                 setErrorMessage(response.data.status, response.data.message)
@@ -166,17 +197,6 @@
         }
     })
 
-    $scope.tables = []
-    $scope.columns = []
-
-    $scope.selectedRepo = ''
-    $scope.selectedTable = ''
-    $scope.selectedPrimaryKey = ''
-    $scope.selectedTitle= ''
-    $scope.selectedDescription = ''
-    $scope.selectedImageLink = ''
-    $scope.selectedUnivCode = ''
-
 
     $('#myModal').on('hidden.bs.modal', function () {
         $scope.urlErrorMessage = false
@@ -186,11 +206,10 @@
 
     // Called when creating recsys through Datahub
     vm.createRecsysFromParams = function() {
-        if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.urlName == '' || $scope.urlName == null) {
-          $scope.errorMessage.status = "missing_name"
-          $scope.errorMessage.message = "Missing recommender name or url"
+        if (checkBasicParams() == false || checkRecsysParams() == false) {
           return
         }
+
         console.log(config.server_url+'/recsys/')
 
         var recsys_params = {
@@ -206,13 +225,20 @@
             'universal_code_field': $scope.selectedUnivCode.value,
         }
 
+        console.log(recsys_params)
+
         $('#myModal').modal('toggle');
         $scope.$parent.itemDeferred = $q.defer()
         $scope.$parent.itemPromise = $scope.itemDeferred.promise
 
         $http({
-          method: 'POST',
           url: config.server_url+'/recsys/',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $cookies.get('csrftoken'),
+          },
+          method: 'POST',
           data: recsys_params,
         }).then(function successCallback(response) {
             console.log(response)
@@ -235,7 +261,7 @@
 
       var authorization_url = config.buildURL('/oauth2/authorize/', params);
       var server_url = config.server_url
-      var popup = window.open(authorization_url,'newwindow', config='height=600,width=600,' +
+      var popup = window.open(authorization_url,'newwindow', myconfig='height=600,width=600,' +
       'toolbar=no, menubar=no, scrollbars=no, resizable=no,' + 'location=no, directories=no, status=no')
 
       var fnCheckLocation = function(){

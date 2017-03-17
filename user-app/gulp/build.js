@@ -67,6 +67,16 @@ gulp.task('images', function () {
     .pipe(gulp.dest(paths.dist + '/assets/images/'));
 });
 
+gulp.task('fontello', function () {
+  return gulp.src(paths.src + '/assets/fontello/**/*')
+    .pipe(gulp.dest(paths.dist + '/assets/fontello/'));
+});
+
+gulp.task('fontawesome', function() {
+    return gulp.src(['bower_components/font-awesome/fonts/fontawesome-webfont.*'])
+            .pipe(gulp.dest(paths.dist + '/fonts/'));
+});
+
 gulp.task('fonts', function () {
   return gulp.src($.mainBowerFiles())
     .pipe($.filter('**/*.{eot,svg,ttf,woff}'))
@@ -83,4 +93,4 @@ gulp.task('clean', function (done) {
   $.del([paths.dist + '/', paths.tmp + '/'], done);
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'misc']);
+gulp.task('build', ['html', 'images', 'fontello', 'fontawesome', 'fonts', 'misc']);

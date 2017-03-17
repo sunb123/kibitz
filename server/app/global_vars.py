@@ -1,3 +1,8 @@
+#
+SPARK_HOME = '/opt/spark'
+
+SERVER_HOME = '/var/www/html/kibitz/server'
+
 # api urls
 user_api = ''
 
@@ -7,8 +12,12 @@ recsys_param_format = ['name', 'url_name', 'repo_base', 'repo_name', 'item_table
 
 required_recsys_params = ['title', 'description', 'image']
 
-default_recsys_template = {"rating_icon_color": "#000000", "rating_icon_font_size": 14, "rating_icon_on":"glyphicon glyphicon-star", \
-            "rating_icon_off":"glyphicon glyphicon-star-empty", "use_field_selection":"false", "field_selection_column_name":"", \
+default_recsys_template = {"rating_icon_color": "#000000", "rating_icon_font_size": 14, "rating_states":[{'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'},\
+                        {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}, \
+                        {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}, \
+                        {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}, \
+                        {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}], \
+            "use_field_selection":"false", "field_selection_column_name":"", \
             "template_number":1, "item_width":'280px', "item_fields_include":[]}
 
 

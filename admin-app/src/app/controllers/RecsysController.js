@@ -78,7 +78,7 @@
       console.log('go to login')
       return
     } else {
-      $scope.$parent.loggedIn = true
+      console.log('logged in')
     }
 
     var vm = this;

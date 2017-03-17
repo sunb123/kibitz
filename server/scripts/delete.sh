@@ -8,7 +8,7 @@ while getopts n: FLAG; do
             case $OPTARG in
                 *)
                     URL_NAME=$OPTARG
-                ;
+                ;;
             esac
         ;;
         *)
@@ -20,5 +20,5 @@ done
 
 echo $URL_NAME
 
-sudo sed -i.bak "/.*\/$URL_NAME.*\#kibitz_alias_url.*/d" /etc/apache2/sites-enabled/000-default.conf # create a bak backup file
+sudo sed -i.bak "/.*Alias \/$URL_NAME.*/d" /etc/apache2/sites-enabled/000-default.conf # create a bak backup file
 sudo service apache2 reload # restart

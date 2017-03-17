@@ -34,7 +34,8 @@ angular.module('adminapp', ['ngAnimate', 'ngCookies', 'ngTouch', 'gridster', 'dn
   })
 
   .config(function ($stateProvider, $urlRouterProvider, $mdThemingProvider,
-                    $mdIconProvider, $httpProvider) {
+                    $mdIconProvider, $httpProvider, $cookiesProvider) {
+    $cookiesProvider.defaults.path = '/';
 
     $httpProvider.defaults.withCredentials = true;
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';

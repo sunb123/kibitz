@@ -7,10 +7,17 @@
   word-break: break-all;
 }
 
+/*
+md-card {
+  word-wrap: break-word;
+}
+*/
+
 md-card img {
-  max-width: auto; //280px;
-  max-height: auto; //210px;
+  //max-width: 280px;
+  //max-height: 210px;
   height:auto;
+  width: auto;
 }
 
 .card-title {
@@ -19,7 +26,7 @@ md-card img {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-height: auto; //80px;
+    //max-height: auto; //80px;
     height: auto; //70px;
 }
 
@@ -32,12 +39,12 @@ md-card img {
 }
 
 .item-card {
-    width: auto; // 280px;
+    width: 280px;
     height: auto; // 400px;
 }
 
 .item-img {
-    //width: 280px;
+    width: 280px;
     //height: 400px;
     padding:0px 0px 0px 0px;
 }
@@ -66,7 +73,7 @@ md-card img {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-height: auto; //80px;
+    //max-height: auto; //80px;
     height: auto; //70px;
 }
 
@@ -75,7 +82,7 @@ md-card img {
 }
 
 .item-card {
-    max-width: 280px;
+    width: 280px;
     height: auto; // 400px;
 }
 

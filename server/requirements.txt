@@ -17,3 +17,5 @@ django-cors-headers==1.1.0
 requests==2.11.1
 django-distributedlock==0.2.2
 filelock==2.0.7
+py4j==0.10.4
+numpy==1.12.0

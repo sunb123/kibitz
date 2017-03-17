@@ -12,7 +12,7 @@ from recsys.serializers import RecsysSerializer
 from app.user_methods import is_logged_in, is_admin
 from app.user_methods import makeRequest, makeGetRequest
 from recsys.methods import checkRecsysUrlUnique
-from app.global_vars import default_recsys_template
+from app.global_vars import default_recsys_template, SERVER_HOME
 from app.methods import getItemTableFormat
 from app.system_methods import lock_decorator
 
@@ -49,20 +49,22 @@ class RecsysViewSet(viewsets.ViewSet):
         user = Account.objects.get(username=username)
         owner_id = user.id
         repo_base = username
-        repo = data.get('repo_name')
+        repo_name = data.get('repo_name')
         item_table_name = data.get('item_table_name')
 
         # create recsys object
-        recsys = Recsys(name=recommenderName, url_name=urlName, repo_base=username, repo_name=urlName,
+        recsys = Recsys(name=recommenderName, url_name=urlName, repo_base=repo_base, repo_name=repo_name,
             item_table_name=item_table_name)
         recsys.primary_key_field = data.get('primary_key_field')
         recsys.title_field = data.get('title_field')
         recsys.description_field = data.get('description_field')
-        recsys.image_link_field = data.get('image_link_field')
-        recsys.universal_code_field = data.get('universal_code_field')
+        recsys.image_link_field = data.get('image_link_field','')
+        recsys.universal_code_field = data.get('universal_code_field','')
         recsys.owner = user
         recsys.status = 'paused'
-        recsys.template = json.dumps(default_recsys_template)
+	template = default_recsys_template
+	template['item_fields_include'] = [recsys.title_field, recsys.description_field]
+        recsys.template = json.dumps(template)
         recsys.save()
         print "recsys saved"
 
@@ -70,7 +72,7 @@ class RecsysViewSet(viewsets.ViewSet):
 
         # check if there is overall rating field, if not then add it
         # TODO: if don't require item id, need to add it
-        api_url = '/api/v1/repos/{}/{}/tables/{}'.format(repo_base, repo, item_table_name)
+        api_url = '/api/v1/repos/{}/{}/tables/{}'.format(repo_base, repo_name, item_table_name)
         resp = makeGetRequest(api_url, owner_id)
         print resp, "request return"
 
@@ -83,27 +85,27 @@ class RecsysViewSet(viewsets.ViewSet):
         #     if col.get('column_name') == 'id':
         #         has_id = True
         # if not has_id:
-        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
-        #     query = "ALTER TABLE {}.{} ADD {} {}".format(repo, item_table_name, 'id', 'text')
+        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo_name)
+        #     query = "ALTER TABLE {}.{} ADD {} {}".format(repo_name, item_table_name, 'id', 'text')
         #     r = makeRequest('POST', api_url, owner_id, query=query)
         #     print r.content
-        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
+        #     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo_name)
         #     query = "select (*) from {}.{};".format(master_repo, item_table_name)
         #     r = makeRequest('POST', api_url, owner_id, query=query)
         #     if r.status_code == 200:
         #         count = r.json()['rows'][0]
-        #         queryID = "insert into {}.{} ( id ) values ".format(repo, item_table_name)
+        #         queryID = "insert into {}.{} ( id ) values ".format(repo_name, item_table_name)
         #         for i in xrange(count)""
         #             queryID += "({}),".format(str(i))
         #         r = makeRequest('POST', api_url, owner_id, query=queryID)
         #         print r.content
         if not has_overall_rating:
-            api_url = '/api/v1/query/{}/{}'.format(repo_base, repo)
-            query = "ALTER TABLE {}.{} ADD {} {}".format(repo, item_table_name, 'overall_rating', 'text')
+            api_url = '/api/v1/query/{}/{}'.format(repo_base, repo_name)
+            query = "ALTER TABLE {}.{} ADD {} {}".format(repo_name, item_table_name, 'overall_rating', 'text')
             r = makeRequest('POST', api_url, owner_id, query=query)
             # print r.content
 
-        output = subprocess.check_output(['./scripts/deploy.sh', '-n', urlName])
+        output = subprocess.check_output([SERVER_HOME+'/scripts/deploy.sh', '-n', urlName])
 
         return HttpResponse("recsys")
 
@@ -177,7 +179,7 @@ class RecsysViewSet(viewsets.ViewSet):
         recsys = Recsys.objects.get(id=pk)
         urlName = recsys.url_name
         if recsys.owner_id == request.user.id:
-            #output = subprocess.check_output(['./scripts/delete.sh', '-n', urlName])
+            output = subprocess.check_output([SERVER_HOME+'/scripts/delete.sh', '-n', urlName])
             recsys.delete()
             return HttpResponse("recsys destroyed")
         else:
