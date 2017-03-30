@@ -10,7 +10,16 @@
   function loginService($q, $http, $cookies){
 
     return {
-      loggedIn : function() {
+      recsysPaused: function(recsys) {
+        if (recsys.status == "paused") {
+            return true
+        } else {
+            return false
+        }
+
+      }, 
+
+      loggedIn: function() {
         if ($cookies.get('k_username')) {
             return true
         } else {

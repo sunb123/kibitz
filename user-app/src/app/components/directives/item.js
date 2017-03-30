@@ -12,6 +12,7 @@ angular.module('app')
         require: '^ItemsController',
         controller: ['$scope', 'itemService', function Controller($scope, itemService) {
                     $scope.sendRating = itemService.sendRating
+                    $scope.sendNotInterested = itemService.sendNotInterested
                     var mytemplate = $scope.$parent.template
 
                     $scope.hoveringOver = function(value) {

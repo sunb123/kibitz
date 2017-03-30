@@ -1,4 +1,4 @@
-import json, requests, subprocess, re, ast, csv
+import json, requests, subprocess, re, ast, csv, sys
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
@@ -16,12 +16,12 @@ from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, crea
 from recsys.methods import checkRecsysUrlUnique
 
 from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format, SPARK_HOME, SERVER_HOME
-from app.methods import getItemTableFormat, makeRating, updateItemRating
+from app.methods import getItemTableFormat, makeRating, updateItemRating, makeNotInterested
 from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery
 
 from authentication.models import Account
 from recsys.models import Recsys
-from app.models import Rating
+from app.models import Rating, NotInterested
 
 class AuthCodeToAccessTokenView(views.APIView): # set access and refresh tokens to DH admin user
 
@@ -165,6 +165,37 @@ class RecsysParamsView(views.APIView):
         'description_field', 'image_link_field', 'universal_code_field']
         return JsonResponse({key: getattr(recsys, key) for key in selected_keys})
 
+class NotInterestedItemsView(views.APIView):
+
+    def get(self, request, pk=None, format=None):
+        user_id = request.user.id
+        recsys_id = request.query_params.get('recsys_id')
+        recsys = Recsys.objects.get(id=recsys_id)
+        owner_id = recsys.owner_id
+        repo_base = recsys.repo_base
+        item_metas = NotInterested.objects.filter(recsys_id=recsys_id, user_id=user_id)
+	item_ids = [str(meta.item_id) for meta in item_metas]
+
+	print item_ids
+
+        api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
+
+        query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
+	query += "where id in {} ".format(tuple(item_ids))
+        query += "order by cast(id as int) asc;"
+       
+        print query        
+ 
+        return_dict = {}
+        r = makeRequest('POST', api_url, owner_id, query=query)
+
+        if r.status_code == 200:
+	    items = r.json()['rows']
+	    return JsonResponse({'items':items})
+        print "status", r.status_code        
+
+        return HttpResponse("status", r.status_code)
+
 class ItemView(views.APIView): # TODO: allow non-logged in users to get items (give most popular items)
 
     @is_logged_in
@@ -185,6 +216,9 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
             return_dict['items'] = r.json()['rows']
         ratings = Rating.objects.all()
 
+
+#        return JsonResponse(return_dict)
+
         # STEP 1: Attach rating distribution for each item
         for item in return_dict['items']:
             item_ratings = ratings.filter(Q(item_id=int(item.get('id'))) | Q(universal_code=item.get(universal_code_field)))
@@ -203,6 +237,10 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
 
         # STEP 2: Attach popular items. sort by most ratings
         return_dict['trending_items'] = sorted(return_dict['items'], key=lambda item: item.get('total_rating_count'), reverse=True)
+
+
+#        return JsonResponse(return_dict)
+
 
         # STEP 3: get rated items. attach my ratings
         if username != None:
@@ -223,22 +261,31 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
                 item['my_rating'] = rating
             return_dict['rated_items'] = my_rated_items
 
-            # STEP 4: Get recommended items
+        # STEP 4: Get recommended items
             if len(ratings) != 0:
-                output = subprocess.check_output([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user.id), '100'])
-                print "recommender out: ", output
-
-                rec_ratings = ast.literal_eval(output)
-                rec_rating_dict = {}
-                for rating in rec_ratings:
-                    rec_rating_dict[rating.get('item_id')] = rating.get('rating')
-
-                recommended_item_ids = set([str(rating.get('item_id')) for rating in rec_ratings])
-                recommended_items = filter(lambda x: x.get('id') in recommended_item_ids, return_dict['items'])
-
-                for item in recommended_items:
-                    item['suggested_rating'] = str(rec_rating_dict.get(int(item['id'])))
-                return_dict['recommended_items'] = recommended_items
+                output = subprocess.Popen([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user.id), '100'], stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+		returncode = output.wait()
+		print('ping returned {0}'.format(returncode))
+		out = output.stdout.read()
+		print(out)                
+		print "recommender out: ", output
+	 #       print type(out)
+	#	print ast.literal_eval(out)
+	
+		if out == []:
+			rec_ratings = ast.literal_eval(out)
+			rec_rating_dict = {}
+			for rating in rec_ratings:
+			    rec_rating_dict[rating.get('item_id')] = rating.get('rating')
+			recommended_item_ids = set([str(rating.get('item_id')) for rating in rec_ratings])
+			recommended_items = filter(lambda x: x.get('id') in recommended_item_ids, return_dict['items'])
+			for item in recommended_items:
+			    item['suggested_rating'] = str(rec_rating_dict.get(int(item['id'])))
+			recommended_items = sorted(recommended_items, key=lambda x: x.get('suggested_rating'), reverse=True)[:20] # get top 20 recommendations
+                else:
+			recommended_items = []
+		return_dict['recommended_items'] = recommended_items
 
         return JsonResponse(return_dict)
 
@@ -255,7 +302,7 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
 class RatingView(views.APIView):
 
     def get(self, request, pk=None, format=None):
-        return HttpResponse(request.user)
+        return JsonResponse(request.user)
 
     @is_logged_in
     def post(self, request, pk=None, format=None): # make rating for logged in user
@@ -272,6 +319,26 @@ class RatingView(views.APIView):
 
     def delete(self, request, pk=None, format=None):
         pass
+
+class NotInterestedView(views.APIView):
+
+    def get(self, request, pk=None, format=None):
+        return JsonResponse(request.user)
+
+    @is_logged_in
+    def post(self, request, pk=None, format=None): # make rating for logged in user
+        username = request.user.username #request.COOKIES.get('k_username')
+        item_id = request.data.get('item_id')
+        recsys_id = request.data.get('recsys_id')
+        makeNotInterested(username, item_id, recsys_id)
+        return HttpResponse("not interested done")
+
+    def put(self, request, pk=None, format=None):
+        pass
+
+    def delete(self, request, pk=None, format=None):
+        pass
+
 
 class RecommendationView(views.APIView):
 

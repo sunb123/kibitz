@@ -1,4 +1,12 @@
 <!-- TODO: Replace table to table component when https://github.com/angular/material/issues/796 will closed -->
+
+
+<div ng-if="vm.recsysPaused"><h2 style="text-align:center">Sorry! The site is currently being updated. It will be back up shortly.</h2></div>
+
+
+
+<span ng-if="!vm.recsysPaused">
+
 <style>
     meter {
         margin: 0px 5px 0px 5px;
@@ -105,3 +113,5 @@
 
     </div>
 </div>
+
+</span>

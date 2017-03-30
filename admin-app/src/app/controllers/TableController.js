@@ -24,6 +24,7 @@
     }
 
     $scope.errorMessage = {'status':'', 'message':''}
+
     function setErrorMessage(status, message) {
       $scope.errorMessage.status = status
       $scope.errorMessage.message = message
@@ -81,8 +82,7 @@
     function checkBasicParams() {
         if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.recommenderName == undefined ||
             $scope.urlName == '' || $scope.urlName == null || $scope.urlName == undefined) {
-          $scope.errorMessage.status = "missing_field"
-          $scope.errorMessage.message = "Missing recommender name or url"
+          setErrorMessage("missing_field", "Missing recommender name or url")
           return false
         } 
         return true
@@ -94,8 +94,7 @@
             $scope.selectedPrimaryKey == '' || $scope.selectedPrimaryKey == null || $scope.selectedPrimaryKey == undefined ||
             $scope.selectedTitle == '' || $scope.selectedTitle == null || $scope.selectedTitle == undefined ||
             $scope.selectedDescription == '' || $scope.selectedDescription == null || $scope.selectedDescription == undefined) {
-	  $scope.errorMessage.status = "missing_field"
-          $scope.errorMessage.message = "Missing recommender name or url"
+	  setErrorMessage("missing_field", "Missing additional fields")
           return false
         }
 	return true
@@ -117,6 +116,8 @@
     $scope.readHeaders = function() {
 	if (checkBasicParams() == false) {
 	  return
+        } else {
+          setErrorMessage('','')
         }
 
         var myfile = $('#csvFile')[0].files[0]
@@ -141,15 +142,13 @@
         }
 
         var file = $('#csvFile')[0].files[0]
-        if (Object.keys(vm.headers).length == 0) {
-          $scope.errorMessage.status = "missing_headers"
-          $scope.errorMessage.message = "Missing CSV headers"
+        if (Object.keys(vm.headers).length == 0) { // TODO: determine which headers are required
+          setErrorMessage("missing_header", "Missing CSV headers")
           return
         }
 
         $timeout(function() {
           if (reader.readyState == 2) {
-            $('#myModal').modal('toggle');
             $scope.$parent.itemDeferred = $q.defer()
             $scope.$parent.itemPromise = $scope.itemDeferred.promise
 
@@ -166,8 +165,10 @@
                 setErrorMessage('','')
                 $scope.showFieldSelection = true
                 $scope.$parent.loadRecsysList()
+                $('#myModal').modal('toggle');
             }, function (response) {
                 console.log('Error status: ' + response.status);
+                $scope.$parent.itemDeferred.resolve('resolved')
                 setErrorMessage(response.data.status, response.data.message)
             }, function (evt) {
                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
@@ -227,7 +228,6 @@
 
         console.log(recsys_params)
 
-        $('#myModal').modal('toggle');
         $scope.$parent.itemDeferred = $q.defer()
         $scope.$parent.itemPromise = $scope.itemDeferred.promise
 
@@ -244,9 +244,11 @@
             console.log(response)
             setErrorMessage('','')
             $scope.$parent.loadRecsysList()
+            $('#myModal').modal('toggle');
 
         }, function errorCallback(response) {
             console.log(response)
+            $scope.$parent.itemDeferred.resolve('resolved')
             setErrorMessage(response.data.status, response.data.message)
         });
     }

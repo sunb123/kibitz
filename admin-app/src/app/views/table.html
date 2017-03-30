@@ -101,8 +101,8 @@ No recommenders
                         </div>
                         </form>
 
-                        <div style="color: red" ng-if="errorMessage.status == 'missing_fields'">Error: {{ errorMessage.message }}</div>
-                        <div style="color: red" ng-if="errorMessage.status == 'missing_headers'">Error: {{ errorMessage.message }}</div>
+                        <!-- <div style="color: red" ng-if="errorMessage.status == 'missing_fields'">Error: {{ errorMessage.message }}</div> -->
+                        <div style="color: red" ng-if="errorMessage.status == 'missing_header'">Error: {{ errorMessage.message }}</div>
                         <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Suggested to include and select headers for Title, Description, Image Link, and Universal Code (e.g., ISBN or UPC)</h4>
                         <input id="csvFile" type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
                         <button type="button" class="btn btn-primary" ng-click="readHeaders()" style="font-size: 20px;">Select CSV Headers</button>

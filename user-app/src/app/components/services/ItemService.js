@@ -90,6 +90,8 @@
 
 
     var sendRating = function(item_id, rating, recsys_id) {
+      console.log(rating)
+
       if (rating != 0) {
         var params = {
             'recsys_id': recsys_id,
@@ -115,6 +117,32 @@
         })
       }
     }
+
+    var sendNotInterested = function(item_id, recsys_id) {
+	var params = {
+	    'recsys_id': recsys_id,
+	    'item_id': item_id,
+	  }
+	  console.log(params)
+
+	$http({
+	  method: 'POST',
+	  url: config.server_url + '/not-interested/',
+	  data: params,
+	  headers: {
+	    'Accept': 'application/json',
+	    'Content-Type': 'application/json',
+	    'X-CSRFToken': $cookies.get('csrftoken'),
+	  },
+	}).then(function(resp){
+	  $rootScope.$broadcast('itemNotInterested', {'item_id':item_id})
+	  console.log(resp)
+	}, function(resp){
+	  console.log(resp)
+	})
+    }
+
+
 
     var getMyRatingTemplate = function(rating) { // 1 to 5
       if (rating == undefined) {
@@ -143,7 +171,7 @@
 
       getMyRatingTemplate: getMyRatingTemplate,
       sendRating: sendRating,
-
+      sendNotInterested: sendNotInterested,
     };
 
 

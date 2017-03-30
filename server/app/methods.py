@@ -2,7 +2,7 @@ from app.user_methods import makeRequest
 from app.user_methods import master_dh_query_url, master_repo, rating_table
 from recsys.models import Recsys
 from authentication.models import Account
-from app.models import Rating
+from app.models import Rating, NotInterested
 
 def getItemTableFormat(params):
     field_list = []
@@ -49,6 +49,20 @@ def updateItemRating(item_id, recsys_id):
     query = "update {}.{} set overall_rating='{}' where id='{}';".format(repo, item_repo, overall_rating, item_id)
     resp = makeRequest('POST', api_url, owner_id, query=query)
     return resp
+
+def makeNotInterested(username, item_id, recsys_id, universal_code=None):
+    user_id = Account.objects.get(username=username).id
+    if universal_code != None:
+        interestObj = NotInterested.objects.filter(user_id=user_id, universal_code=universal_code).first()
+    else:
+        interestObj = NotInterested.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
+
+    if interestObj == None:
+        user = Account.objects.get(username=username)
+        interestObj = NotInterested(item_id=item_id, recsys_id=recsys_id, universal_code=universal_code, user=user)
+    interestObj.save()
+
+    return interestObj 
 
 
 # def retrieveRatings(user_id, recsys_id):

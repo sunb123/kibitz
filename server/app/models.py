@@ -33,11 +33,21 @@ class Rating(models.Model):
     rating = models.IntegerField(blank=False)
     universal_code = models.CharField(max_length=999, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     #objects = models.Manager() # TODO: abstract manager class
+    # USERNAME_FIELD = ''
+    REQUIRED_FIELDS = []
 
+class NotInterested(models.Model):
+    item_id = models.PositiveIntegerField()
+    recsys_id = models.PositiveIntegerField()
+    universal_code = models.CharField(max_length=999, null=True)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    #objects = models.Manager() # TODO: abstract manager class
     # USERNAME_FIELD = ''
     REQUIRED_FIELDS = []

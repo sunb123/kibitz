@@ -42,7 +42,7 @@ class RecsysViewSet(viewsets.ViewSet):
             return HttpResponse("no recommender name. failed")
         if not checkRecsysUrlUnique(urlName):
             return Response({
-                'status': 'Bad request',
+                'status': 'url_error',
                 'message': 'Url already taken'
             }, status=status.HTTP_400_BAD_REQUEST)
 

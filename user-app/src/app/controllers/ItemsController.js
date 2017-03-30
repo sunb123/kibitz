@@ -84,7 +84,7 @@
       }
 
       if (recommend) { // recommmended items
-        while (addedCount < 4 && vm.recCount < vm.wholeRecommendedList.length) {
+        while (addedCount < 16 && vm.recCount < vm.wholeRecommendedList.length) {
           var item = vm.wholeRecommendedList[vm.recCount]
           if (!hasRating(item.id)) {
             vm.recommendedList.push(item);
@@ -123,7 +123,7 @@
         return vm.recCount < vm.wholeRecommendedList.length
       } else if (vm.wholeTable.length != 0) {
         var tableBase = tableToUse($scope.$parent.tabNumber)
-        console.log(vm.count, tableBase.length, !vm.displayingSearched)
+        //console.log(vm.count, tableBase.length, !vm.displayingSearched)
         if (!vm.displayingSearched) {
           return vm.count < tableBase.length
         } else {
@@ -168,22 +168,8 @@
       return false
     }
 
-    // function isRatedItem(item_id) {
-    //   for (var i=0; i < vm.ratedTabData.length; i++) {
-    //     if (vm.ratedTabData[i]['id'] == item_id) {
-    //       return true
-    //     }
-    //   }
-    //   return false
-    // }
-
-    // function addToRatedTabData(item_id) {
-    //   if (!isRatedItem(item_id)){
-    //     vm.ratedTabData.push(findItem(item_id))
-    //   }
-    // }
-
     $scope.sendRating = itemService.sendRating
+    $scope.sendNotInterested = itemService.sendNotInterested
 
     $scope.hoveringOver = function(value) {
       $scope.overStar = value;
@@ -221,6 +207,12 @@
 
     $scope.$parent.recsysDeferred.promise.then(function(recsys){
       console.log(recsys)
+
+      vm.recsysPaused = loginService.recsysPaused(recsys)
+      if (vm.recsysPaused) {
+          return
+      }
+
       vm.recsys = recsys
       $scope.recsys_id = vm.recsys.id
       vm.pk_field = vm.recsys.primary_key
@@ -295,20 +287,22 @@
     }
 
     $scope.setRatingsTemplate = function(item) {
-      var myrating = item.rating
-      var total_rating_count = item.total_rating_count
-      var d = item.distribution_percentage
-      var rating_template = itemService.getMyRatingTemplate(item.my_rating)
-      rating_template += '<input type="hidden" name="myrating" class="rating-value" value="%f"></div>'.format(item.my_rating)
-      rating_template += 'Total Ratings: %d'.format(item.total_rating_count)
-      var distribution = '<div class="input-group"> \
-      <span>5 Stars</span><meter id="meter-5-star" value="%f"></meter><span>%s</span></div> \
-      <div><span>4 Stars</span><meter id="meter-4-star" value="%f"></meter><span>%s</span></div> \
-      <div><span>3 Stars</span><meter id="meter-3-star" value="%f"></meter><span>%s</span></div> \
-      <div><span>2 Stars</span><meter id="meter-2-star" value="%f"></meter><span>%s</span></div> \
-      <div><span>1 Stars</span><meter id="meter-1-star" value="%f"></meter><span>%s</span></div>'
-        .format(d[5], getStr(d[5]),d[4], getStr(d[4]),d[3], getStr(d[3]),d[2], getStr(d[2]),d[1], getStr(d[1]));
-      return rating_template + distribution + '</fieldset>'
+      if (item.total_rating_count !== undefined) {
+	      var myrating = item.rating
+	      var total_rating_count = item.total_rating_count
+	      var d = item.distribution_percentage
+	      var rating_template = itemService.getMyRatingTemplate(item.my_rating)
+	      rating_template += '<input type="hidden" name="myrating" class="rating-value" value="%f"></div>'.format(item.my_rating)
+	      rating_template += 'Total Ratings: %d'.format(item.total_rating_count)
+	      var distribution = '<div class="input-group"> \
+	      <span>5 Stars</span><meter id="meter-5-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>4 Stars</span><meter id="meter-4-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>3 Stars</span><meter id="meter-3-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>2 Stars</span><meter id="meter-2-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>1 Stars</span><meter id="meter-1-star" value="%f"></meter><span>%s</span></div>'
+		.format(d[5], getStr(d[5]),d[4], getStr(d[4]),d[3], getStr(d[3]),d[2], getStr(d[2]),d[1], getStr(d[1]));
+	      return rating_template + distribution + '</fieldset>'
+      }
     }
 
     $scope.$on('itemSearch', function(event, args) {
@@ -325,11 +319,40 @@
       vm.itemRated(args)
     })
 
+    $scope.$on('itemNotInterested', function(event, args) {
+      vm.itemNotInterested(args)
+    })
+
+
     // $scope.showingRated = function() {
     //   return tabNumber == 2
     // }
 
+    vm.itemNotInterested = function(args) {
+      var item_id = args.item_id
+      var item = findItem(item_id)
+      console.log(item)
+
+      if (hasRating(item_id)) { // remove rated item from rated list
+        for (i in vm.ratedTabData) { 
+          if (vm.ratedTabData[i].id == item_id) {
+            vm.ratedTabData.splice(i, 1)
+          }
+        }
+      } else {
+        for (i in vm.tableData) { // remove item from main list
+          if (vm.tableData[i].id == item_id) {
+            vm.tableData.splice(i, 1)
+          }
+        }
+
+      }
+
+    }
+
     vm.itemRated = function(args) {
+      // TODO: include an unrate function
+
       var item_id = args.item_id
       var rating = args.rating
       var item = findRatedItem(item_id)
@@ -347,7 +370,6 @@
           }
         }
       }
-
     }
 
     vm.tabSwitch = function(tabNumber) {

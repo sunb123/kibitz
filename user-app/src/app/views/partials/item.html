@@ -6,7 +6,7 @@
   <img class="item-img md-card-image" ng-src="{{myimage != '' ? myimage : 'assets/images/No_image.jpg.png' }}" onerror="this.src='assets/images/No_image.jpg.png'" alt="image caption" ng-click="$mdOpenMenu()" ng-cloak>
       <md-menu-content width="3">
 <!--           <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
- -->          <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+ -->          <md-menu-item><md-button ng-click="$mdCloseMenu();sendNotInterested(itemid, recsysid)">Not Interested</md-button></md-menu-item>
       </md-menu-content>
   </md-menu>
 
@@ -87,7 +87,7 @@
           </md-button>
           <md-menu-content width="3">
 <!--               <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
- -->              <md-menu-item><md-button ng-click="$mdCloseMenu()">Not Interested</md-button></md-menu-item>
+ -->              <md-menu-item><md-button ng-click="$mdCloseMenu();sendNotInterested(itemid, recsysid)">Not Interested</md-button></md-menu-item>
           </md-menu-content>
       </md-menu>
     </md-card-actions>

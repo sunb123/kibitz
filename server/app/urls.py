@@ -1,8 +1,8 @@
 from django.conf.urls import include, url
 from rest_framework_nested import routers
 from authentication.views import LoginView, LogoutView, ProfileCodeLoginView, AdminUserView, EndUserView #, AccountViewSet
-from app.views import ItemView, RatingView, CSVUploadView, RepoTableView, AuthCodeToAccessTokenView, \
-WidgetTestView , RecsysParamsView, RecommendationView
+from app.views import ItemView, RatingView, NotInterestedView, CSVUploadView, RepoTableView, AuthCodeToAccessTokenView, \
+WidgetTestView , RecsysParamsView, RecommendationView, NotInterestedItemsView
 from recsys.views import RecsysViewSet
 
 router = routers.SimpleRouter()
@@ -30,6 +30,12 @@ urlpatterns = [
     url(r'^api/v1/rating/$', RatingView.as_view(), name='ratings'),
     url(r'^api/v1/rating/(?P<pk>[^/]+)/$', RatingView.as_view(), name='ratings'),
 
+    url(r'^api/v1/not-interested/$', NotInterestedView.as_view(), name='not-interested'),
+    url(r'^api/v1/not-interested/(?P<pk>[^/]+)/$', NotInterestedView.as_view(), name='not-interested'),
+    
+    url(r'^api/v1/not-interested-items/$', NotInterestedItemsView.as_view(), name='not-interested-items'),
+    url(r'^api/v1/not-interested-items/(?P<pk>[^/]+)/$', NotInterestedItemsView.as_view(), name='not-interested-items'),
+    
     url(r'^api/v1/recommendation/$', RecommendationView.as_view(), name='recommendation'),
     url(r'^api/v1/recommendation/(?P<pk>[^/]+)/$', RecommendationView.as_view(), name='recommendation'),
 

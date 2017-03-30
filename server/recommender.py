@@ -34,78 +34,80 @@ recommendation_limit = int(sys.argv[3])
 
 rows = Rating.objects.filter(recsys_id=recsys_id)
 
-def convertToTuples(rows):
-    mylist = []
-    for r in rows:
-        rating_tuple = (r.user_id,r.item_id,r.rating)
-        mylist.append(rating_tuple)
-    return mylist
+if rows.count() > 0:
+	def convertToTuples(rows):
+	    mylist = []
+	    for r in rows:
+		rating_tuple = (r.user_id,r.item_id,r.rating)
+		mylist.append(rating_tuple)
+	    return mylist
 
-#print convertToTuples(rows)
-dataset = sc.parallelize(convertToTuples(rows))
+	#print convertToTuples(rows)
+	dataset = sc.parallelize(convertToTuples(rows))
 
-training_RDD, validation_RDD, test_RDD = dataset.randomSplit([1, 0, 0], seed=0L)
-validation_for_predict_RDD = validation_RDD.map(lambda x: (x[0], x[1]))
-test_for_predict_RDD = test_RDD.map(lambda x: (x[0], x[1]))
+	training_RDD, validation_RDD, test_RDD = dataset.randomSplit([1, 0, 0], seed=0L)
+	validation_for_predict_RDD = validation_RDD.map(lambda x: (x[0], x[1]))
+	test_for_predict_RDD = test_RDD.map(lambda x: (x[0], x[1]))
 
-seed = 5L
-iterations = 10
-regularization_parameter = 0.1
-ranks = [4, 8, 12]
-errors = [0, 0, 0]
-err = 0
-tolerance = 0.02
+	seed = 5L
+	iterations = 10
+	regularization_parameter = 0.1
+	ranks = [4, 8, 12]
+	errors = [0, 0, 0]
+	err = 0
+	tolerance = 0.02
 
-# min_error = float('inf')
-# best_rank = -1
-# best_iteration = -1
+	# min_error = float('inf')
+	# best_rank = -1
+	# best_iteration = -1
 
-# for rank in ranks: #ranks = [4,8,12]
-#     model = ALS.train(training_RDD, rank, seed=seed, iterations=iterations,
-#                       lambda_=regularization_parameter)
-#     predictions = model.predictAll(validation_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))
-#     rates_and_preds = validation_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)
-#     error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())
-#     errors[err] = error
-#     err += 1
-#     print 'For rank %s the RMSE is %s' % (rank, error)
-#     if error < min_error:
-#         min_error = error
-#         best_rank = rank
-# print 'The best model was trained with rank %s' % best_rank
+	# for rank in ranks: #ranks = [4,8,12]
+	#     model = ALS.train(training_RDD, rank, seed=seed, iterations=iterations,
+	#                       lambda_=regularization_parameter)
+	#     predictions = model.predictAll(validation_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))
+	#     rates_and_preds = validation_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)
+	#     error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())
+	#     errors[err] = error
+	#     err += 1
+	#     print 'For rank %s the RMSE is %s' % (rank, error)
+	#     if error < min_error:
+	#         min_error = error
+	#         best_rank = rank
+	# print 'The best model was trained with rank %s' % best_rank
 
-best_rank = 4
+	best_rank = 4
 
-# TODO: find rank of model that has least error
-model = ALS.train(training_RDD, best_rank, seed=seed, iterations=iterations,
-                      lambda_=regularization_parameter)
-# predictions = model.predictAll(test_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))
-# rates_and_preds = test_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)
-# error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())
+	# TODO: find rank of model that has least error
+	model = ALS.train(training_RDD, best_rank, seed=seed, iterations=iterations,
+			      lambda_=regularization_parameter)
+	# predictions = model.predictAll(test_for_predict_RDD).map(lambda r: ((r[0], r[1]), r[2]))
+	# rates_and_preds = test_RDD.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)
+	# error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())
 
-# def get_counts_and_averages(ID_and_ratings_tuple):
-#     nratings = len(ID_and_ratings_tuple[1])
-#     return ID_and_ratings_tuple[0], (nratings, float(sum(x for x in ID_and_ratings_tuple[1]))/nratings)
+	# def get_counts_and_averages(ID_and_ratings_tuple):
+	#     nratings = len(ID_and_ratings_tuple[1])
+	#     return ID_and_ratings_tuple[0], (nratings, float(sum(x for x in ID_and_ratings_tuple[1]))/nratings)
 
-# item_ID_with_ratings_RDD = (dataset.map(lambda x: (x[1], x[2])).groupByKey())
-# item_ID_with_avg_ratings_RDD = item_ID_with_ratings_RDD.map(get_counts_and_averages)
-# item_rating_counts_RDD = item_ID_with_avg_ratings_RDD.map(lambda x: (x[0], x[1][0]))
+	# item_ID_with_ratings_RDD = (dataset.map(lambda x: (x[1], x[2])).groupByKey())
+	# item_ID_with_avg_ratings_RDD = item_ID_with_ratings_RDD.map(get_counts_and_averages)
+	# item_rating_counts_RDD = item_ID_with_avg_ratings_RDD.map(lambda x: (x[0], x[1][0]))
 
-user_ID = int(user_id)
+	user_ID = int(user_id)
 
-user_rated_item_ids = dataset.filter(lambda x: x[0] == str(user_ID)).map(lambda x: x[1]).collect()
+	user_rated_item_ids = dataset.filter(lambda x: x[0] == str(user_ID)).map(lambda x: x[1]).collect()
 
-unrated_items = dataset.filter(lambda x: x[1] not in user_rated_item_ids).map(lambda x: (str(user_ID), x[1]))
+	unrated_items = dataset.filter(lambda x: x[1] not in user_rated_item_ids).map(lambda x: (str(user_ID), x[1]))
 
-ratings = model.predictAll(unrated_items).take(recommendation_limit)
+	ratings = model.predictAll(unrated_items).take(recommendation_limit)
 
-output_ratings = []
-for r in ratings:
-    output_ratings.append({'user_id':r.user, 'item_id':r.product, 'rating':r.rating})
+	output_ratings = []
+	for r in ratings:
+	    output_ratings.append({'user_id':r.user, 'item_id':r.product, 'rating':r.rating})
 
-print output_ratings
+	print output_ratings
 
-
+else:
+	print []
 # product_features = model.productFeatures().take(100)
 # print product_features
 
