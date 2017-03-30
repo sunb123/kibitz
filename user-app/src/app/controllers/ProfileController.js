@@ -10,9 +10,23 @@
   function ProfileController($scope) {
     var vm = this;
 
+    var items = [];
 
-    // TODO: look for cookie that represents logged in user.
-    // if no cookie, then assume logged out.
+    $scope.$parent.recsysDeferred.promise.then(function(recsys){
+      $http({
+        method: 'GET',
+        url: config.server_url+'/not-interested-items/'+'?recsys_id='+recsys.id,
+      }).then(function(resp){
+        items = resp.items
+        console.log(resp)
+      }, function(resp){
+        console.log(resp)
+      })
+
+    }, function(resp){
+      console.log(resp)
+    })
+
 
     vm.user = {
       title: $scope.$parent.username,

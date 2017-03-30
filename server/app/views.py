@@ -174,27 +174,20 @@ class NotInterestedItemsView(views.APIView):
         owner_id = recsys.owner_id
         repo_base = recsys.repo_base
         item_metas = NotInterested.objects.filter(recsys_id=recsys_id, user_id=user_id)
-	item_ids = [str(meta.item_id) for meta in item_metas]
-
-	print item_ids
+	    item_ids = [str(meta.item_id) for meta in item_metas]
 
         api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
-
         query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-	query += "where id in {} ".format(tuple(item_ids))
+	    query += "where id in {} ".format(tuple(item_ids))
         query += "order by cast(id as int) asc;"
-       
-        print query        
- 
+
         return_dict = {}
         r = makeRequest('POST', api_url, owner_id, query=query)
-
         if r.status_code == 200:
-	    items = r.json()['rows']
-	    return JsonResponse({'items':items})
-        print "status", r.status_code        
+	        items = r.json()['rows']
+	        return JsonResponse({'items':items})
 
-        return HttpResponse("status", r.status_code)
+        return HttpResponse("status:", r.status_code)
 
 class ItemView(views.APIView): # TODO: allow non-logged in users to get items (give most popular items)
 
@@ -268,11 +261,11 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
 		returncode = output.wait()
 		print('ping returned {0}'.format(returncode))
 		out = output.stdout.read()
-		print(out)                
+		print(out)
 		print "recommender out: ", output
 	 #       print type(out)
 	#	print ast.literal_eval(out)
-	
+
 		if out == []:
 			rec_ratings = ast.literal_eval(out)
 			rec_rating_dict = {}
