@@ -2,32 +2,49 @@
 
 <md-card ng-if="$parent.template.template_number == 1" class="item-card" ng-cloak>
 
-  <md-menu md-position-mode="target-right bottom"  md-offset="0 -70">
-  <img class="item-img md-card-image" ng-src="{{myimage != '' ? myimage : 'assets/images/No_image.jpg.png' }}" onerror="this.src='assets/images/No_image.jpg.png'" alt="image caption" ng-click="$mdOpenMenu()" ng-cloak>
-      <md-menu-content width="3">
-<!--           <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
- -->          <md-menu-item><md-button ng-click="$mdCloseMenu();sendNotInterested(itemid, recsysid)">Not Interested</md-button></md-menu-item>
-      </md-menu-content>
-  </md-menu>
+<img class="item-img md-card-image" ng-src="{{myimage != '' ? myimage : 'assets/images/No_image.jpg.png' }}" onerror="this.src='assets/images/No_image.jpg.png'" alt="image caption" ng-cloak>
 
-<span data-toggle="popover" data-original-title="Description" data-content="{{description | limitTo:500}}" data-trigger="hover">
+<!-- <span data-toggle="popover" data-original-title="Description" data-content="{{description | limitTo:500}}" data-trigger="hover"> -->
 
   <md-card-title class="item-title">
     <md-card-title-text class="item-title-text">
-      <span class="md-headline card-title trim-info">{{mytitle}}</span>
+      
+      <span class="md-headline card-title trim-info">{{mytitle}}</span>      
+
       <span class="md-subhead">
 
-        <span ng-if="myrating != undefined">
-          <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, myrating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="getOnStyle()"></span>
-          {{ showingRated || focus == true ? null : myrating}}
-        </span>
+      <table>
+        <tr>
+          <td style="width: 205px">
+		<span ng-if="myrating != undefined">
+		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, myrating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="getOnStyle()"></span>
+		  {{ showingRated || focus == true ? null : myrating}}
+        	  <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+		</span>
+		<span ng-if="myrating == undefined">
+		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, rating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+		  {{ showingRated || focus == true ? null : rating}}
+        	  <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+		</span>
 
-        <span ng-if="myrating == undefined">
-          <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, rating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
-          {{ showingRated || focus == true ? null : rating}}
-        </span>
+          </td>
+          <td>
+	      <md-menu>
+		  <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open($event)">
+		      <i class="material-icons" ng-click="">more_vert</i>
+		  </md-button>
+		  <md-menu-content width="3">
+	<!--               <md-menu-item><md-button ng-click="$mdMenu.close()">Save</md-button></md-menu-item> -->
+	                  <md-menu-item>
+                              <md-button ng-show="tabNumber != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
+	                      <md-button ng-show="tabNumber == 2" ng-click="$mdMenu.close();sendRating(itemid, 'unrate', recsysid)">Unrate</md-button>
+                          </md-menu-item>
+                  </md-menu-content>
+	      </md-menu>
+          </td>
+        </tr>      
+       <table>
 
-        <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
 
       </span>
       <div ng-if="suggestedrating">You might rate this: {{ suggestedrating | number:2}} </div>
@@ -58,39 +75,48 @@
       <span class="md-headline card-title trim-info">{{mytitle | cut:true:40:'...'}}</span>
       <span class="md-subhead">
 
-        <span ng-if="myrating != undefined">
-          <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, myrating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="getOnStyle()"></span>
-        {{ showingRated || focus == true ? null : myrating}}
-        </span>
+      <table>
+        <tr>
+          <td style="width: 205px">
+		<span ng-if="myrating != undefined">
+		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, myrating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="getOnStyle()"></span>
+		{{ showingRated || focus == true ? null : myrating}}
+		  <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+		</span>
 
-        <span ng-if="myrating == undefined">
-          <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, rating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
-          {{ showingRated || focus == true ? null : rating}}
-        </span>
+		<span ng-if="myrating == undefined">
+		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['did not like it','it was ok','liked it','really liked it','it was amazing']" aria-labelledby="default-rating" ng-click="sendRating(itemid, rating, recsysid)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+		  {{ showingRated || focus == true ? null : rating}}
+		  <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+		</span>
 
-        <span class="label" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
-
-        <div ng-if="suggestedrating">You might rate this: {{ suggestedrating | number:2}} </div>
+                <div ng-if="suggestedrating">You might rate this: {{ suggestedrating | number:2}} </div>
+          </td>
+          <td>
+	      <md-menu>
+		  <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open($event)">
+		      <i class="material-icons" ng-click="">more_vert</i>
+		  </md-button>
+		  <md-menu-content width="3">
+	<!--               <md-menu-item><md-button ng-click="$mdMenu.close()">Save</md-button></md-menu-item> -->
+	                  <md-menu-item>
+                              <md-button ng-show="tabNumber != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
+	                      <md-button ng-show="tabNumber == 2" ng-click="$mdMenu.close();sendRating(itemid, 'unrate', recsysid)">Unrate</md-button>
+                          </md-menu-item>
+                  </md-menu-content>
+	      </md-menu>
+          </td>
+        </tr>
+      </table>
 
       </span>
 
     </md-card-title-text>
   </md-card-title>
-  <md-card-content>
+  <md-card-content style="margin:auto">
     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{ itemdata }}" data-html="true">Item Details</md-card-actions>
     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{ ratingdata }}" data-html="true">Rating Details</md-card-actions>
 
-    <md-card-actions>
-      <md-menu>
-          <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
-              <i class="material-icons" ng-click="">more_vert</i>
-          </md-button>
-          <md-menu-content width="3">
-<!--               <md-menu-item><md-button ng-click="$mdCloseMenu()">Save</md-button></md-menu-item>
- -->              <md-menu-item><md-button ng-click="$mdCloseMenu();sendNotInterested(itemid, recsysid)">Not Interested</md-button></md-menu-item>
-          </md-menu-content>
-      </md-menu>
-    </md-card-actions>
 
   </md-card-content>
 

@@ -15,10 +15,6 @@
       return
     }
 
-    $scope.print = function(url) {
-      return 'http://images.amazon.com/images/P/0374157065.01.MZZZZZZZ.jpg'
-    }
-
     vm.isGridView = true;
     vm.tableData = [];
     vm.wholeTable = [];
@@ -30,11 +26,12 @@
     vm.wholeRecommendedList = [];
     vm.displayingSearched = false;
 
-    vm.count = 0;
-    vm.recCount = 0;
+    vm.count = 0; // iterate index of entire item list
+    vm.recCount = 0; // iterate index of recommended list
     vm.tabState = 0;
     vm.itemFields = [];
-    $scope.test = "string string"
+    $scope.sendRating = itemService.sendRating
+    $scope.sendNotInterested = itemService.sendNotInterested
 
     function tableToUse(tabNumber) {
        if (tabNumber == 0) {
@@ -106,7 +103,7 @@
             }
             vm.count++;
         }
-      } else { //if ($scope.$parent.tabNumber == 0) { // showing searched items
+      } else { // showing searched items
         while (addedCount < 4 && vm.count < vm.searchedList.length) {
           var item = vm.searchedList[vm.count]
           if (!hasRating(item.id) && !isRecommended(item.id)) {
@@ -151,7 +148,7 @@
       return false
     }
 
-    function findItem(item_id) { // from whole table
+    function findItem(item_id) { // from whole table. NOTE: could be slow
       for (var i=0; i < vm.wholeTable.length; i++) {
         if (vm.wholeTable[i]['id'] == item_id) {
           return vm.wholeTable[i]
@@ -167,9 +164,6 @@
       }
       return false
     }
-
-    $scope.sendRating = itemService.sendRating
-    $scope.sendNotInterested = itemService.sendNotInterested
 
     $scope.hoveringOver = function(value) {
       $scope.overStar = value;
@@ -270,8 +264,7 @@
       for (i in itemDetails) {
         field = itemDetails[i]
         value = item[field]
-        item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div> \
-      <div style='word-wrap: break-word' class='col-xs-8 display-value'>%s</div></div>".format(capitalize(field), value)
+        item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div><div class='col-xs-8 display-value item-field'>%s</div></div>".format(capitalize(field), value)
       }
       item_template += "</fieldset>"
       return item_template
@@ -328,48 +321,85 @@
     //   return tabNumber == 2
     // }
 
-    vm.itemNotInterested = function(args) {
-      var item_id = args.item_id
-      var item = findItem(item_id)
-      console.log(item)
+    function removeFromWholeTable(item_id) {
+        for (i in vm.wholeTable) { // remove rated item from rated list
+          if (vm.wholeTable[i].id == item_id) {
+            vm.wholeTable.splice(i, 1)
+          }
+        }
+    }
 
-      if (hasRating(item_id)) { // remove rated item from rated list
-        for (i in vm.ratedTabData) { 
+    function removeFromTrendTabTable(item_id) {
+        for (i in vm.trendTabData) { // remove rated item from rated list
+          if (vm.trendTabData[i].id == item_id) {
+            vm.trendTabData.splice(i, 1)
+          }
+        }
+    }
+
+    function removeFromRatedTabData(item_id) {
+        for (i in vm.ratedTabData) { // remove rated item from rated list
           if (vm.ratedTabData[i].id == item_id) {
             vm.ratedTabData.splice(i, 1)
           }
         }
-      } else {
+    }
+
+    function removeFromTableData(item_id) {
         for (i in vm.tableData) { // remove item from main list
           if (vm.tableData[i].id == item_id) {
             vm.tableData.splice(i, 1)
           }
         }
+    }
 
-      }
+    function removeFromRecommended(item_id) {
+        for (i in vm.recommendedList) { 
+          if (vm.recommendedList[i].id == item_id) {
+            vm.recommendedList.splice(i, 1)
+          }
+        }
+        for (i in vm.wholeRecommendedList) { 
+          if (vm.wholeRecommendedList[i].id == item_id) {
+            vm.wholeRecommendedList.splice(i, 1)
+          }
+        }
+    }
 
+
+    vm.itemNotInterested = function(args) {
+      var item_id = args.item_id
+      removeFromTableData(item_id) 
+      removeFromRatedTabData(item_id)        
+      removeFromWholeTable(item_id)
+      removeFromTrendTabTable(item_id)
+      removeFromRecommended(item_id)
     }
 
     vm.itemRated = function(args) {
-      // TODO: include an unrate function
-
       var item_id = args.item_id
       var rating = args.rating
-      var item = findRatedItem(item_id)
-      if (!item) {
-        item = findItem(item_id)
-      }
-      console.log(item)
-      item.my_rating = rating
-
-      if (!hasRating(item_id)) { // add rated item to rated list
-        vm.ratedTabData.push(item)
-        for (i in vm.tableData) { // remove rated item from main list
-          if (vm.tableData[i].id == item_id) {
-            vm.tableData.splice(i, 1)
-          }
+      if (rating == 'unrate') {
+        if (hasRating(item_id)) { 
+           removeFromTableData(item_id)  // remove from rated table
+           removeFromRatedTabData(item_id)        
+        }
+      } else { // make rating
+        var item = findRatedItem(item_id)
+        if (!item) {
+          item = findItem(item_id)
+        }
+        console.log(item)
+        item.my_rating = rating
+ 
+        if (!hasRating(item_id)) { // add rated item to rated list
+          vm.ratedTabData.push(item)
+          removeFromTableData(item_id) //NOTE: should remove from recommended list too?
+          removeFromWholeTable(item_id)
+          removeFromTrendTabTable(item_id)
         }
       }
+
     }
 
     vm.tabSwitch = function(tabNumber) {
@@ -432,7 +462,6 @@
       var end = new Date().getTime();
       console.log(end - start, "search time")
       $scope.$parent.showSearchProgress = false;
-
     }
 
   }

@@ -101,3 +101,32 @@ def properStringForQuery(string):
 
 def is_isbn_or_upc(string):
     pass
+
+# NOTE: assumes item ids are string type in DH
+def whereInClauseQuery(field, values, notIn, *args): # args is another set of field, values
+    if notIn:
+        query = "where {} not in ".format(field)
+    else:
+        query = "where {} in ".format(field)
+
+    if len(values) == 0:
+        return ""
+    elif len(values) == 1:
+        query += "('"+values[0]+"') "
+    else:
+        query += "{} ".format(tuple(values))
+    
+    if len(args) != 0:
+        field, values, notIn = args[0], args[1], args[2]
+        if len(values) != 0:
+            if notIn:
+                query += "and {} not in ".format(field)
+	    else:
+                query += "and {} in ".format(field)
+
+            if len(values) == 1:
+                query += "('"+values[0]+"') "
+            else:
+                query += "{} ".format(tuple(values))
+
+    return query

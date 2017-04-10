@@ -1,7 +1,7 @@
 from django.conf.urls import include, url
 from rest_framework_nested import routers
 from authentication.views import LoginView, LogoutView, ProfileCodeLoginView, AdminUserView, EndUserView #, AccountViewSet
-from app.views import ItemView, RatingView, NotInterestedView, CSVUploadView, RepoTableView, AuthCodeToAccessTokenView, \
+from app.views import ItemView, RatingView, NotInterestedView, CSVUploadView, CSVReuploadView, RepoTableView, AuthCodeToAccessTokenView, \
 WidgetTestView , RecsysParamsView, RecommendationView, NotInterestedItemsView
 from recsys.views import RecsysViewSet
 
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^api/v1/repo-table/$', RepoTableView.as_view(), name='repo-table'),
 
     url(r'^api/v1/csv/$', CSVUploadView.as_view(), name='csv'),
+    url(r'^api/v1/re-csv/$', CSVReuploadView.as_view(), name='re-csv'),
 
     url(r'^api/v1/auth/login/$', LoginView.as_view(), name='login'),
     url(r'^api/v1/auth/logout/$', LogoutView.as_view(), name='logout'),

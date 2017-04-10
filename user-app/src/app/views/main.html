@@ -27,7 +27,7 @@
               </ul>
             </div> -->
             <span ng-show="loggedIn()">
-              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()">
+              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()" md-clear-button="true">
                   <md-item-template>
                     <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
                   </md-item-template>
@@ -56,12 +56,15 @@
 
       <section>
         <md-menu ng-if="loggedIn()">
-            <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdOpenMenu()">
+            <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open()">
                 <span>{{vm.username()}}</span>
                 <i class="material-icons">keyboard_arrow_down</i>
             </md-button>
             <md-menu-content width="3">
-                <md-menu-item><md-button ui-sref="home.profile">Profile</md-button></md-menu-item>
+                <md-menu-item>
+                     <md-button ng-show="$state.current.name != 'home.profile'" ui-sref="home.profile">Profile</md-button>
+                     <md-button ng-show="$state.current.name != 'home.items'" ui-sref="home.items">Home</md-button>
+                </md-menu-item>
                 <md-menu-item><md-button ng-click="vm.logout();$mdCloseMenu()">Log Out</md-button></md-menu-item>
             </md-menu-content>
         </md-menu>

@@ -1,58 +1,24 @@
-<!-- TODO: Add validations -->
-<md-content md-theme="dark" class="md-padding" layout="row" layout-sm="column">
-    <md-input-container>
-        <label>Username</label>
-        <input ng-model="vm.user.title">
-    </md-input-container>
-    <md-input-container>
-        <label>Email</label>
-        <input ng-model="vm.user.email" type="email">
-    </md-input-container>
-</md-content>
-<md-content class="md-padding">
-    <form name="userForm">
-<!--         <div layout layout-sm="column">
-            <md-input-container flex="80">
-                <label>Company (Disabled)</label>
-                <input ng-model="vm.user.company" disabled>
-            </md-input-container>
-            <md-input-container flex>
-                <label>Submission Date</label>
-                <input type="date" ng-model="vm.user.submissionDate">
-            </md-input-container>
-        </div> -->
-        <div layout layout-sm="column">
-            <md-input-container flex>
-                <label>First Name</label>
-                <input ng-model="vm.user.firstName">
-            </md-input-container>
-            <md-input-container flex>
-                <label>Last Name</label>
-                <input ng-model="vm.user.lastName">
-            </md-input-container>
-        </div>
-<!--         <md-input-container flex>
-            <label>Address</label>
-            <input ng-model="vm.user.address">
-        </md-input-container>
-        <div layout layout-sm="column">
-            <md-input-container flex>
-                <label>City</label>
-                <input ng-model="vm.user.city">
-            </md-input-container>
-            <md-input-container flex>
-                <label>State</label>
-                <input ng-model="user.state">
-            </md-input-container>
-            <md-input-container flex>
-                <label>Postal Code</label>
-                <input ng-model="vm.user.postalCode">
-            </md-input-container>
-        </div>
-        <md-input-container flex>
-            <label>About us</label>
-            <textarea ng-model="vm.user.biography" columns="1"
-                      md-maxlength="150"></textarea>
-        </md-input-container> -->
-    </form>
-</md-content>
+<div class="table-responsive-vertical md-whiteframe-z1" style="margin-top:50px; background-color:white">
+
+<h3 style="padding: 15px 15px 15px 15px">Not Interested Items</h3>
+
+<table id="table" class="table table-hover table-bordered">
+	<tbody>
+	     <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
+		<tr ng-repeat="data in items track by $index" ui-sref-active="md-warn">
+		    <td>
+                            <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open()">
+				<i class="material-icons" ng-click="vm.removeNotInterested($index)">clear</i>
+			    </md-button>
+                    </td>
+                    <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:40}}</span></td>
+		    <td data-title="Description">{{data[vm.description_field] | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
+		</tr>
+	    </div>
+	</tbody>
+</table>
+<div layout="row" layout-align="center center" ng-show="vm.checkEndOfList(true)">
+	<button ng-click="vm.pagingFunction(true)" class="btn btn-default" style="margin: 15px 15px 15px 15px">Load More</button>
+</div>
+
+</div>

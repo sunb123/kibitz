@@ -16,8 +16,8 @@ from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, crea
 from recsys.methods import checkRecsysUrlUnique
 
 from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format, SPARK_HOME, SERVER_HOME
-from app.methods import getItemTableFormat, makeRating, updateItemRating, makeNotInterested
-from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery
+from app.methods import getItemTableFormat, makeRating, removeRating, updateItemRating, makeNotInterested, removeNotInterested
+from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery, whereInClauseQuery
 
 from authentication.models import Account
 from recsys.models import Recsys
@@ -61,7 +61,7 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
         raw_item_headers = reader.next()[1]
         all_headers = [header.lower() for header in raw_item_headers] # list of other fields
 
-        #print all_headers
+        print all_headers
 
         ############################
         # operations in admin DH
@@ -73,22 +73,31 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
 
         # create item table from CSV. add id and overall_rating if not there.
         itemTableFormat = getItemTableFormat(all_headers)
-        #print itemTableFormat
+        print itemTableFormat
 
         api_url = '/api/v1/repos/{}/{}/tables'.format(username, urlName)
         r = makeRequest('POST', api_url, owner_id, data={ "table_name": item_table_name, "params": itemTableFormat})
 
         # insert items into table
-        api_url = '/api/v1/query/{}/{}'.format(username, recommenderName)
+        api_url = '/api/v1/query/{}/{}'.format(username, urlName)
+
+        count = 0
         query = "insert into {}.{} values ".format(urlName, item_table_name)
         for i, values in reader:
-            if i != 0:
+            if count == 4094: # NOTE: split calls into chunks for Datahub
+                query = query[:-1]
+                r = makeRequest('POST', api_url, owner_id, query=query)
+                print r.status_code, r.content
+                count = 0
+                query = "insert into {}.{} values ".format(urlName, item_table_name)
+            elif i != 0:
+                count += 1
                 #values = [repr(val) for val in values]
                 if 'id' not in all_headers:
                     values.insert(0,str(i)) #id field
                 if 'overall_rating' not in all_headers:
                     values.append('') # overall rating field
-                print values
+                #print values
                 for i, val in enumerate(values):
                     if i == 0: # NOTE: include E to allow escape chars for postgresql
                         query += "(E'{}',".format(properStringForQuery(val))
@@ -97,8 +106,10 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
                     else:
                         query += "E'{}',".format(properStringForQuery(val))
 
+        #print query
         query = query[:-1]
         r = makeRequest('POST', api_url, owner_id, query=query)
+        #print r.status_code
 
         # create recsys object
         recsys = Recsys(name=recommenderName, url_name=urlName, repo_base=username, repo_name=urlName,
@@ -117,6 +128,76 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
         output = subprocess.check_output([SERVER_HOME+'/scripts/deploy.sh', '-n', urlName])
 
         return HttpResponse(output)
+
+class CSVReuploadView(views.APIView):
+
+    @is_logged_in
+    @is_admin
+    def post(self, request, pk=None, format=None):
+        data = request.data
+        username = request.user.username
+        user_id = request.user.id
+        recsys_id = request.query_params.get('recsys_id')
+        recsys = Recsys.objects.get(id=recsys_id)
+        owner_id = recsys.owner_id
+        repo_base = recsys.repo_base
+        repo_name = recsys.repo_name
+
+        required_headers = json.loads(data.get("required_headers")) # dict of {'title': title_field, 'description': description_field, ..}
+
+        file = data.get('file')
+        reader = enumerate(csv.reader(file, delimiter=','))
+        raw_item_headers = reader.next()[1]
+        all_headers = [header.lower() for header in raw_item_headers] # list of other fields
+
+        print all_headers
+
+        ############################
+        # operations in admin DH
+        ############################
+
+
+        # TODO: create new table with new headers, change recsys item table to new table.
+
+        # create item table from CSV. add id and overall_rating if not there.
+        itemTableFormat = getItemTableFormat(all_headers)
+        print itemTableFormat
+
+        api_url = '/api/v1/repos/{}/{}/tables'.format(repo_base, repo_name)
+        r = makeRequest('POST', api_url, owner_id, data={ "table_name": item_table_name, "params": itemTableFormat})
+
+        # insert items into table
+        api_url = '/api/v1/query/{}/{}'.format(repo_base, repo_name)
+
+        count = 0
+        query = "insert into {}.{} values ".format(repo_name, item_table_name)
+        for i, values in reader:
+            if count == 4094: # NOTE: split calls into chunks for Datahub
+                query = query[:-1]
+                r = makeRequest('POST', api_url, owner_id, query=query)
+                print r.status_code, r.content
+                count = 0
+                query = "insert into {}.{} values ".format(repo_name, item_table_name)
+            elif i != 0:
+                count += 1
+                #values = [repr(val) for val in values]
+                if 'id' not in all_headers:
+                    values.insert(0,str(i)) #id field
+                if 'overall_rating' not in all_headers:
+                    values.append('') # overall rating field
+                #print values
+                for i, val in enumerate(values):
+                    if i == 0: # NOTE: include E to allow escape chars for postgresql
+                        query += "(E'{}',".format(properStringForQuery(val))
+                    elif i == len(values)-1:
+                        query += "E'{}'),".format(properStringForQuery(val))
+                    else:
+                        query += "E'{}',".format(properStringForQuery(val))
+
+        #print query
+        query = query[:-1]
+        r = makeRequest('POST', api_url, owner_id, query=query)
+        #print r.status_code
 
 class RepoTableView(views.APIView):
 
@@ -174,18 +255,18 @@ class NotInterestedItemsView(views.APIView):
         owner_id = recsys.owner_id
         repo_base = recsys.repo_base
         item_metas = NotInterested.objects.filter(recsys_id=recsys_id, user_id=user_id)
-	    item_ids = [str(meta.item_id) for meta in item_metas]
+        item_ids = [str(meta.item_id) for meta in item_metas]
 
         api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
         query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-	    query += "where id in {} ".format(tuple(item_ids))
+        query += whereInClauseQuery("id", item_ids, False)
         query += "order by cast(id as int) asc;"
 
-        return_dict = {}
         r = makeRequest('POST', api_url, owner_id, query=query)
+        print r.content
         if r.status_code == 200:
-	        items = r.json()['rows']
-	        return JsonResponse({'items':items})
+            items = r.json()['rows']
+            return JsonResponse({'items':items})
 
         return HttpResponse("status:", r.status_code)
 
@@ -194,27 +275,40 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
     @is_logged_in
     def get(self, request, pk=None, format=None): # list get
         username = request.user.username
+        user_id = request.user.id
         recsys_id = request.query_params.get('recsys_id')
         recsys = Recsys.objects.get(id=recsys_id)
         owner_id = recsys.owner_id
         repo_base = recsys.repo_base
         universal_code_field = recsys.universal_code_field
 
+        # exclude not interested items
+        item_metas = NotInterested.objects.filter(user_id=user_id) # get not interested items across all recsys
+        item_ids = [str(meta.item_id) for meta in item_metas if str(meta.recsys_id) == recsys_id] # filter not interested items for current recsys
+        univ_codes = [str(meta.universal_code) for meta in item_metas if meta.universal_code != None]
+
         api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
-        query = "select * from {}.{} order by cast(id as int) asc;".format(recsys.repo_name, recsys.item_table_name)
+        query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
+        query += whereInClauseQuery("id", item_ids, True, universal_code_field, univ_codes, True)
+        query += "order by cast(id as int) asc;"
+
+        print query
 
         return_dict = {}
-        r = makeRequest('POST', api_url, owner_id, query=query)
+        r = makeRequest('POST', api_url, owner_id, query=query) # exclude not interested items
         if r.status_code == 200:
             return_dict['items'] = r.json()['rows']
+        else:
+            #print r.json(), r.content, r.status_code
+            return HttpResponse("failed to get items")    
+    
         ratings = Rating.objects.all()
-
 
 #        return JsonResponse(return_dict)
 
         # STEP 1: Attach rating distribution for each item
         for item in return_dict['items']:
-            item_ratings = ratings.filter(Q(item_id=int(item.get('id'))) | Q(universal_code=item.get(universal_code_field)))
+            item_ratings = ratings.filter(Q(item_id=int(item.get('id'))) | Q(universal_code=item.get(universal_code_field))) # NOTE: get ratings across recsys
             total_rating_count = len(item_ratings)
             distribution_count = {1:0, 2:0, 3:0, 4:0, 5:0}
             distribution_percentage = {1:0, 2:0, 3:0, 4:0, 5:0}
@@ -256,18 +350,17 @@ class ItemView(views.APIView): # TODO: allow non-logged in users to get items (g
 
         # STEP 4: Get recommended items
             if len(ratings) != 0:
-                output = subprocess.Popen([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user.id), '100'], stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
-		returncode = output.wait()
-		print('ping returned {0}'.format(returncode))
-		out = output.stdout.read()
-		print(out)
+                output = subprocess.check_output([SPARK_HOME+'/bin/spark-submit',SERVER_HOME+'/recommender.py', str(recsys_id), str(user.id), '100'])#, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) # use Popen to debug
+		#returncode = output.wait()
+		#print('ping returned {0}'.format(returncode))
+		#out = output.stdout.read()
+		#print(out)
 		print "recommender out: ", output
-	 #       print type(out)
-	#	print ast.literal_eval(out)
+	        #print type(out)
+	 	#print ast.literal_eval(out)
 
-		if out == []:
-			rec_ratings = ast.literal_eval(out)
+		if output != []:
+			rec_ratings = ast.literal_eval(output)
 			rec_rating_dict = {}
 			for rating in rec_ratings:
 			    rec_rating_dict[rating.get('item_id')] = rating.get('rating')
@@ -310,8 +403,15 @@ class RatingView(views.APIView):
     def put(self, request, pk=None, format=None):
         pass
 
-    def delete(self, request, pk=None, format=None):
-        pass
+    @is_logged_in
+    def delete(self, request, pk=None, format=None): # remove rating
+        username = request.user.username 
+        item_id = request.data.get('item_id')
+        rating = request.data.get('rating')
+        recsys_id = request.data.get('recsys_id')
+        removeRating(username, item_id, rating, recsys_id)
+        updateItemRating(item_id, recsys_id)
+        return HttpResponse("delete rating done")
 
 class NotInterestedView(views.APIView):
 
@@ -319,8 +419,8 @@ class NotInterestedView(views.APIView):
         return JsonResponse(request.user)
 
     @is_logged_in
-    def post(self, request, pk=None, format=None): # make rating for logged in user
-        username = request.user.username #request.COOKIES.get('k_username')
+    def post(self, request, pk=None, format=None): # make not interested for logged in user
+        username = request.user.username 
         item_id = request.data.get('item_id')
         recsys_id = request.data.get('recsys_id')
         makeNotInterested(username, item_id, recsys_id)
@@ -329,8 +429,13 @@ class NotInterestedView(views.APIView):
     def put(self, request, pk=None, format=None):
         pass
 
-    def delete(self, request, pk=None, format=None):
-        pass
+    @is_logged_in
+    def delete(self, request, pk=None, format=None): # remove not interested for logged in user
+        username = request.user.username
+        item_id = request.data.get('item_id')
+        recsys_id = request.data.get('recsys_id')
+        removeNotInterested(username, item_id, recsys_id)
+        return HttpResponse("delete not interested done")
 
 
 class RecommendationView(views.APIView):

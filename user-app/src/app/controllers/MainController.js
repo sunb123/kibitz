@@ -24,6 +24,7 @@
 
   function MainController(navService, loginService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout, $http, $cookies, config) {
     var vm = this;
+    $scope.$state = $state
 
     var urlSuffix = window.location.href.split(config.app_home_url+'/')[1]
     vm.recsys_url = urlSuffix.split('/')[0]
@@ -60,6 +61,7 @@
     }, function(resp){
       console.log(resp)
     })
+
 
     vm.username = function() {
       return $cookies.get('k_username')

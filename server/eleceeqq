@@ -1,0 +1,19 @@
+                         List of relations
+ Schema |                  Name                   | Type  | Owner  
+--------+-----------------------------------------+-------+--------
+ public | app_notinterested                       | table | master
+ public | app_rating                              | table | master
+ public | auth_group                              | table | master
+ public | auth_group_permissions                  | table | master
+ public | auth_permission                         | table | master
+ public | authentication_account                  | table | master
+ public | authentication_account_groups           | table | master
+ public | authentication_account_user_permissions | table | master
+ public | custom_session                          | table | master
+ public | django_admin_log                        | table | master
+ public | django_content_type                     | table | master
+ public | django_migrations                       | table | master
+ public | django_session                          | table | master
+ public | recsys_recsys                           | table | master
+(14 rows)
+

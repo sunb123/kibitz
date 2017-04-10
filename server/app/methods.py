@@ -31,6 +31,19 @@ def makeRating(username, item_id, rating, recsys_id, universal_code=None):
 
     return ratingObj
 
+def removeRating(username, item_id, rating, recsys_id, universal_code=None):
+    user_id = Account.objects.get(username=username).id
+    if universal_code != None:
+        ratingObj = Rating.objects.filter(user_id=user_id, universal_code=universal_code).first()
+    else:
+        ratingObj = Rating.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
+
+    if ratingObj != None:
+        ratingObj.delete()
+        return "rating deleted"
+    else:
+        raise Exception("rating object not found")
+
 def updateItemRating(item_id, recsys_id):
     recsys = Recsys.objects.get(id=recsys_id)
     owner_id = recsys.owner_id
@@ -38,12 +51,15 @@ def updateItemRating(item_id, recsys_id):
     repo = recsys.repo_name
     item_repo = recsys.item_table_name
 
-    ratings = Rating.objects.filter(item_id=item_id, recsys_id=recsys_id)
+    ratings = Rating.objects.filter(item_id=item_id, recsys_id=recsys_id) # overall rating among admin's own site ratings. TODO: use ratings on items across diff recsys
 
-    total_rating = 0 # use floats later for partial ratings
-    for rating in ratings:
-        total_rating += rating.rating
-    overall_rating = total_rating / len(ratings)
+    total_rating = 0 # TODO: use floats later for partial ratings
+    if len(ratings) > 0:
+        for rating in ratings:
+            total_rating += rating.rating
+        overall_rating = total_rating / len(ratings)
+    else:
+        overall_rating = 0
 
     api_url = '/api/v1/query/{}/{}'.format(repo_base, repo) # admin username,
     query = "update {}.{} set overall_rating='{}' where id='{}';".format(repo, item_repo, overall_rating, item_id)
@@ -61,9 +77,20 @@ def makeNotInterested(username, item_id, recsys_id, universal_code=None):
         user = Account.objects.get(username=username)
         interestObj = NotInterested(item_id=item_id, recsys_id=recsys_id, universal_code=universal_code, user=user)
     interestObj.save()
-
     return interestObj 
 
+def removeNotInterested(username, item_id, recsys_id, universal_code=None):
+    user_id = Account.objects.get(username=username).id
+    if universal_code != None:
+        interestObj = NotInterested.objects.filter(user_id=user_id, universal_code=universal_code).first()
+    else:
+        interestObj = NotInterested.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
+
+    if interestObj != None:
+        interestObj.delete()
+        return "not interested obj deleted"
+    else:
+        raise Exception("not interested object not found")
 
 # def retrieveRatings(user_id, recsys_id):
 #     # TODO: look at items table of recsys.

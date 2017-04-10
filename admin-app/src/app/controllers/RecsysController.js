@@ -193,7 +193,7 @@
 
     function getItemFieldsTemplate() {
         var fields = []
-        var list = $scope.roles
+        var list = $scope.models.lists.roles
         for (var i=0; i < list.length; i++) {
             fields.push(list[i].label)
         }
@@ -214,6 +214,13 @@
         for(key in recsysFields) {
             vm.recsys[key] = recsysFields[key]
         }
+    }
+
+    function setRecsysWithRepos(recsys_id) {
+        var recsysFields = getRecsysFields(vm.recsys_id)
+        for(key in recsysFields) {
+            vm.recsys[key] = recsysFields[key]
+        }
 
         $scope.myStyle = {}
 
@@ -221,13 +228,13 @@
         vm.recsysFieldsAdv[0].templateOptions.options = vm.repoList
         vm.item_table_columns = getItemFields()
 
-        $scope.roles = []
+        var roles = []
         if (vm.item_table_columns != null && vm.item_table_columns != []) {
             for (var i=0; i < vm.item_table_columns.length; i++) {
-                $scope.roles.push({label: vm.item_table_columns[i].column_name })
+                roles.push({label: vm.item_table_columns[i].column_name })
             }
         }
-        $scope.roles = $scope.roles.map(function(x){return x.label})
+        $scope.models.lists.roles = roles
     }
 
     $scope.$watch('vm.recsys.repo_name', function(newVal, oldVal){ // records at value not option dict
@@ -265,22 +272,27 @@
         $rootScope.$broadcast('rate');
     }, true)
 
-    $scope.roles = []
-    $scope.user = {
-        roles: []
-    };
+
     $scope.rolesChecked = {}
+    $scope.models = {
+        "selected": null,
+        "lists": {
+            "roles": [] 
+        }
+
+    }
 
     $scope.$parent.itemDeferred.promise.then(function() {
       var recsysFields = getRecsysFields(vm.recsys_id)
       vm.recsys.name = recsysFields.name
       vm.recsys.url_name = recsysFields.url_name
       vm.template = vm.getTemplate(recsysFields.template)
+      setRecsys(vm.recsys_id)
       loadTemplate(vm.template)
     })
 
     $scope.$parent.reposDeferred.promise.then(function(){
-        setRecsys(vm.recsys_id)
+        setRecsysWithRepos(vm.recsys_id)
     })
 
 
@@ -292,8 +304,14 @@
         vm.recsys.rating_icon_fontsize = template.rating_icon_fontsize != undefined ? template.rating_icon_fontsize : vm.recsys.rating_icon_fontsize
         $scope.ratingStates = template.rating_states != undefined ? template.rating_states : $scope.ratingStates
         $scope.slickCurrentIndex = template.template_number != undefined ? template.template_number : $scope.slickCurrentIndex
-        $scope.user.roles = template.item_fields_include != undefined ? template.item_fields_include : vm.recsys.item_fields_include
-
+        
+        var item_fields_include = template.item_fields_include != undefined ? template.item_fields_include : vm.recsys.item_fields_include
+        var item
+        for (var i=0; i < item_fields_include.length; i++) {
+            item = item_fields_include[i]
+            $scope.rolesChecked[item] = true
+            
+        }
         console.log(template)
     }
 
@@ -384,8 +402,7 @@
         template['rating_states'] = $scope.ratingStates
 
         template['template_number'] = $scope.slickCurrentIndex
-        template['item_fields_include'] = $scope.user.roles
-
+        template['item_fields_include'] = $scope.models.lists.roles.filter(function(item){return $scope.rolesChecked[item.label] == true}).map(function(item){ return item.label})
         template['item_width'] = '280px'
 
         template['use_field_selection'] = true
@@ -484,33 +501,96 @@
         $state.go('home.table', {}, {reload: true});
     }
 
-    $scope.check = function(value, checked){
-        if (checked) {
+    $scope.check = function(value){
+        if ($scope.rolesChecked[value] != true) {
             $scope.rolesChecked[value] = true
         } else {
             delete $scope.rolesChecked[value]
         }
-    }
-
-    $scope.setCheck = function(role) {
-        if ($scope.user.roles.indexOf(role) != -1) {
-            $scope.check(role, true)
-        }
+        console.log(value)
     }
 
     $scope.getStyle = function(role) {
-        if ($scope.rolesChecked[role]) {
+        if ($scope.rolesChecked[role] == true) {
             return {'background-color':'#dff0d8'}
         } else {
             return {'background-color':'#fff'}
         }
     }
 
+
+    var fileHeaders;
+    var reader = new FileReader();
+    reader.onload = function(progressEvent){
+        var lines = this.result.split('\n');
+        fileHeaders = lines[0].toLocaleLowerCase().split(',');
+        var headerOptions = headerListToOptions(fileHeaders)
+        vm.csvHeadersFields[0].templateOptions.options = headerOptions
+        vm.csvHeadersFields[1].templateOptions.options = headerOptions
+        vm.csvHeadersFields[2].templateOptions.options = headerOptions
+        vm.csvHeadersFields[3].templateOptions.options = headerOptions
+        $scope.hasHeaders = true
+    };
+
+    $scope.readHeaders = function() {
+	if (checkBasicParams() == false) {
+	  return
+        } else {
+          setErrorMessage('','')
+        }
+
+        var myfile = $('#csvFile')[0].files[0]
+        reader.readAsText(myfile)
+        $timeout(function() {
+          console.log(fileHeaders)
+        }, 100)
+    }
+
+    $scope.uploadCSV = function() {
+        var file = $('#csvFile')[0].files[0]
+        if (Object.keys(vm.headers).length == 0) { // TODO: determine which headers are required
+          setErrorMessage("missing_header", "Missing CSV headers")
+          return
+        }
+
+        $timeout(function() {
+          if (reader.readyState == 2) {
+            $scope.$parent.itemDeferred = $q.defer()
+            $scope.$parent.itemPromise = $scope.itemDeferred.promise
+
+            Upload.upload({
+                url: config.server_url+'/csv/',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': $cookies.get('csrftoken'),
+                },
+                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'required_headers':JSON.stringify(vm.headers)},
+            }).then(function (response) {
+                console.log('Success ' + response.config.data.file.name + ' uploaded. Response: ' + response.data);
+                setErrorMessage('','')
+                $scope.showFieldSelection = true
+                $scope.$parent.loadRecsysList()
+                $('#myModal').modal('toggle');
+            }, function (response) {
+                console.log('Error status: ' + response.status);
+                $scope.$parent.itemDeferred.resolve('resolved')
+                setErrorMessage(response.data.status, response.data.message)
+            }, function (evt) {
+                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
+            });
+          } else {
+            console.log("failed to read file in time")
+
+          }
+        }, 200); // NOTE: should loop: sleep then check ready status
+    }
+
     tinymce.init({
         mode : "exact",
         elements : "item-card-demo"
     });
-
 }
 
 })();
