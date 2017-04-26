@@ -1,0 +1,58 @@
+2017-04-24 06:17:17.864 INFO  (main) [   ] o.e.j.s.Server jetty-9.3.14.v20161028
+2017-04-24 06:17:18.666 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter  ___      _       Welcome to Apache Solr? version 6.5.0
+2017-04-24 06:17:18.667 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter / __| ___| |_ _   Starting in standalone mode on port 8983
+2017-04-24 06:17:18.667 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter \__ \/ _ \ | '_|  Install dir: /var/www/html/kibitz/server/solr-6.5.0
+2017-04-24 06:17:18.683 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter |___/\___/_|_|    Start time: 2017-04-24T06:17:18.669Z
+2017-04-24 06:17:18.684 INFO  (main) [   ] o.a.s.s.StartupLoggingUtils Property solr.log.muteconsole given. Muting ConsoleAppender named CONSOLE
+2017-04-24 06:17:18.699 INFO  (main) [   ] o.a.s.c.SolrResourceLoader Using system property solr.solr.home: /var/www/html/kibitz/server/solr-6.5.0/server/solr
+2017-04-24 06:17:18.705 INFO  (main) [   ] o.a.s.c.SolrXmlConfig Loading container configuration from /var/www/html/kibitz/server/solr-6.5.0/server/solr/solr.xml
+2017-04-24 06:17:19.029 INFO  (main) [   ] o.a.s.u.UpdateShardHandler Creating UpdateShardHandler HTTP client with params: socketTimeout=600000&connTimeout=60000&retry=true
+2017-04-24 06:17:19.195 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found 0 core definitions underneath /var/www/html/kibitz/server/solr-6.5.0/server/solr
+2017-04-24 06:17:19.277 INFO  (main) [   ] o.e.j.s.Server Started @1901ms
+2017-04-24 06:19:08.810 INFO  (qtp717356484-19) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json} status=0 QTime=57
+2017-04-24 06:19:08.890 INFO  (qtp717356484-15) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json} status=0 QTime=13
+2017-04-24 06:19:08.903 INFO  (qtp717356484-20) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={core=books&action=STATUS&wt=json} status=0 QTime=1
+2017-04-24 06:19:08.945 INFO  (qtp717356484-19) [   ] o.a.s.h.a.CoreAdminOperation core create command name=books&action=CREATE&instanceDir=books&wt=json
+2017-04-24 06:19:09.029 INFO  (qtp717356484-19) [   x:books] o.a.s.c.SolrResourceLoader [books] Added 51 libs to classloader, from paths: [/var/www/html/kibitz/server/solr-6.5.0/contrib/clustering/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/extraction/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/langid/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/velocity/lib, /var/www/html/kibitz/server/solr-6.5.0/dist]
+2017-04-24 06:19:09.199 INFO  (qtp717356484-19) [   x:books] o.a.s.c.SolrConfig Using Lucene MatchVersion: 6.5.0
+2017-04-24 06:19:09.365 INFO  (qtp717356484-19) [   x:books] o.a.s.s.IndexSchema [books] Schema name=example-data-driven-schema
+2017-04-24 06:19:09.503 WARN  (qtp717356484-19) [   x:books] o.a.s.c.SolrResourceLoader Solr loaded a deprecated plugin/analysis class [solr.SynonymFilterFactory]. Please consult documentation how to replace it accordingly.
+2017-04-24 06:19:09.516 WARN  (qtp717356484-19) [   x:books] o.a.s.c.SolrResourceLoader Solr loaded a deprecated plugin/analysis class [solr.WordDelimiterFilterFactory]. Please consult documentation how to replace it accordingly.
+2017-04-24 06:19:09.950 INFO  (qtp717356484-19) [   x:books] o.a.s.s.IndexSchema Loaded schema example-data-driven-schema/1.6 with uniqueid field id
+2017-04-24 06:19:09.985 INFO  (qtp717356484-19) [   x:books] o.a.s.c.CoreContainer Creating SolrCore 'books' using configuration from instancedir /var/www/html/kibitz/server/solr-6.5.0/server/solr/books
+2017-04-24 06:19:10.002 INFO  (qtp717356484-19) [   x:books] o.a.s.c.SolrCore solr.RecoveryStrategy.Builder
+2017-04-24 06:19:10.008 INFO  (qtp717356484-19) [   x:books] o.a.s.c.SolrCore [[books] ] Opening new SolrCore at [/var/www/html/kibitz/server/solr-6.5.0/server/solr/books], dataDir=[/var/www/html/kibitz/server/solr-6.5.0/server/solr/books/data/]
+2017-04-24 06:19:10.013 INFO  (qtp717356484-19) [   x:books] o.a.s.c.JmxMonitoredMap JMX monitoring is enabled. Adding Solr mbeans to JMX Server: com.sun.jmx.mbeanserver.JmxMBeanServer@4f80542f
+2017-04-24 06:19:10.142 INFO  (qtp717356484-19) [   x:books] o.a.s.r.XSLTResponseWriter xsltCacheLifetimeSeconds=5
+2017-04-24 06:19:10.501 INFO  (qtp717356484-19) [   x:books] o.a.s.u.UpdateHandler Using UpdateLog implementation: org.apache.solr.update.UpdateLog
+2017-04-24 06:19:10.501 INFO  (qtp717356484-19) [   x:books] o.a.s.u.UpdateLog Initializing UpdateLog: dataDir= defaultSyncLevel=FLUSH numRecordsToKeep=100 maxNumLogsToKeep=10 numVersionBuckets=65536
+2017-04-24 06:19:10.510 INFO  (qtp717356484-19) [   x:books] o.a.s.u.CommitTracker Hard AutoCommit: if uncommited for 15000ms; 
+2017-04-24 06:19:10.510 INFO  (qtp717356484-19) [   x:books] o.a.s.u.CommitTracker Soft AutoCommit: disabled
+2017-04-24 06:19:10.527 INFO  (qtp717356484-19) [   x:books] o.a.s.s.SolrIndexSearcher Opening [Searcher@5ae0f297[books] main]
+2017-04-24 06:19:10.534 INFO  (qtp717356484-19) [   x:books] o.a.s.r.ManagedResourceStorage File-based storage initialized to use dir: /var/www/html/kibitz/server/solr-6.5.0/server/solr/books/conf
+2017-04-24 06:19:10.548 INFO  (qtp717356484-19) [   x:books] o.a.s.h.c.SpellCheckComponent Initializing spell checkers
+2017-04-24 06:19:10.554 INFO  (qtp717356484-19) [   x:books] o.a.s.s.DirectSolrSpellChecker init: {name=default,field=_text_,classname=solr.DirectSolrSpellChecker,distanceMeasure=internal,accuracy=0.5,maxEdits=2,minPrefix=1,maxInspections=5,minQueryLength=4,maxQueryFrequency=0.01}
+2017-04-24 06:19:10.557 INFO  (qtp717356484-19) [   x:books] o.a.s.h.c.QueryElevationComponent Loading QueryElevation from: /var/www/html/kibitz/server/solr-6.5.0/server/solr/books/conf/elevate.xml
+2017-04-24 06:19:10.568 INFO  (qtp717356484-19) [   x:books] o.a.s.h.ReplicationHandler Commits will be reserved for  10000
+2017-04-24 06:19:10.593 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@5ae0f297[books] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2017-04-24 06:19:10.594 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2017-04-24 06:19:10.594 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.h.c.SpellCheckComponent Loading spell index for spellchecker: default
+2017-04-24 06:19:10.597 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.SolrCore [books] Registered new searcher Searcher@5ae0f297[books] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2017-04-24 06:19:10.603 INFO  (qtp717356484-19) [   x:books] o.a.s.u.UpdateLog Could not find max version in index or recent updates, using new clock 1565539435128291328
+2017-04-24 06:19:10.611 INFO  (qtp717356484-19) [   x:books] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={name=books&action=CREATE&instanceDir=books&wt=json} status=0 QTime=1667
+2017-04-24 06:19:11.360 INFO  (qtp717356484-16) [   x:books] o.a.s.u.p.LogUpdateProcessorFactory [books]  webapp=/solr path=/update params={}{add=[1 (1565539435464884224), 2 (1565539435522555904), 3 (1565539435524653056), 4 (1565539435526750208), 5 (1565539435528847360), 6 (1565539435530944512), 7 (1565539435531993088), 8 (1565539435534090240), 9 (1565539435536187392), 10 (1565539435537235968), ... (999 adds)]} 0 461
+2017-04-24 06:19:11.365 INFO  (qtp717356484-12) [   x:books] o.a.s.u.DirectUpdateHandler2 start commit{,optimize=false,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false,prepareCommit=false}
+2017-04-24 06:19:11.366 INFO  (qtp717356484-12) [   x:books] o.a.s.u.SolrIndexWriter Calling setCommitData with IW:org.apache.solr.update.SolrIndexWriter@71ee647e
+2017-04-24 06:19:11.829 INFO  (qtp717356484-12) [   x:books] o.a.s.s.SolrIndexSearcher Opening [Searcher@7eeaf1e5[books] main]
+2017-04-24 06:19:11.832 INFO  (qtp717356484-12) [   x:books] o.a.s.u.DirectUpdateHandler2 end_commit_flush
+2017-04-24 06:19:11.833 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@7eeaf1e5[books] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-24 06:19:11.833 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2017-04-24 06:19:11.835 INFO  (searcherExecutor-7-thread-1-processing-x:books) [   x:books] o.a.s.c.SolrCore [books] Registered new searcher Searcher@7eeaf1e5[books] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-24 06:19:11.836 INFO  (qtp717356484-12) [   x:books] o.a.s.u.p.LogUpdateProcessorFactory [books]  webapp=/solr path=/update params={commit=true}{commit=} 0 470
+2017-04-24 06:19:29.682 INFO  (qtp717356484-21) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json} status=0 QTime=6
+2017-04-24 06:19:29.712 INFO  (qtp717356484-20) [   ] o.a.s.m.SolrMetricManager Closing metric reporters for: solr.core.books
+2017-04-24 06:19:29.712 INFO  (qtp717356484-20) [   ] o.a.s.c.SolrCore [books]  CLOSING SolrCore org.apache.solr.core.SolrCore@7400de68
+2017-04-24 06:19:29.732 INFO  (qtp717356484-20) [   ] o.a.s.m.SolrMetricManager Closing metric reporters for: solr.core.books
+2017-04-24 06:19:29.752 INFO  (qtp717356484-20) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={deleteInstanceDir=true&core=books&deleteDataDir=true&action=UNLOAD&wt=json&deleteIndex=true} status=0 QTime=41
+2017-04-24 06:19:30.075 INFO  (ShutdownMonitor) [   ] o.a.s.c.CoreContainer Shutting down CoreContainer instance=558216562
+2017-04-24 06:19:30.076 INFO  (ShutdownMonitor) [   ] o.a.s.m.SolrMetricManager Closing metric reporters for: solr.node

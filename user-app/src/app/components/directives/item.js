@@ -6,8 +6,8 @@ angular.module('app')
   	return {
         // @ expects a string value
         // = expects a javascript variable
-  		scope: { mytitle: '@', description: '@', rating: '=', myrating: '=', myimage: '@', itemid: '=',
-        mytemplate: '=', itemdata: '=', ratingdata: '=', recsysid: '=', suggestedrating: '='},
+  		scope: { mytitle: '@', description: '@', rating: '=', myrating: '=', myimage: '@', itemd: '=', 
+                         mytemplate: '=', itemdata: '=', ratingdata: '=', recsysid: '=', itemid: '=', univcode: '=', suggestedrating: '='},
   		templateUrl: 'app/views/partials/item.html',
         require: '^ItemsController',
         controller: ['$scope', 'itemService', function Controller($scope, itemService) {

@@ -11,6 +11,82 @@ $widget-height: 310px;
 $font-weight-bold: 600;
 $font-size-large: 22px;
 
+
+.autocompletedemoCustomTemplate .autocomplete-custom-template li {
+  border-bottom: 1px solid #ccc;
+  height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  white-space: normal;
+}
+
+.autocompletedemoCustomTemplate .enc-univ-srch {
+  padding: 8px 5px 5px 8px;
+}
+
+.autocompletedemoCustomTemplate .enc-univ-dropdown {
+  padding-right: 5px;
+  padding-top: 8px;
+  padding-left: 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+/*
+.autocompletedemoCustomTemplate md-autocomplete-wrap:after { // add a dropdown icon
+  font-family: "Material Icons";
+  content: "\E5C5";
+  line-height: 1;
+  font-size: 24px;
+  font-weight: normal;
+  padding: 8px 10px 10px 8px;
+}
+*/
+
+.autocompletedemoCustomTemplate md-autocomplete-wrap:before { // add a search icon
+  font-family: "Material Icons";
+  content: "\E8B6";
+  line-height: 1;
+  padding: 8px 0px 0px 8px;
+  font-weight: normal;
+  font-size: 24px;
+}
+
+.autocompletedemoCustomTemplate .autocomplete-custom-template li:last-child {
+  border-bottom-width: 220px;
+}
+
+.autocompletedemoCustomTemplate .autocomplete-custom-template .item-title,
+.autocompletedemoCustomTemplate .autocomplete-custom-template .item-metadata {
+  display: block;
+  line-height: 2;
+}
+
+.autocompletedemoCustomTemplate .autocomplete-custom-template .item-title md-icon {
+  height: 18px;
+  width: 18px;
+}
+
+.autocompletedemoCustomTemplate md-autocomplete {
+  width: 100%;
+}
+
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1) rotate(360deg); }
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+
+
 // LOGIN FORM
 html{
     background-color: #f3f3f3;

@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from rest_framework_nested import routers
 from authentication.views import LoginView, LogoutView, ProfileCodeLoginView, AdminUserView, EndUserView #, AccountViewSet
 from app.views import ItemView, RatingView, NotInterestedView, CSVUploadView, CSVReuploadView, RepoTableView, AuthCodeToAccessTokenView, \
-WidgetTestView , RecsysParamsView, RecommendationView, NotInterestedItemsView
+WidgetTestView , RecsysParamsView, RecommendationView, NotInterestedItemsView, TextSearchView, ItemPagingView
 from recsys.views import RecsysViewSet
 
 router = routers.SimpleRouter()
@@ -26,6 +26,9 @@ urlpatterns = [
 
     url(r'^api/v1/item/$', ItemView.as_view(), name='items'),
     url(r'^api/v1/item/(?P<pk>[^/]+)/$', ItemView.as_view(), name='items'),
+    
+    url(r'^api/v1/item-paging/$', ItemPagingView.as_view(), name='item-paging'),
+    url(r'^api/v1/item-paging/(?P<pk>[^/]+)/$', ItemPagingView.as_view(), name='item-paging'),
 
     url(r'^api/v1/rating/$', RatingView.as_view(), name='ratings'),
     url(r'^api/v1/rating/(?P<pk>[^/]+)/$', RatingView.as_view(), name='ratings'),
@@ -52,6 +55,8 @@ urlpatterns = [
     url(r'^api/v1/auth/logout/$', LogoutView.as_view(), name='logout'),
 
     url(r'^api/v1/widget-test/$', WidgetTestView.as_view(), name='widget-test'),
+    
+    url(r'^api/v1/text-search/$', TextSearchView.as_view(), name='text-search'),
 
     url(r'^api/v1/recsys-params/$', RecsysParamsView.as_view(), name='recsys-params'),
 

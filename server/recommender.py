@@ -26,7 +26,7 @@ recommendation_limit = int(sys.argv[3])
 # NOTE: makes recommendation only on the items of the given collection.
 # query = "select * from {}.{} where recsys_id='{}' order by id asc;" \
 #     .format(master_repo, rating_table, recsys_id)
-# resp = makeRequest('POST', master_dh_query_url, 'master', query=query)
+# resp = makeRequest('POST', master_dh_query_url,  query=query)
 # rows = resp.json()['rows']
 
 #rows = Recsys.objects.filter(recsys_id=recsys_id)

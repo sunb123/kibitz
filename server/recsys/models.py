@@ -13,6 +13,7 @@ class Recsys(models.Model):
     image_link_field = models.CharField(max_length=140)
     universal_code_field = models.CharField(max_length=140)
     template = models.TextField()
+    solr_core_name = models.CharField(max_length=40, null=True)
     status = models.CharField(max_length=40, blank=False, default="paused") # paused or active
     owner = models.ForeignKey(Account)
 

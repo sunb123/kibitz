@@ -12,8 +12,11 @@ from app.system_methods import lock_decorator
 # App Settings
 ##########################
 
-# NOTE: must have master account with is_superuser=True in authentication_account table
+# NOTE: server DB must have master account with is_superuser=True in authentication_account table
+# master DB account username = 'master'
+# master DB account password = 'kibitzaccount32271' 
 
+# Master Datahub (DH) account
 master_username = 'test321'
 master_password = 'kibitzaccount32271'
 master_email = 'brian.sun41@gmail.com'
@@ -167,7 +170,7 @@ def createAdminUserObject(username, email=None, password=None, access_token=None
 
 
 def makeGetRequest(url, user_id):
-    access_token = getAdminUserTokens(user_id) # NOTE: makes call to DH to get tokens
+    access_token = getAdminUserTokens(user_id) 
     if access_token == None or access_token == '':
         raise Exception("No access token")
     resp = requests.get(base_url+url,headers={'Authorization':'Bearer '+access_token})
@@ -176,7 +179,17 @@ def makeGetRequest(url, user_id):
         resp = requests.get(base_url+url,headers={'Authorization':'Bearer '+access_token})
     return resp
 
-def makeRequest(method, url, user_id, query='', data={}, isMaster=False): # only POST for now
+def makeDeleteRequest(url, user_id):
+    access_token = getAdminUserTokens(user_id) 
+    if access_token == None or access_token == '':
+        raise Exception("No access token")
+    resp = requests.delete(base_url+url,headers={'Authorization':'Bearer '+access_token})
+    if resp.status_code == 401: # token expired.
+        access_token = refreshAdminToken(user_id)
+        resp = requests.delete(base_url+url,headers={'Authorization':'Bearer '+access_token})
+    return resp
+
+def makeRequest(method, url, user_id, query='', data={}, files={}, isMaster=False): # only POST for now
     if method != 'POST':
         return 'Method must be POST'
     payload = {'query': query, 'format': 'json',}
@@ -184,20 +197,20 @@ def makeRequest(method, url, user_id, query='', data={}, isMaster=False): # only
     if isMaster:
         access_token = masterAccessToken()
         payload.update(data)
-        resp = requests.post(base_url+url,headers={'Authorization': 'Bearer '+access_token},data=payload)
+        resp = requests.post(base_url+url,headers={'Authorization': 'Bearer '+access_token},data=payload, files=files)
         if resp.status_code == 401: # token expired.
             access_token = refreshMasterToken()
-            resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload)
+            resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload, files=files)
         return resp
     else: # request to admin DH
-        access_token = getAdminUserTokens(user_id) # NOTE: makes call to DH to get tokens
+        access_token = getAdminUserTokens(user_id) 
         payload.update(data)
         if access_token == None or access_token == '': # NOTE: auth type user with no tokens
             raise Exception("No access token")
-        resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload)
+        resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload, files=files)
         if resp.status_code == 401: # token expired.
             access_token = refreshAdminToken(user_id)
-            resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload)
+            resp = requests.post(base_url+url,headers={'Authorization':'Bearer '+access_token},data=payload, files=files)
         return resp
 
 @lock_decorator

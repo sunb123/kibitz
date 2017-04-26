@@ -68,7 +68,7 @@
         return false
     }
 
-
+    // NOTE: not needed for now. assume list size is small.
     vm.pagingFunction = function() {
 
     }

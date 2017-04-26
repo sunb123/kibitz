@@ -9,12 +9,61 @@
 
   function itemService($q, $http, config, $cookies, $rootScope){
 
-    var sendRating = function(item_id, rating, recsys_id) {
+    var convertSolrHeaders = function(docs) {
+        var doc, tmp, i, prop;
+        for (i in docs) {
+            doc = docs[i]
+            for (prop in doc) {
+                if (prop != 'id' && prop != "_version") {
+                    tmp = doc[prop][0] // remove array wrap on field
+                    delete doc[prop]
+                    prop = prop.slice(0,-2) // remove _t from header
+                    doc[prop] = tmp
+                }
+            }
+            delete doc["_version"]
+        }
+        return docs
+    }
+
+    var textSearch = function(recsys_id, searchQuery, start, rows) {
+        var results = $q.defer()
+        $http({
+          method: 'GET', 
+          url: config.server_url + '/text-search/',
+          params: {
+              'recsys_id': recsys_id,
+              'rows': rows,
+              'start': start,
+              'q': searchQuery,
+          },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': $cookies.get('csrftoken')
+          },
+        }).then(function(resp){
+          console.log(resp)
+          var docs = convertSolrHeaders(resp.data.docs)
+          results.resolve(docs)
+        }, function(resp){
+          console.log(resp)
+          results.resolve([])
+        })
+
+        return results.promise
+    }
+
+
+
+
+    var sendRating = function(item, item_id, rating, recsys_id, univ_code) {
       if (rating != 0) {
         var params = {
             'recsys_id': recsys_id,
             'item_id': item_id,
             'rating': rating,
+            'univ_code': univ_code,
         }
         console.log(params)
         var method;
@@ -34,7 +83,7 @@
             'X-CSRFToken': $cookies.get('csrftoken')
           },
         }).then(function(resp){
-          $rootScope.$broadcast('itemRated', {'item_id':item_id, 'rating':rating})
+          $rootScope.$broadcast('itemRated', {'item':item, 'item_id':item_id, 'rating':rating})
           console.log(resp)
         }, function(resp){
           console.log(resp)
@@ -93,6 +142,7 @@
       getMyRatingTemplate: getMyRatingTemplate,
       sendRating: sendRating,
       sendNotInterested: sendNotInterested,
+      textSearch: textSearch,
     };
 
 

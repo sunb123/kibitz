@@ -1,0 +1,65 @@
+2017-04-25 03:23:57.085 INFO  (main) [   ] o.e.j.s.Server jetty-9.3.14.v20161028
+2017-04-25 03:23:57.458 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter  ___      _       Welcome to Apache Solr? version 6.5.0
+2017-04-25 03:23:57.458 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter / __| ___| |_ _   Starting in standalone mode on port 8983
+2017-04-25 03:23:57.458 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter \__ \/ _ \ | '_|  Install dir: /var/www/html/kibitz/server/solr-6.5.0
+2017-04-25 03:23:57.479 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter |___/\___/_|_|    Start time: 2017-04-25T03:23:57.460Z
+2017-04-25 03:23:57.480 INFO  (main) [   ] o.a.s.s.StartupLoggingUtils Property solr.log.muteconsole given. Muting ConsoleAppender named CONSOLE
+2017-04-25 03:23:57.497 INFO  (main) [   ] o.a.s.c.SolrResourceLoader Using system property solr.solr.home: /var/www/html/kibitz/server/solr-6.5.0/server/solr
+2017-04-25 03:23:57.502 INFO  (main) [   ] o.a.s.c.SolrXmlConfig Loading container configuration from /var/www/html/kibitz/server/solr-6.5.0/server/solr/solr.xml
+2017-04-25 03:23:57.816 INFO  (main) [   ] o.a.s.u.UpdateShardHandler Creating UpdateShardHandler HTTP client with params: socketTimeout=600000&connTimeout=60000&retry=true
+2017-04-25 03:23:57.975 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found 2 core definitions underneath /var/www/html/kibitz/server/solr-6.5.0/server/solr
+2017-04-25 03:23:57.977 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Cores are: [books, zxc]
+2017-04-25 03:23:58.069 INFO  (main) [   ] o.e.j.s.Server Started @1479ms
+2017-04-25 03:23:58.078 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.SolrResourceLoader [books] Added 51 libs to classloader, from paths: [/var/www/html/kibitz/server/solr-6.5.0/contrib/clustering/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/extraction/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/langid/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/velocity/lib, /var/www/html/kibitz/server/solr-6.5.0/dist]
+2017-04-25 03:23:58.080 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.SolrResourceLoader [zxc] Added 51 libs to classloader, from paths: [/var/www/html/kibitz/server/solr-6.5.0/contrib/clustering/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/extraction/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/langid/lib, /var/www/html/kibitz/server/solr-6.5.0/contrib/velocity/lib, /var/www/html/kibitz/server/solr-6.5.0/dist]
+2017-04-25 03:23:58.253 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.SolrConfig Using Lucene MatchVersion: 6.5.0
+2017-04-25 03:23:58.282 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.SolrConfig Using Lucene MatchVersion: 6.5.0
+2017-04-25 03:23:58.478 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.s.IndexSchema [zxc] Schema name=example-data-driven-schema
+2017-04-25 03:23:58.480 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.s.IndexSchema [books] Schema name=example-data-driven-schema
+2017-04-25 03:23:58.605 WARN  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.SolrResourceLoader Solr loaded a deprecated plugin/analysis class [solr.SynonymFilterFactory]. Please consult documentation how to replace it accordingly.
+2017-04-25 03:23:58.620 WARN  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.SolrResourceLoader Solr loaded a deprecated plugin/analysis class [solr.WordDelimiterFilterFactory]. Please consult documentation how to replace it accordingly.
+2017-04-25 03:23:59.077 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.s.IndexSchema Loaded schema example-data-driven-schema/1.6 with uniqueid field id
+2017-04-25 03:23:59.080 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.s.IndexSchema Loaded schema example-data-driven-schema/1.6 with uniqueid field id
+2017-04-25 03:23:59.128 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.CoreContainer Creating SolrCore 'zxc' using configuration from instancedir /var/www/html/kibitz/server/solr-6.5.0/server/solr/zxc
+2017-04-25 03:23:59.134 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.CoreContainer Creating SolrCore 'books' using configuration from instancedir /var/www/html/kibitz/server/solr-6.5.0/server/solr/books
+2017-04-25 03:23:59.156 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.SolrCore solr.RecoveryStrategy.Builder
+2017-04-25 03:23:59.156 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.SolrCore solr.RecoveryStrategy.Builder
+2017-04-25 03:23:59.161 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.SolrCore [[zxc] ] Opening new SolrCore at [/var/www/html/kibitz/server/solr-6.5.0/server/solr/zxc], dataDir=[/var/www/html/kibitz/server/solr-6.5.0/server/solr/zxc/data/]
+2017-04-25 03:23:59.161 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.SolrCore [[books] ] Opening new SolrCore at [/var/www/html/kibitz/server/solr-6.5.0/server/solr/books], dataDir=[/var/www/html/kibitz/server/solr-6.5.0/server/solr/books/data/]
+2017-04-25 03:23:59.167 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.c.JmxMonitoredMap JMX monitoring is enabled. Adding Solr mbeans to JMX Server: com.sun.jmx.mbeanserver.JmxMBeanServer@4a883b15
+2017-04-25 03:23:59.167 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.c.JmxMonitoredMap JMX monitoring is enabled. Adding Solr mbeans to JMX Server: com.sun.jmx.mbeanserver.JmxMBeanServer@4a883b15
+2017-04-25 03:23:59.227 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.r.XSLTResponseWriter xsltCacheLifetimeSeconds=5
+2017-04-25 03:23:59.227 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.r.XSLTResponseWriter xsltCacheLifetimeSeconds=5
+2017-04-25 03:23:59.608 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.u.UpdateHandler Using UpdateLog implementation: org.apache.solr.update.UpdateLog
+2017-04-25 03:23:59.608 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.u.UpdateLog Initializing UpdateLog: dataDir= defaultSyncLevel=FLUSH numRecordsToKeep=100 maxNumLogsToKeep=10 numVersionBuckets=65536
+2017-04-25 03:23:59.610 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.u.UpdateHandler Using UpdateLog implementation: org.apache.solr.update.UpdateLog
+2017-04-25 03:23:59.610 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.u.UpdateLog Initializing UpdateLog: dataDir= defaultSyncLevel=FLUSH numRecordsToKeep=100 maxNumLogsToKeep=10 numVersionBuckets=65536
+2017-04-25 03:23:59.641 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.u.CommitTracker Hard AutoCommit: if uncommited for 15000ms; 
+2017-04-25 03:23:59.641 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.u.CommitTracker Soft AutoCommit: disabled
+2017-04-25 03:23:59.642 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.u.CommitTracker Hard AutoCommit: if uncommited for 15000ms; 
+2017-04-25 03:23:59.642 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.u.CommitTracker Soft AutoCommit: disabled
+2017-04-25 03:23:59.746 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.s.SolrIndexSearcher Opening [Searcher@309b8f0[zxc] main]
+2017-04-25 03:23:59.746 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.s.SolrIndexSearcher Opening [Searcher@7ac12740[books] main]
+2017-04-25 03:23:59.754 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.r.ManagedResourceStorage File-based storage initialized to use dir: /var/www/html/kibitz/server/solr-6.5.0/server/solr/zxc/conf
+2017-04-25 03:23:59.759 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.r.ManagedResourceStorage File-based storage initialized to use dir: /var/www/html/kibitz/server/solr-6.5.0/server/solr/books/conf
+2017-04-25 03:23:59.768 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.h.c.SpellCheckComponent Initializing spell checkers
+2017-04-25 03:23:59.768 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.h.c.SpellCheckComponent Initializing spell checkers
+2017-04-25 03:23:59.775 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.s.DirectSolrSpellChecker init: {name=default,field=_text_,classname=solr.DirectSolrSpellChecker,distanceMeasure=internal,accuracy=0.5,maxEdits=2,minPrefix=1,maxInspections=5,minQueryLength=4,maxQueryFrequency=0.01}
+2017-04-25 03:23:59.775 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.s.DirectSolrSpellChecker init: {name=default,field=_text_,classname=solr.DirectSolrSpellChecker,distanceMeasure=internal,accuracy=0.5,maxEdits=2,minPrefix=1,maxInspections=5,minQueryLength=4,maxQueryFrequency=0.01}
+2017-04-25 03:23:59.778 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.h.c.QueryElevationComponent Loading QueryElevation from: /var/www/html/kibitz/server/solr-6.5.0/server/solr/zxc/conf/elevate.xml
+2017-04-25 03:23:59.788 INFO  (coreLoadExecutor-6-thread-2) [   x:zxc] o.a.s.h.ReplicationHandler Commits will be reserved for  10000
+2017-04-25 03:23:59.789 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.h.c.QueryElevationComponent Loading QueryElevation from: /var/www/html/kibitz/server/solr-6.5.0/server/solr/books/conf/elevate.xml
+2017-04-25 03:23:59.793 INFO  (coreLoadExecutor-6-thread-1) [   x:books] o.a.s.h.ReplicationHandler Commits will be reserved for  10000
+2017-04-25 03:23:59.815 INFO  (searcherExecutor-8-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@7ac12740[books] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-25 03:23:59.815 INFO  (searcherExecutor-7-thread-1-processing-x:zxc) [   x:zxc] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@309b8f0[zxc] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-25 03:23:59.815 INFO  (searcherExecutor-7-thread-1-processing-x:zxc) [   x:zxc] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2017-04-25 03:23:59.815 INFO  (searcherExecutor-7-thread-1-processing-x:zxc) [   x:zxc] o.a.s.h.c.SpellCheckComponent Loading spell index for spellchecker: default
+2017-04-25 03:23:59.817 INFO  (searcherExecutor-7-thread-1-processing-x:zxc) [   x:zxc] o.a.s.c.SolrCore [zxc] Registered new searcher Searcher@309b8f0[zxc] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-25 03:23:59.815 INFO  (searcherExecutor-8-thread-1-processing-x:books) [   x:books] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2017-04-25 03:23:59.817 INFO  (searcherExecutor-8-thread-1-processing-x:books) [   x:books] o.a.s.h.c.SpellCheckComponent Loading spell index for spellchecker: default
+2017-04-25 03:23:59.819 INFO  (searcherExecutor-8-thread-1-processing-x:books) [   x:books] o.a.s.c.SolrCore [books] Registered new searcher Searcher@7ac12740[books] main{ExitableDirectoryReader(UninvertingDirectoryReader(Uninverting(_0(6.5.0):C999)))}
+2017-04-25 04:47:15.147 INFO  (qtp717356484-17) [   x:zxc] o.a.s.c.S.Request [zxc]  webapp=/solr path=/query params={q=lies~0.75&start=0&rows=100} hits=9 status=0 QTime=2631
+2017-04-25 04:47:25.870 INFO  (qtp717356484-21) [   x:zxc] o.a.s.c.S.Request [zxc]  webapp=/solr path=/query params={q=lies~0.75&start=0&rows=100} hits=9 status=0 QTime=1
+2017-04-25 04:47:35.127 INFO  (qtp717356484-17) [   x:zxc] o.a.s.c.S.Request [zxc]  webapp=/solr path=/query params={q=lie~0.75&start=0&rows=100} hits=0 status=0 QTime=3
+2017-04-25 04:47:35.536 INFO  (qtp717356484-16) [   x:zxc] o.a.s.c.S.Request [zxc]  webapp=/solr path=/query params={q=lies~0.75&start=0&rows=100} hits=9 status=0 QTime=1
+2017-04-25 04:48:40.315 INFO  (qtp717356484-18) [   x:zxc] o.a.s.c.S.Request [zxc]  webapp=/solr path=/query params={q=liess~0.75&start=0&rows=100} hits=3 status=0 QTime=14

@@ -69,16 +69,6 @@
       //console.log($scope.tableData)
     })
 
-    function headerListToOptions(headerList) {
-        var options = []
-        var option;
-        for (var i in headerList) {
-            option = {'name':headerList[i], 'value':headerList[i]}
-            options.push(option)
-        }
-        return options
-    }
-
     function checkBasicParams() {
         if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.recommenderName == undefined ||
             $scope.urlName == '' || $scope.urlName == null || $scope.urlName == undefined) {
@@ -100,19 +90,83 @@
 	return true
     }
 
-    var fileHeaders;
-    var reader = new FileReader();
-    reader.onload = function(progressEvent){
-        var lines = this.result.split('\n');
-        fileHeaders = lines[0].toLocaleLowerCase().split(',');
-        var headerOptions = headerListToOptions(fileHeaders)
-        vm.csvHeadersFields[0].templateOptions.options = headerOptions
-        vm.csvHeadersFields[1].templateOptions.options = headerOptions
-        vm.csvHeadersFields[2].templateOptions.options = headerOptions
-        vm.csvHeadersFields[3].templateOptions.options = headerOptions
-        $scope.hasHeaders = true
-    };
 
+    vm.headers = {}
+    vm.csvHeadersFields = [
+        {
+            key: 'title',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Title',
+                placeholder: 'Select the title field',
+                required: false,
+                options: [],
+            }
+        },
+        {
+            key: 'description',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Description',
+                placeholder: 'Select the description field',
+                required: false,
+                options: [],
+            }
+        },
+                {
+            key: 'image',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Image',
+                placeholder: 'Select the image link field',
+                required: false,
+                options: [],
+            }
+        },
+        {
+            key: 'univ_code',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Universal Code',
+                placeholder: 'Select the universal code field',
+                required: false,
+                options: [],
+            }
+        },
+
+    ];
+
+    function headerListToOptions(headerList) {
+        var options = []
+        var option;
+        for (var i in headerList) {
+            option = {'name':headerList[i], 'value':parseInt(i)}
+            options.push(option)
+        }
+        return options
+    }
+
+    var fileHeaders;
+    var reader;
+    function setReader() {
+        reader = new FileReader();
+        reader.onload = function(progressEvent){
+            var lines = this.result.split('\n');
+            fileHeaders = lines[0].toLocaleLowerCase().split(',').map(function(v){return v.trim()});
+            var headerOptions = headerListToOptions(fileHeaders)
+            vm.csvHeadersFields[0].templateOptions.options = headerOptions
+            vm.csvHeadersFields[1].templateOptions.options = headerOptions
+            vm.csvHeadersFields[2].templateOptions.options = headerOptions
+            vm.csvHeadersFields[3].templateOptions.options = headerOptions
+            $scope.hasHeaders = true
+        };
+    }
+    setReader();  
+  
     $scope.readHeaders = function() {
 	if (checkBasicParams() == false) {
 	  return
@@ -121,13 +175,26 @@
         }
 
         var myfile = $('#csvFile')[0].files[0]
+        setReader()
         reader.readAsText(myfile)
         $timeout(function() {
           console.log(fileHeaders)
         }, 100)
     }
 
-    $scope.createRecommender = function() {
+    function enableCreateRecommenderButton() {
+      $('#createRecommenderButton').prop('disabled',false)
+      $('#createRecommenderButtonText').text('Create')
+      $('#createRecommenderButtonLoading').removeClass('fa fa-spinner spinning')
+    }
+
+    function showCreatingButton() {
+      $('#createRecommenderButton').prop('disabled',true)
+      $('#createRecommenderButtonText').text(' Creating')
+      $('#createRecommenderButtonLoading').addClass('fa fa-spinner spinning')
+    }
+
+    $scope.createRecommender = function() { 
       if (vm.whichTab == 1) {
         vm.createRecsysFromParams()
       } else if (vm.whichTab == 0) {
@@ -146,11 +213,13 @@
           setErrorMessage("missing_header", "Missing CSV headers")
           return
         }
-
+        
+        showCreatingButton() // disable create button until success
+        
         $timeout(function() {
           if (reader.readyState == 2) {
-            $scope.$parent.itemDeferred = $q.defer()
-            $scope.$parent.itemPromise = $scope.itemDeferred.promise
+            //$scope.$parent.itemDeferred = $q.defer()
+            //$scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
 
             Upload.upload({
                 url: config.server_url+'/csv/',
@@ -159,17 +228,19 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': $cookies.get('csrftoken'),
                 },
-                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'required_headers':JSON.stringify(vm.headers)},
+                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'headers':JSON.stringify(vm.headers)},
             }).then(function (response) {
                 console.log('Success ' + response.config.data.file.name + ' uploaded. Response: ' + response.data);
                 setErrorMessage('','')
                 $scope.showFieldSelection = true
                 $scope.$parent.loadRecsysList()
+                enableCreateRecommenderButton()
                 $('#myModal').modal('toggle');
             }, function (response) {
                 console.log('Error status: ' + response.status);
                 $scope.$parent.itemDeferred.resolve('resolved')
                 setErrorMessage(response.data.status, response.data.message)
+                enableCreateRecommenderButton()
             }, function (evt) {
                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                 console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);
@@ -198,7 +269,6 @@
         }
     })
 
-
     $('#myModal').on('hidden.bs.modal', function () {
         $scope.urlErrorMessage = false
         $scope.$digest()
@@ -211,6 +281,8 @@
           return
         }
 
+        showCreatingButton()
+        
         console.log(config.server_url+'/recsys/')
 
         var recsys_params = {
@@ -229,7 +301,7 @@
         console.log(recsys_params)
 
         $scope.$parent.itemDeferred = $q.defer()
-        $scope.$parent.itemPromise = $scope.itemDeferred.promise
+        $scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
 
         $http({
           url: config.server_url+'/recsys/',
@@ -244,11 +316,13 @@
             console.log(response)
             setErrorMessage('','')
             $scope.$parent.loadRecsysList()
+            enableCreateRecommenderButton()
             $('#myModal').modal('toggle');
 
         }, function errorCallback(response) {
             console.log(response)
             $scope.$parent.itemDeferred.resolve('resolved')
+            enableCreateRecommenderButton()
             setErrorMessage(response.data.status, response.data.message)
         });
     }
@@ -301,56 +375,6 @@
 
       var interval = setInterval(fnCheckLocation, 500);
     }
-
-    vm.headers = {}
-    vm.csvHeadersFields = [
-        {
-            key: 'title',
-            type: 'select',
-            templateOptions: {
-                type: 'text',
-                label: 'Title',
-                placeholder: 'Select the title field',
-                required: false,
-                options: [],
-            }
-        },
-        {
-            key: 'description',
-            type: 'select',
-            templateOptions: {
-                type: 'text',
-                label: 'Description',
-                placeholder: 'Select the description field',
-                required: false,
-                options: [],
-            }
-        },
-                {
-            key: 'image',
-            type: 'select',
-            templateOptions: {
-                type: 'text',
-                label: 'Image',
-                placeholder: 'Select the image link field',
-                required: false,
-                options: [],
-            }
-        },
-        {
-            key: 'univ_code',
-            type: 'select',
-            templateOptions: {
-                type: 'text',
-                label: 'Universal Code',
-                placeholder: 'Select the universal code field',
-                required: false,
-                options: [],
-            }
-        },
-
-    ];
-
 
   }
 })();

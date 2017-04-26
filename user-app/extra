@@ -1,0 +1,440 @@
+(function(){
+
+  angular
+    .module('app')
+    .controller('ItemsController', [
+      '$q', 'itemService', 'loginService', '$mdSidenav', '$scope', '$timeout', '$http', 'config', '$state', '$cookies',
+      ItemsController
+    ])
+
+  function ItemsController($q, itemService, loginService, $mdSidenav, $scope, $timeout, $http, config, $state, $cookies) {
+    var vm = this;
+
+    if (!loginService.loggedIn()) {
+      $state.go('home.login');
+      return
+    }
+
+    vm.isGridView = true;
+    vm.tableData = [];
+    vm.ratedTabData = []; // my rated items
+    vm.searchedList = [];
+
+    vm.recommendedList = [];
+    vm.wholeRecommendedList = [];
+    vm.displayingSearched = false;
+
+    vm.recCount = 0; // iterate index of recommended list
+    vm.searchCount = 0 // iterate index of searched list
+    vm.ratingCount = 0 // iterate index of rated list
+    vm.tabState = $scope.$parent.tabNumber;
+
+    vm.current_page = 1;
+    vm.rows_per_page = 4;
+    vm.atEndOfList = false;
+
+    vm.itemFields = [];
+    $scope.sendRating = itemService.sendRating
+    $scope.sendNotInterested = itemService.sendNotInterested
+
+    // TODO: 
+    //  change findItem to get item from backend
+
+    function isRatingTab() {
+        return vm.tabState == 2
+    }
+    
+    vm.pagingFunction = function (recommend) {
+        var addedCount = 0
+        if (recommend) {
+            while (addedCount < 16 && vm.recCount < vm.wholeRecommendedList.length) {
+              var item = vm.wholeRecommendedList[vm.recCount]
+              if (!hasRating(item.id)) {
+                vm.recommendedList.push(item);
+                addedCount++;
+              }
+              vm.recCount++;
+            }
+        } else if (vm.displayingSearched) {
+             while (addedCount < 4 && vm.searchCount < vm.searchedList.length) {
+                 var item = vm.searchedList[vm.searchCount]
+                 if (!hasRating(item.id) && !isRecommended(item.id)) {
+                   vm.tableData.push(item);
+                   addedCount++;
+                 }
+                 vm.searchCount++;
+             }
+        } else if (isRatingTab()) {
+             while (addedCount < 4 && vm.ratingCount < vm.ratedTabData.length) {
+                 var item = vm.ratedTabData[vm.ratingCount]
+                 vm.ratedTabData.push(item);
+                 addedCount++;
+                 vm.ratingCount++;
+             }
+        } else { // home and trending. get items from backend
+            if (vm.tabState == 0) {
+                var sorted = false 
+            } else {
+                var sorted = true
+            }
+            while (addedCount < 4 && !vm.atEndOfList) {
+                 var items = vm.getTableRows(sorted, vm.current_page, vm.rows_per_page) 
+                 for (i in items) {
+                     var item = items[i]
+                     if (!hasRating(item.id) && !isRecommended(item.id)) {
+                       vm.tableData.push(item);
+                       addedCount++;
+                     }
+                 } 
+             }
+        }
+    }
+
+    vm.checkEndOfList = function(recommend) {
+        if (recommend) {
+            return vm.recCount < vm.wholeRecommendedList.length
+        } else if (vm.displayingSearched) {
+            return vm.searchCount < vm.searchedList.length
+        } else if (isRatingTab()) { 
+            return vm.ratingCount < vm.ratedTabData.length
+        } else { // all items or trending
+            return vm.atEndOfList
+        }
+    }
+
+    vm.getTableRows = function(sorted, current_page, rows_per_page) {
+      // set atEndOfList to true if return empty rows and not next params
+      // update current page if return is successful
+      var rows;
+      var query_params = '&?current_page='+vm.current_page+'&?rows_per_page='+vm.rows_per_page
+      if (sorted) {
+          query_params += '&?is_sorted=true'
+      }
+
+      $http({
+        method: 'GET',
+        url: config.server_url+'/item-paging/'+'?recsys_id='+$scope.recsys_id+query_params,
+      }).then(function(resp){
+        console.log(resp.data)
+        if (resp.data.done == true) {
+            vm.atEndOfList = true
+            rows = []
+        } else {
+            rows = resp.data.items
+            vm.current_page += 1
+        }
+      }, function(resp){
+        console.log(resp)
+      })
+
+      return rows
+    }
+
+    vm.hasRecommendations = function() {
+      return vm.wholeRecommendedList.length != 0 && vm.recommendedList.length != 0
+    }
+
+    function isRecommended(item_id) {
+      for (var i=0; i < vm.wholeRecommendedList.length; i++) {
+        if (vm.wholeRecommendedList[i]['id'] == item_id) {
+          return true
+        }
+      }
+      return false
+    }
+
+    function hasRating(item_id) {
+      for (var i=0; i < vm.ratedTabData.length; i++) {
+        if (vm.ratedTabData[i]['id'] == item_id) {
+          return true
+        }
+      }
+      return false
+    }
+
+    // TODO: backend call , with item_id
+    function findItem(item_id) { // from whole table. NOTE: could be slow
+      for (var i=0; i < vm.tableData.length; i++) {
+        if (vm.tableData[i]['id'] == item_id) {
+          return vm.tableData[i]
+        }
+      }
+    }
+
+    function findRatedItem(item_id) {
+      for (var i=0; i < vm.ratedTabData.length; i++) {
+        if (vm.ratedTabData[i]['id'] == item_id) {
+          return vm.ratedTabData[i]
+        }
+      }
+      return false
+    }
+
+    $scope.hoveringOver = function(value) {
+      $scope.overStar = value;
+    };
+
+    vm.changeToGridView = function () {
+      vm.isGridView = true;
+    }
+
+    vm.changeToListView = function () {
+      vm.isGridView = false;
+    }
+
+
+    // customized template fields
+    vm.pk_field = ''
+    vm.title_field = ''
+    vm.description_field = ''
+    vm.image_field = ''
+    vm.rating_icon_color = ''
+    vm.rating_icon_font_size = ''
+    vm.rating_icon_on = ''
+    vm.rating_icon_off = ''
+    vm.use_field_selection = ''
+    vm.field_selection_column_name = ''
+    vm.template_number = ''
+    vm.item_fields_include = []
+
+    $scope.$parent.recsysDeferred.promise.then(function(recsys){
+      console.log(recsys)
+
+      vm.recsysPaused = loginService.recsysPaused(recsys)
+      if (vm.recsysPaused) {
+          return
+      }
+
+      vm.recsys = recsys
+      $scope.recsys_id = vm.recsys.id
+      vm.pk_field = vm.recsys.primary_key
+      vm.title_field = vm.recsys.title_field
+      vm.description_field = vm.recsys.description_field
+      vm.image_link_field = vm.recsys.image_link_field
+      $scope.template = JSON.parse(vm.recsys.template)
+
+      console.log($scope.template)
+
+      var deferred = $q.defer();
+      $scope.itemPromise = deferred.promise
+
+      $http({
+        method: 'GET',
+        url: config.server_url+'/item/'+'?recsys_id='+$scope.recsys_id,
+      }).then(function(resp){
+        vm.pagingFunction(false)
+        deferred.resolve('')
+        console.log(resp.data)
+        if (resp.data.rated_items != null) {
+          vm.ratedTabData = [].concat(resp.data.rated_items);
+          console.log(vm.ratedTabData)
+        }
+        if (resp.data.recommended_items != null) {
+          vm.wholeRecommendedList = [].concat(resp.data.recommended_items);
+          vm.recommendedList = getInitializedTable(vm.wholeRecommendedList, true)
+        }
+
+        console.log(vm.tableData, $scope.$parent.tabNumber)
+      }, function(resp){
+        console.log(resp)
+      })
+
+    })
+
+    $scope.getOnStyle = function(){
+        return {'color':$scope.template.highlighted_rating_icon_color, 'font-size': $scope.template.rating_icon_fontsize}
+    }
+
+    $scope.getOffStyle = function() {
+        return {'color':$scope.template.rating_icon_color, 'font-size': $scope.template.rating_icon_fontsize}
+    }
+
+    $scope.setItemDetails = function(item) {
+      var itemDetails = $scope.template.item_fields_include
+      var field;
+      var item_template = "<fieldset>"
+      for (i in itemDetails) {
+        field = itemDetails[i]
+        value = item[field]
+        item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div><div class='col-xs-8 display-value item-field'>%s</div></div>".format(capitalize(field), value)
+      }
+      item_template += "</fieldset>"
+      return item_template
+    }
+
+    function capitalize(word) {
+      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+    }
+
+    function getStr(percent) {
+      var p = Math.round(percent * 100)
+      return p.toString() + '%'
+    }
+
+    $scope.setRatingsTemplate = function(item) {
+      if (item.total_rating_count !== undefined) {
+	      var myrating = item.rating
+	      var total_rating_count = item.total_rating_count
+	      var d = item.distribution_percentage
+	      var rating_template = itemService.getMyRatingTemplate(item.my_rating)
+	      rating_template += '<input type="hidden" name="myrating" class="rating-value" value="%f"></div>'.format(item.my_rating)
+	      rating_template += 'Total Ratings: %d'.format(item.total_rating_count)
+	      var distribution = '<div class="input-group"> \
+	      <span>5 Stars</span><meter id="meter-5-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>4 Stars</span><meter id="meter-4-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>3 Stars</span><meter id="meter-3-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>2 Stars</span><meter id="meter-2-star" value="%f"></meter><span>%s</span></div> \
+	      <div><span>1 Stars</span><meter id="meter-1-star" value="%f"></meter><span>%s</span></div>'
+		.format(d[5], getStr(d[5]),d[4], getStr(d[4]),d[3], getStr(d[3]),d[2], getStr(d[2]),d[1], getStr(d[1]));
+	      return rating_template + distribution + '</fieldset>'
+      }
+    }
+
+    $scope.$on('itemSearch', function(event, args) {
+      console.log('got search command', args)
+      vm.itemSearch(args)
+    })
+
+    $scope.$on('tabSwitch', function(event, args) {
+      console.log('got tab switch', args)
+      vm.tabSwitch(args)
+    })
+
+    $scope.$on('itemRated', function(event, args) {
+      vm.itemRated(args)
+    })
+
+    $scope.$on('itemNotInterested', function(event, args) {
+      vm.itemNotInterested(args)
+    })
+
+
+    function removeFromRatedTabData(item_id) {
+        for (i in vm.ratedTabData) { // remove rated item from rated list
+          if (vm.ratedTabData[i].id == item_id) {
+            vm.ratedTabData.splice(i, 1)
+          }
+        }
+    }
+
+    function removeFromTableData(item_id) {
+        for (i in vm.tableData) { // remove item from main list
+          if (vm.tableData[i].id == item_id) {
+            vm.tableData.splice(i, 1)
+          }
+        }
+    }
+
+    function removeFromRecommended(item_id) {
+        for (i in vm.recommendedList) { 
+          if (vm.recommendedList[i].id == item_id) {
+            vm.recommendedList.splice(i, 1)
+          }
+        }
+        for (i in vm.wholeRecommendedList) { 
+          if (vm.wholeRecommendedList[i].id == item_id) {
+            vm.wholeRecommendedList.splice(i, 1)
+          }
+        }
+    }
+
+
+    vm.itemNotInterested = function(args) {
+      var item_id = args.item_id
+      removeFromTableData(item_id) 
+      removeFromRatedTabData(item_id)        
+      removeFromRecommended(item_id)
+    }
+
+    // TODO: pass the whole rated item into args
+    vm.itemRated = function(args) {
+      var item_id = args.item_id
+      var rating = args.rating
+      if (rating == 'unrate') {
+        if (hasRating(item_id)) { 
+           removeFromTableData(item_id)  // remove from rated table
+           removeFromRatedTabData(item_id)        
+        }
+      } else { // make rating
+        var item = findRatedItem(item_id)
+        if (!item) {
+          item = findItem(item_id)
+        }
+        console.log(item)
+        item.my_rating = rating
+ 
+        if (!hasRating(item_id)) { // add rated item to rated list
+          vm.ratedTabData.push(item)
+          removeFromTableData(item_id) //NOTE: should remove from recommended list too?
+        }
+      }
+
+    }
+
+    vm.tabSwitch = function(tabNumber) {
+      if (tabNumber == 0) {
+        vm.current_page = 1;
+        vm.pagingFunction(false)
+      } else if (tabNumber == 1) {
+        vm.current_page = 1;
+        vm.pagingFunction(false)
+        vm.displayingSearched = false
+      } else if (tabNumber == 2) {
+        if (vm.ratedTabData.length != 0) {
+          vm.tableData = vm.ratedTabData.slice(0,4)
+          vm.ratingCount = 4;
+        } else {
+          vm.tableData = []
+        }
+        vm.displayingSearched = false
+      }
+      vm.tabState = tabNumber;
+    }
+
+    vm.itemSearch = function (searchQuery) {
+      var start = new Date().getTime();
+
+      if (searchQuery === "") {
+          vm.current_page = 1
+          vm.tableData = []
+          vm.pagingFunction(false)
+          vm.displayingSearched = false;
+          console.log("no search")
+      } else {
+
+        // TODO: searching using solr
+        var fuse = new Fuse(vm.tableData,
+          {
+            keys: vm.itemFields, // ["title"],
+            // id: 'id',
+            threshold: 0.25, // TODO: find best threshold
+          });
+
+        var searchResults = fuse.search(searchQuery)
+        console.log(searchResults)
+        vm.tableData = []
+        vm.searchedList = searchResults
+        vm.count = 0
+        vm.tableData = getInitializedTable(vm.searchedList, false)
+        console.log(vm.tableData)
+        vm.displayingSearched = true;
+      }
+      var end = new Date().getTime();
+      console.log(end - start, "search time")
+      $scope.$parent.showSearchProgress = false;
+    }
+    
+    // function startProgresBar() {
+    //   $scope.$parent.showSearchProgress = true;
+    //   return
+    // }
+
+    // function endProgresBar() {
+    //   $scope.$parent.showSearchProgress = false;
+    //   return
+    // }
+
+
+  }
+
+})();

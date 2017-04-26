@@ -10,11 +10,21 @@
 
       <section>
         <form class="search-group" style="width:auto">
-          <div class="input-group">
-<!--             <div class="input-group-btn">
-               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px">
-                <span id="search-type">All</span><i class="material-icons" style="width:15px">arrow_drop_down</i>
+          <div class="input-group" style="width:300px">
+
+            <span ng-show="loggedIn()" class="autocompletedemoCustomTemplate">
+              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()" md-clear-button="true">
+                  <md-item-template>
+                    <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                  </md-item-template>
+              </md-autocomplete>
+            </span>
+
+             <div ng-show="loggedIn()" class="input-group-btn">
+               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px;width:100px">
+                <span id="search-type">Filter</span><i class="material-icons" style="width:15px;float:right">arrow_drop_down</i>
               </button>
+
               <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
                 <li role="presentation"><a role="menuitem" style="color:gray; pointer-events: none; cursor: default;">Search by...</a></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#" ng-click="changeSearchType('All')">All</a></li>
@@ -25,14 +35,7 @@
                 <li role="presentation" class="divider"></li>
                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Other</a></li>
               </ul>
-            </div> -->
-            <span ng-show="loggedIn()">
-              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()" md-clear-button="true">
-                  <md-item-template>
-                    <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
-                  </md-item-template>
-              </md-autocomplete>
-            </span>
+            </div>
 
           </div>
         </form>
@@ -84,10 +87,10 @@
   <md-progress-linear md-mode="indeterminate" ng-show="showSearchProgress" style="width: 125%"></md-progress-linear>
 
   <div ng-if="addTabs()" layout="row" layout-align="center center">
-    <md-tabs style="width: 380px;" md-selected="tabIndex">
-      <md-tab label="Home" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
-      <md-tab label="Trending" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
-      <md-tab label="Rated Items" md-on-select="tabSwitch(tabIndex)" style="color: black"></md-tab>
+    <md-tabs style="width: 500px;" md-selected="tabIndex">
+      <md-tab label="Home" md-on-select="tabSwitch(tabIndex)" style="color: black;width:200px" ng-disabled-""></md-tab>
+      <md-tab label="Recommendations" md-on-select="tabSwitch(tabIndex)" style="color: black;width:200px" ng-disabled=""></md-tab>
+      <md-tab label="Your Rated Items" md-on-select="tabSwitch(tabIndex)" style="color: black;width:200px" ng-disabled=""></md-tab>
     </md-tabs>
   </div>
 

@@ -191,6 +191,10 @@
       });
     }
 
+
+
+
+/*
     vm.amazon_ratings = function() {
         // popup for amazon ratings, run script
         // get data output
@@ -234,7 +238,7 @@
 
         });
         return
-/*	
+        
         var iframe = popup.document.createElement("iframe");
 	iframe.setAttribute("src", user_items_page + "/ref=pd_ys_iyr_next?ie=UTF8&collection=purchased&iyrGroup=&maxItem=" + end_item + "&minItem=" + start_item);
 	iframe.style.width = "640px";
@@ -254,7 +258,6 @@
 	console.log("iframe", popup.document.getElementById('amazon_iframe'))
 
         var myiframe = $('#amazon_iframe', popup.document);
-*/
 
         console.log(myiframe)
         $('iframe', popup.document).load(function(){
@@ -338,7 +341,6 @@
         }
 
         var interval = setInterval(fnCheckLocation, 500);
-    */
 
     function sendRatings(data) {
      
@@ -346,7 +348,7 @@
     }
 
 
-
+*/
 
 
 
