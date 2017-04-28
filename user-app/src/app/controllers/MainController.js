@@ -190,9 +190,7 @@
         console.log(response)
       });
     }
-
-
-
+     
 
 /*
     vm.amazon_ratings = function() {

@@ -159,7 +159,7 @@
               "label": "Rating Icon Font Size",
               "sliderOptions": {
                 "floor": 7,
-                "ceil": 32
+                "ceil": 30
               }
             }
         },

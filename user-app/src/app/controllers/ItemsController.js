@@ -43,6 +43,7 @@
 
     $scope.sendRating = itemService.sendRating
     $scope.sendNotInterested = itemService.sendNotInterested
+    $scope.titles = ['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five']
 
     var HOME_TAB = 0    
     var RECOMMEND_TAB = 1
@@ -71,6 +72,7 @@
              }
         } else if (vm.tabState == RECOMMEND_TAB) {
           if (vm.recs_loaded) {
+            console.log("printing recs")
             while (addedCount < 16 && vm.recCount < vm.wholeRecommendedList.length) {
               item = vm.wholeRecommendedList[vm.recCount]
               item_id = item[vm.pk_field]
@@ -239,6 +241,8 @@
 
       console.log($scope.template)
 
+      vm.doInitializeHomeTable()
+      
       var deferred = $q.defer();
       $scope.itemPromise = deferred.promise
       
@@ -348,9 +352,11 @@
     function removeFromRatedTabData(item_id) {
         for (i in vm.ratedTabData) { // remove rated item from rated list
           if (vm.ratedTabData[i].id == item_id) {
-            vm.ratedTabData.splice(i, 1)
+            var item = vm.ratedTabData.splice(i, 1)
+            console.log('removed',item)
           }
         }
+        console.log(vm.ratedTabData)
     }
 
 

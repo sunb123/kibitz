@@ -105,7 +105,7 @@ def is_isbn_or_upc(string):
 # NOTE: assumes item ids are string type in DH
 def whereInClauseQuery(field, values, notIn, *args): 
     '''
-        args: is another set of field, values, notIna
+        args: is another set of field, values, notIn
         used for AND clause
     '''
     if notIn:
@@ -120,17 +120,21 @@ def whereInClauseQuery(field, values, notIn, *args):
     else:
         query += "{} ".format(tuple(values))
     
-    if len(args) != 0:
-        field, values, notIn = args[0], args[1], args[2]
-        if len(values) != 0:
-            if notIn:
-                query += "and {} not in ".format(field)
-	    else:
-                query += "and {} in ".format(field)
+    if len(args) % 3 == 0:
+        for i in range(len(args)/3):
+            field, values, notIn = args[3*i], args[3*i+1], args[3*i+2]
+            if field == '' or field == None:
+                continue
+            if len(values) != 0:
+                if notIn:
+                    query += "and {} not in ".format(field)
+                else:
+                    query += "and {} in ".format(field)
 
-            if len(values) == 1:
-                query += "('"+values[0]+"') "
-            else:
-                query += "{} ".format(tuple(values))
-
+                if len(values) == 1:
+                    query += "('"+values[0]+"') "
+                else:
+                    query += "{} ".format(tuple(values))
+    else:
+        raise Exception("number of arguments needs to be multiple of 3")
     return query

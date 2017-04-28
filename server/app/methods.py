@@ -16,11 +16,20 @@ def getItemTableFormat(params):
     #    field_list.append( {"column_name": "overall_rating", "data_type":"text"} )
     return str(field_list)
 
+#TODO:
+# if recsys created without universal code and then updated to include it
+# case: one user create two different ratings for same item. Same item seesn as diff between diff recsys
+# merge item rating when universal code is added for both recsys
+# 
+# update rating objects when universal code field changes for a recsys
+#  
+
 def makeOrUpdateRating(username, item_id, rating, recsys_id, universal_code=None):
     user_id = Account.objects.get(username=username).id
-    if universal_code != None:
+    ratingObj = None
+    if universal_code != None and universal_code != '':
         ratingObj = Rating.objects.filter(user_id=user_id, universal_code=universal_code).first()
-    else:
+    if ratingObj == None:
         ratingObj = Rating.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
 
     if ratingObj == None:
@@ -35,10 +44,13 @@ def makeOrUpdateRating(username, item_id, rating, recsys_id, universal_code=None
 
 def removeRating(username, item_id, rating, recsys_id, universal_code=None):
     user_id = Account.objects.get(username=username).id
-    if universal_code != None:
-        ratingObj = Rating.objects.filter(user_id=user_id, universal_code=universal_code).first()
-    else:
-        ratingObj = Rating.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
+    ratingObj = None
+    if universal_code != None and universal_code != '':
+       deleteResp = Rating.objects.filter(user_id=user_id, universal_code=universal_code).delete()
+       if deleteResp[0] != 0:
+           return "ratings deleted"
+    # check for ratings created before universal code set 
+    ratingObj = Rating.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
 
     if ratingObj != None:
         ratingObj.delete()
@@ -70,23 +82,28 @@ def removeRating(username, item_id, rating, recsys_id, universal_code=None):
 
 def makeNotInterested(username, item_id, recsys_id, universal_code=None):
     user_id = Account.objects.get(username=username).id
-    if universal_code != None:
+    interestObj = None
+    if universal_code != None and universal_code != '':
         interestObj = NotInterested.objects.filter(user_id=user_id, universal_code=universal_code).first()
-    else:
+    if interestObj == None:
         interestObj = NotInterested.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
 
     if interestObj == None:
         user = Account.objects.get(username=username)
         interestObj = NotInterested(item_id=item_id, recsys_id=recsys_id, universal_code=universal_code, user=user)
-    interestObj.save()
+        interestObj.save()
     return interestObj 
 
 def removeNotInterested(username, item_id, recsys_id, universal_code=None):
     user_id = Account.objects.get(username=username).id
-    if universal_code != None:
-        interestObj = NotInterested.objects.filter(user_id=user_id, universal_code=universal_code).first()
-    else:
-        interestObj = NotInterested.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
+    interestObj = None
+    if universal_code != None and universal_code != '':
+        deleteResp = NotInterested.objects.filter(user_id=user_id, universal_code=universal_code).delete()
+        if deleteResp[0] != 0:
+            return "not interested deleted"
+
+    # check for not interested created before universal code set 
+    interestObj = NotInterested.objects.filter(user_id=user_id, recsys_id=recsys_id, item_id=item_id).first()
 
     if interestObj != None:
         interestObj.delete()

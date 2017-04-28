@@ -13,7 +13,7 @@ from django.db.models import Q
 from app.user_methods import is_logged_in, is_admin
 from app.user_methods import masterAccessToken, master_username, master_password, pw_client_id, pw_client_secret, \
 auth_client_id, auth_client_secret, base_url, redirect_uri, master_dh_query_url, master_repo, rating_table, recsys_table
-from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, createEndUser, makeRequest, makeGetRequest
+from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, createEndUser, makeRequest, makeGetRequest, makeDeleteRequest
 from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format, SPARK_HOME, SERVER_HOME, SOLR_SETTINGS, KIBITZ_TABLE_MARKER
 from app.methods import getItemTableFormat, makeOrUpdateRating, removeRating, makeNotInterested, removeNotInterested, makeSolrRequest, prepare_file_solr, prepare_file_datahub, fetch_csv_from_datahub
 from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery, whereInClauseQuery
@@ -123,16 +123,18 @@ class CSVReuploadView(views.APIView):
         data = request.data
         username = request.user.username
         user_id = request.user.id
-        recsys_id = request.query_params.get('recsys_id')
+        recsys_id = request.data.get('recsys_id')
+        print recsys_id
         recsys = Recsys.objects.get(id=recsys_id)
         owner_id = recsys.owner_id
+        urlName = recsys.url_name
 
         repo_base = recsys.repo_base
         repo_name = 'kibitz' #NOTE: CSV upload tables stored in repo named 'kibitz'
         item_table_name = formatTableName(urlName)
         solr_core_name = formatUrl(urlName)
 
-        required_headers = json.loads(data.get("headers")) # dict of {'title': title_field, 'description': description_field, ..}
+        selected_csv_headers = json.loads(data.get("headers")) # dict of {'title': title_field, 'description': description_field, ..}
 
         # create repo for item table. if kibitz repo exists, do nothing
         api_url = '/api/v1/repos/{}'.format(username)
@@ -167,7 +169,7 @@ class CSVReuploadView(views.APIView):
             }) 
 
         # prepare file for solr indexing
-        file_url_solr = handle_uploaded_file(file)
+        file_url_solr = prepare_file_solr(file, file_url_dh)
         
         # resetup solr index       
         output = subprocess.check_output(['/var/www/html/kibitz/server/scripts/solr_update_index.sh', '-c', solr_core_name, '-f', '{}'.format(file_url_solr)]) 
@@ -320,17 +322,23 @@ class ItemPagingView(views.APIView): # TODO: allow non-logged in users to get it
    
  
         # Attach rating distribution for each item
-        return_dict['items'] = attachRatingDist(return_dict['items'], universal_code_field, primary_key_field)
+        return_dict['items'] = attachRatingDist(return_dict['items'], recsys_id, universal_code_field, primary_key_field)
 
         # TODO: sort by highest rating. later, sort by combination of most ratings and highest. i
         # attach rating count to item table. update rating count on item rate
 
         return JsonResponse(return_dict)
 
-def attachRatingDist(items, universal_code_field, primary_key_field):
-    print 'ITEMS', items, len(items)
+def filterDuplicatesByUser(ratings):
+    pass
+
+def attachRatingDist(items, recsys_id, universal_code_field, primary_key_field):
     for item in items:
-        item_ratings = Rating.objects.filter(Q(item_id=int(item.get(primary_key_field))) | Q(universal_code=item.get(universal_code_field))) # NOTE: get ratings across recsys
+        code = item.get(universal_code_field)
+        pk = int(item.get(primary_key_field))
+        item_ratings = Rating.objects.filter( (Q(recsys_id=recsys_id) & Q(item_id=pk)) | 
+                       (Q(universal_code=code) & ~Q(universal_code='') & ~Q(universal_code=None)) ) # NOTE: get ratings across recsys
+        #item_ratings = filterDuplicatesByUser(item_ratings)
         print "RATINGS", item_ratings, len(item_ratings)
         total_rating_count = len(item_ratings)
         distribution_count = {1:0, 2:0, 3:0, 4:0, 5:0}
@@ -423,7 +431,7 @@ class ItemView(views.APIView):
             for item in my_rated_items:
                 rating = ratings_dict[int(item.get('id'))]
                 item['my_rating'] = rating
-            return_dict['rated_items'] = attachRatingDist(my_rated_items, universal_code_field, primary_key_field)
+            return_dict['rated_items'] = attachRatingDist(my_rated_items, recsys_id, universal_code_field, primary_key_field)
 
 
         # STEP 2: Get recommended items
@@ -438,6 +446,9 @@ class ItemView(views.APIView):
 	 	#print ast.literal_eval(out)
                 recommended_items = []
                 rec_ratings = ast.literal_eval(output)
+                item_metas = NotInterested.objects.filter(user_id=user_id) # get not interested items across all recsys
+                item_ids = [str(meta.item_id) for meta in item_metas if str(meta.recsys_id) == recsys_id] # filter not interested items for current recsys
+                univ_codes = [str(meta.universal_code) for meta in item_metas if meta.universal_code != None]
 
 		if len(rec_ratings) != 0:
 			rec_rating_dict = {}
@@ -446,7 +457,8 @@ class ItemView(views.APIView):
 			recommended_item_ids = tuple([str(rating.get('item_id')) for rating in rec_ratings])
 	                api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
                         query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-                        query += whereInClauseQuery(primary_key_field, recommended_item_ids, False)
+                        query += whereInClauseQuery(primary_key_field, recommended_item_ids, False, \
+                                primary_key_field, item_ids, True, universal_code_field, univ_codes, True)
                         r = makeRequest('POST', api_url, owner_id, query=query)
                         if r.status_code == 200:
                             recommended_items = r.json()['rows']
@@ -457,7 +469,7 @@ class ItemView(views.APIView):
                         recommended_items = filter(lambda x: float(x.get('suggested_rating')) >= 1, recommended_items) # NOTE: filter out negative and zero ratings
                 else:
 			recommended_items = []
-		return_dict['recommended_items'] = attachRatingDist(recommended_items, universal_code_field, primary_key_field)
+		return_dict['recommended_items'] = attachRatingDist(recommended_items, recsys_id, universal_code_field, primary_key_field)
 
         return JsonResponse(return_dict)
 
@@ -497,6 +509,7 @@ class RatingView(views.APIView):
         rating = request.data.get('rating')
         recsys_id = request.data.get('recsys_id')
         univ_code = request.data.get('univ_code')
+        print username, item_id, rating, recsys_id, univ_code
         removeRating(username, item_id, rating, recsys_id, universal_code=univ_code)
         #updateItemRating(item_id, recsys_id)
         return HttpResponse("delete rating done")
@@ -604,7 +617,7 @@ class TextSearchView(views.APIView):
         recsys_id = request.query_params.get('recsys_id')
         recsys = Recsys.objects.get(id=recsys_id)
         core_instance_name = recsys.solr_core_name
-        searchText = request.query_params.get('q') + '~0.75' # NOTE: add fuzzy search and threshold
+        searchText = request.query_params.get('q') + '~0.85' # NOTE: add fuzzy search and threshold
         rows = request.query_params.get('rows')
         start = request.query_params.get('start')
         resp = makeSolrRequest(port, core_instance_name, searchText, rows, start)

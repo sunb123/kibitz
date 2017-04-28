@@ -25,18 +25,14 @@
     <div infinite-scroll='vm.pagingFunction()' infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
         <div class="table-responsive-vertical">
 
-              <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
-              <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
-                  <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data['overall_rating']" myrating="data['my_rating']" myimage="{{data[vm.image_link_field]}}" itemd="data" itemid="data[vm.pk_field]" itemdata="setItemDetails(data)" ratingdata="setRatingsTemplate(data)" gridview="true" recsysid="recsys_id" univcode="data[vm.univ_code_field]" mytemplate="template" ng-repeat="data in vm.tableData track by $index"></item>
-              </div>
-<!--
-            <span ng-if="vm.tabState != 0" cg-busy="{promise:itemPromise, message:'Loading'}">
-              <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
-              <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
-                  <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data['overall_rating']" myrating="data['my_rating']" myimage="{{data[vm.image_link_field]}}" itemd="data" itemid="data[vm.pk_field]" itemdata="setItemDetails(data)" ratingdata="setRatingsTemplate(data)" gridview="true" recsysid="recsys_id" univcode="data[vm.univ_code_field]" mytemplate="template" ng-repeat="data in vm.tableData track by $index"></item>
-              </div>
-            </span>
--->
+            <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
+            <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
+            <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
+                <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data['overall_rating']" myrating="data['my_rating']" myimage="{{data[vm.image_link_field]}}" itemd="data" itemid="data[vm.pk_field]" itemdata="setItemDetails(data)" ratingdata="setRatingsTemplate(data)" gridview="true" recsysid="recsys_id" univcode="data[vm.univ_code_field]" mytemplate="template" ng-repeat="data in vm.tableData track by $index"></item>
+            </div>
+            
+            <span ng-if="vm.tabState != 0" cg-busy="{promise:itemPromise, message:'Loading'}"></span>
+            
             <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList()">
                 <button ng-click="vm.pagingFunction()" class="btn btn-default" style="margin: 15px 15px 15px 15px">Load More</button>
             </div>
@@ -60,10 +56,10 @@
                             <td data-title="Rating" style="width:150px">
 
                             <span ng-if="data['my_rating'] != undefined">
-                                <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+                                <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
                             </span>
                             <span ng-if="data['my_rating'] == undefined">
-                                <span uib-rating ng-model="data['overall_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['overall_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+                                <span uib-rating ng-model="data['overall_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['overall_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
                             </span>
 
                             </td>
@@ -84,10 +80,10 @@
                             <td data-title="Rating" style="width:150px">
 
                             <span ng-if="data['my_rating'] != undefined">
-                                <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+                                <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
                             </span>
                             <span ng-if="data['my_rating'] == undefined">
-                                <span uib-rating ng-model="data['overall_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['one','two','three','four','five']" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['overall_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+                                <span uib-rating ng-model="data['overall_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['overall_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
                             </span>
 
                             </td>

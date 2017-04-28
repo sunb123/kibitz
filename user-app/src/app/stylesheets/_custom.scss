@@ -11,6 +11,15 @@ $widget-height: 310px;
 $font-weight-bold: 600;
 $font-size-large: 22px;
 
+.fa-caret-down{
+  transform: rotate(0deg);
+  transition: transform 0.3s linear;
+}
+
+.fa-caret-down.open{
+  transform: rotate(180deg);
+  transition: transform 0.3s linear;
+}
 
 .autocompletedemoCustomTemplate .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;

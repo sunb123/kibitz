@@ -27,6 +27,7 @@ from app.system_methods import createSessionForUser, lock_decorator
 
 class LoginView(views.APIView):
 
+#    @csrf_exempt
     def post(self, request, format=None):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -75,6 +76,7 @@ class LogoutView(views.APIView):
 class ProfileCodeLoginView(views.APIView): # login method only for admin users.
 
     @lock_decorator
+#    @csrf_exempt
     def post(self, request, format=None):
         username = request.data.get('username')
         payload = {
@@ -119,6 +121,7 @@ class AdminUserView(views.APIView):
     def get(self, request, pk=None, format=None):
         return HttpResponse("user get "+str(pk))
 
+#    @csrf_exempt
     def post(self, request, pk=None, format=None): # create
         data = request.data
         user = False
@@ -151,6 +154,7 @@ class EndUserView(views.APIView):
         return HttpResponse("user get "+str(pk))
 
     @lock_decorator
+#    @csrf_exempt
     def post(self, request, pk=None, format=None):
         data = request.data
 

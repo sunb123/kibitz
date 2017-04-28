@@ -9,15 +9,15 @@
 	        <button class="btn btn-primary" ng-class="{active: vm.isTab('general')}" ng-click="vm.setTab('general')" style="outline:none;width:94px">General</button>
                 <button class="btn btn-primary" ng-class="{active: vm.isTab('template')}" ng-click="vm.setTab('template')" style="outline:none;width:94px">Templating</button>
 	        <button class="btn btn-primary" ng-class="{active: vm.isTab('data')}" ng-click="vm.setTab('data')" style="outline:none;width:94px">Data</button>
+                <button class="btn btn-primary" ng-class="{active: vm.isTab('widget')}" ng-click="vm.setTab('widget')" style="outline:none;width:94px">Widget</button>
 	        <button class="btn btn-primary" ng-class="{active: vm.isTab('advanced')}" ng-click="vm.setTab('advanced')" style="outline:none;width:94px">Advanced</button>
-<!--           <button class="btn btn-primary" ng-class="{active: vm.tabSetting == 'widget'}" ng-click="vm.setTab('widget')" style="outline:none">Widget</button> -->
 	    </div>
 	</div>
 
 	<form ng-submit="vm.submit()" ng-show="vm.isTab('general')" novalidate>
 
 	    <formly-form model="vm.recsys" fields="vm.recsysFields" form="vm.recsysForm">
-	        <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysForm.$invalid">Save</button>
+	        <button type="submit" class="btn btn-primary" style="font-size:20px" ng-disabled="vm.recsysForm.$invalid">Save</button>
 	    </formly-form>
 	</form>
 
@@ -47,7 +47,7 @@
   </md-card-title>
 
   <md-card-content>
-    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{$parent.item_details}}" data-html="true">Item Details</md-card-actions>
+    <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Item Details" data-content="{{$parent.item_details() }}" data-html="true">Item Details</md-card-actions>
     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions>
 
     <md-card-actions>
@@ -108,16 +108,16 @@
 
 
           <div ng-show="!vm.showingEachIcon" style="padding-bottom:5px">
-            <label>Selected: </label><div class="btn btn-default" style="display:block;font-size:40px" uib-popover-template="'allIconPopoverTemplateOn'" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOnClass()" popover-trigger="'outsideClick'"></div>
-            <label>Unselected: </label><div class="btn btn-default" style="display:block;font-size:40px" uib-popover-template="'allIconPopoverTemplateOff'" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOffClass()" popover-trigger="'outsideClick'"></div>
+            <label>Selected Icon: </label><div class="btn btn-default" style="display:block;font-size:40px" uib-popover-template="'allIconPopoverTemplateOn'" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOnClass()" popover-trigger="'outsideClick'"></div>
+            <label>Unselected Icon: </label><div class="btn btn-default" style="display:block;font-size:40px" uib-popover-template="'allIconPopoverTemplateOff'" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOffClass()" popover-trigger="'outsideClick'"></div>
           </div>
 
           <div ng-show="vm.showingEachIcon" style="padding:0px 0px 13px 0px">
-            <label>Selected: </label><div><span ng-repeat="i in [1,2,3,4,5] track by $index">
+            <label>Selected Icon: </label><div><span ng-repeat="i in [1,2,3,4,5] track by $index">
               <span uib-popover-template="'eachIconPopoverTemplateOn'" style="font-size:40px;" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOnClass($index)" popover-trigger="'outsideClick'"></span>
             </span></div>
             <br>
-            <label>Unselected: </label><div><span ng-repeat="i in [1,2,3,4,5] track by $index">
+            <label>Unselected Icon: </label><div><span ng-repeat="i in [1,2,3,4,5] track by $index">
               <span uib-popover-template="'eachIconPopoverTemplateOff'" style="font-size:40px;" data-toggle="popover" popover-title="{{dynamicPopover.title}}" ng-class="vm.getOffClass($index)" popover-trigger="'outsideClick'"></span>
             </span></div>
           </div>
@@ -212,7 +212,7 @@
 -->
 
 
-<button class="btn btn-primary" ng-click="saveTemplate()">Save</button>
+<button class="btn btn-primary" style="font-size:20px" ng-click="saveTemplate()">Save</button>
 
 
 </div>
@@ -237,23 +237,22 @@
 
 	<form ng-submit="vm.submit()" ng-show="vm.isTab('advanced')" style="margin-bottom: 30px">  <!-- ng-submit="vm.cssUpload(1, vm.cssText)" -->
 
-      <formly-form model="vm.recsys" fields="vm.recsysFieldsAdv" form="vm.recsysFormAdv">
-          <button type="submit" class="btn btn-primary" ng-disabled="vm.recsysFormAdv.$invalid">Save</button>
-      </formly-form>
-      <hr style="border-top: 1px solid darkgray">
-      <h4>Update Search Index</h4>
-      <h6>Press if Datahub tables have been updated</h6>
-      <button>Update</button>
-
-<!-- 		<h4>CSS Edit</h4>
+            <formly-form model="vm.recsys" fields="vm.recsysFieldsAdv" form="vm.recsysFormAdv">
+                <button type="submit" class="btn btn-primary" style="font-size:20px" ng-disabled="vm.recsysFormAdv.$invalid">Save</button>
+            </formly-form>
+<!--        <hr style="border-top: 1px solid darkgray">
+            <h4>Update Search Index</h4>
+            <h6>Press if Datahub tables have been updated</h6>
+            <button>Update</button>
+              
+     <h4>CSS Edit</h4>
 		<textarea ng-model="vm.cssText" style="height:600px; width: 80%; display: block"></textarea>
-
     <h4>CSS Link</h4>
     <input ng-model="vm.cssLink" type="text" name="" style="width:80%">
 
     <button type="submit" class="btn btn-primary" style="display: block; margin: 10px 0px 10px 0px">Submit</button>
  -->
-  </form>
+        </form>
 <!--
 	<form>
 		Include extra item fields in item description. (author, gender, age, date, etc.)
@@ -281,15 +280,24 @@
                             <div style="color: red" ng-if="errorMessage.status == 'missing_header'">Error: {{ errorMessage.message }}</div>
                             <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Suggested to include and select headers for Title, Description, Image Link, and Universal Code (e.g., ISBN or UPC)</h4>
                             <input id="csvFile" type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
-                            <button type="button" class="btn btn-primary" ng-click="readHeaders()" style="font-size: 20px;">Select CSV Headers</button>
+                            <button type="button" class="btn btn-primary" ng-click="readHeaders()" style="font-size: 20px;margin: 0px 0px 10px 0px">Select CSV Headers</button>
     
                             <div>
                               <form ng-show="hasHeaders" style="margin-bottom: 30px;width:300px">
                                   <formly-form model="vm.headers" fields="vm.csvHeadersFields" form="vm.csvHeadersForm"></formly-form>
                               </form>
                             </div>
-                    </div>
-     
+                            <button type="button" class="btn btn-primary" style="font-size: 20px;margin: 50px 0px 10px 0px" id="uploadButton" ng-click="upload()">
+                                 <span id="uploadButtonLoading"></span>
+                                 <span id="uploadButtonText">Upload</span>
+                            </button>
+
+                            
+                  </div>
+                  
+                 
+                       
+
     </div>
 
 
@@ -396,9 +404,8 @@
           <tr>
             <td style="width: 205px;">
 		  <span relink-event="rate">
-		    <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=vm.getOnStyle()" on-leave="focus = null;myStyle=vm.getOffStyle()"  titles="['yes','yesy','yesy','yesy','yes']" aria-labelledby="default-rating" ng-click="" ng-style="myStyle" ng-init="myStyle=vm.getOffStyle()" rating-states="ratingStates"></span>
+	    	    <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="focus = true;myStyle=vm.getOnStyle()" on-leave="focus = null;myStyle=vm.getOffStyle()"  titles="titles" ng-click="" ng-style="myStyle" ng-init="myStyle=vm.getOffStyle()" rating-states="ratingStates"></span>
 		    <!-- {{ showingRated || focus == true ? null : rating}} -->
-		    <span class="label" ng-style="{'font-size': vm.recsys.rating_icon_fontsize}" ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
 		  </span>
             </td>
             <td>
@@ -420,7 +427,7 @@
     </md-card-title>
 
     <md-card-content>
-      <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-content="{{ item_details }}" data-html="true" data-container=".template">Item Details</md-card-actions>
+      <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-content="{{ item_details() }}" data-html="true" data-container=".template">Item Details</md-card-actions>
       <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-content="{{ ratings_template }}" data-html="true" data-container=".template">Rating Details</md-card-actions>
 
     </md-card-content>
@@ -431,7 +438,7 @@
 
 <script type="text/ng-template" id="tpl2.html">
 
-  <md-card class="item-card" ng-cloak style="height:560px;overflow:hidden;">
+  <md-card class="item-card" ng-cloak style="height:560px;overflow-x:hidden;overflow-y:scroll">
   
   <img class="item-img md-card-image" ng-src="{{myimage}}" alt="image caption"  ng-cloak>
 
@@ -446,8 +453,7 @@
           <tr>
             <td style="width: 205px;">  
 		<span relink-event="rate">
-		    <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value);focus = true;myStyle=vm.getOnStyle()" on-leave="focus = null;myStyle=vm.getOffStyle()" titles="" aria-labelledby="default-rating" ng-click="" ng-style="myStyle" ng-init="myStyle=vm.getOffStyle()" rating-states="ratingStates"></span>
-		    <span class="label" ng-style={'font-size': vm.recsys.rating_icon_fontsize} ng-class="{'label-danger': overStar<=1, 'label-warning': overStar>=2 && $parent.overStar<=3, 'label-success': overStar>=4}" ng-show="focus">Rate {{overStar}}</span>
+		    <span class="rating-icon" uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value);focus = true;myStyle=vm.getOnStyle()" on-leave="focus = null;myStyle=vm.getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="" ng-style="myStyle" ng-init="myStyle=vm.getOffStyle()" rating-states="ratingStates"></span>
 		  </span>
 
 		</span>
@@ -469,7 +475,7 @@
     </md-card-title>
 
     <md-card-content>
-      <md-card-actions><span ng-bind-html="item_details"></span></md-card-actions>
+      <md-card-actions><span ng-bind-html="item_details()"></span></md-card-actions>
 
   <!--     <md-card-actions class="item-popover" data-toggle="popover" data-trigger="hover" data-original-title="Rating Details" data-content="{{$parent.ratings_template}}" data-html="true">Rating Details</md-card-actions> -->
 

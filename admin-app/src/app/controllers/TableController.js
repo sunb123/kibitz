@@ -175,6 +175,9 @@
         }
 
         var myfile = $('#csvFile')[0].files[0]
+        if (myfile == undefined) {
+            return
+        }
         setReader()
         reader.readAsText(myfile)
         $timeout(function() {
@@ -188,9 +191,9 @@
       $('#createRecommenderButtonLoading').removeClass('fa fa-spinner spinning')
     }
 
-    function showCreatingButton() {
+    function disableCreateButton() {
       $('#createRecommenderButton').prop('disabled',true)
-      $('#createRecommenderButtonText').text(' Creating')
+      $('#createRecommenderButtonText').text(' Creating...')
       $('#createRecommenderButtonLoading').addClass('fa fa-spinner spinning')
     }
 
@@ -214,7 +217,7 @@
           return
         }
         
-        showCreatingButton() // disable create button until success
+        disableCreateButton() // disable create button until success
         
         $timeout(function() {
           if (reader.readyState == 2) {
@@ -238,7 +241,7 @@
                 $('#myModal').modal('toggle');
             }, function (response) {
                 console.log('Error status: ' + response.status);
-                $scope.$parent.itemDeferred.resolve('resolved')
+                //$scope.$parent.itemDeferred.resolve('resolved')
                 setErrorMessage(response.data.status, response.data.message)
                 enableCreateRecommenderButton()
             }, function (evt) {
@@ -281,7 +284,7 @@
           return
         }
 
-        showCreatingButton()
+        disableCreateButton()
         
         console.log(config.server_url+'/recsys/')
 

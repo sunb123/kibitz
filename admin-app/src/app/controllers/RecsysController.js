@@ -4,74 +4,12 @@
        .module('app')
        .controller('RecsysController', [
           'navService', 'tableService', 'loginService', 'recsysService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', 
-          '$stateParams','$scope', '$cookies', '$timeout', '$rootScope', '$http', 'config',
+          '$stateParams','$scope', '$cookies', '$timeout', '$rootScope', '$http', 'config', 'Upload',
           RecsysController
        ])
 
-    angular.module('app').run(function(formlyConfig) {
-      var ngModelAttrs = {};
-
-      function camelize(string) {
-        string = string.replace(/[\-_\s]+(.)?/g, function(match, chr) {
-          return chr ? chr.toUpperCase() : '';
-        });
-        // Ensure 1st char is always lowercase
-        return string.replace(/^([A-Z])/, function(match, chr) {
-          return chr ? chr.toLowerCase() : '';
-        });
-      }
-
-      // attributes
-      angular.forEach([
-        'color-picker-format',
-        'color-picker-alpha',
-        'color-picker-swatch',
-        'color-picker-swatch-pos',
-        'color-picker-swatch-bootstrap',
-        'color-picker-swatch-only',
-        'color-picker-pos',
-        'color-picker-case'
-      ], function(attr) {
-        ngModelAttrs[camelize(attr)] = {attribute: attr};
-      });
-
-      formlyConfig.setType({
-        name: 'colorpicker',
-        template: '<color-picker ng-model="model[options.key]"></color-picker>',
-        wrapper: ['bootstrapLabel', 'bootstrapHasError'],
-        defaultOptions: {
-          ngModelAttrs: ngModelAttrs
-        }
-      });
-    })
-
-  angular.module('app').run(function(formlyConfig) {
-    formlyConfig.setType({
-      name: 'slider',
-      template: ['<rzslider rz-slider-model="model[options.key]"' +
-                 ' rz-slider-options="to.sliderOptions"></rzslider>'].join(' '),
-      wrapper: ['bootstrapLabel', 'bootstrapHasError']
-    });
-
-    formlyConfig.setType({
-      name: 'range-slider',
-      template: ['<rzslider rz-slider-model="model[options.key].low"' +
-                 'rz-slider-high="model[options.key].high" ' +
-                 'rz-slider-options="to.sliderOptions"></rzslider>'].join(' '),
-      wrapper: ['bootstrapLabel', 'bootstrapHasError']
-    });
-
-    formlyConfig.setWrapper([
-      {
-        name: 'panel',
-        templateUrl: 'panel.html'
-      },
-    ]);
-
-  });
-
   function RecsysController(navService, tableService, loginService, recsysService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast,
-    $stateParams, $scope, $cookies, $timeout, $rootScope, $http, config) {
+    $stateParams, $scope, $cookies, $timeout, $rootScope, $http, config, Upload) {
 
     if (!loginService.loggedIn()) {
       $state.go('home.login');
@@ -321,6 +259,13 @@
     $scope.$parent.reposDeferred.promise.then(function(){
         setRecsysWithRepos(vm.recsys_id)
     })
+    
+    function formatRatingStates(ratingStates) {
+        for (var i in ratingStates) {
+            delete ratingStates[i]['title']
+        }
+        return ratingStates
+    }
 
     // TODO: edit which item field to create clickable filter on
     // drop down list with none option
@@ -328,8 +273,9 @@
         vm.recsys.rating_icon_color = template.rating_icon_color != undefined ? template.rating_icon_color : vm.recsys.rating_icon_color
         vm.recsys.highlighted_rating_icon_color = template.highlighted_rating_icon_color != undefined ? template.highlighted_rating_icon_color : vm.recsys.highlighted_rating_icon_color
         vm.recsys.rating_icon_fontsize = template.rating_icon_fontsize != undefined ? template.rating_icon_fontsize : vm.recsys.rating_icon_fontsize
-        $scope.ratingStates = template.rating_states != undefined ? template.rating_states : $scope.ratingStates
+        $scope.ratingStates = formatRatingStates(template.rating_states != undefined ? template.rating_states : $scope.ratingStates)
         $scope.slickCurrentIndex = template.template_number != undefined ? template.template_number : $scope.slickCurrentIndex       
+        $scope.titles = ['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five']
  
         var item_fields_include = template.item_fields_include != undefined ? template.item_fields_include : vm.recsys.item_fields_include
         var item
@@ -351,23 +297,24 @@
         }).then(function(resp){
           console.log(resp)
           var item = resp.data.item
+          $scope.first_item = item
           console.log(item_fields_include)
           console.log(vm.recsys)
           $scope.myimage = item_fields_include.includes(vm.recsys.image_link_field) ? item[vm.recsys.image_link_field] : ''
           $scope.mytitle = item_fields_include.includes(vm.recsys.title_field) ? item[vm.recsys.title_field] : ''
           $scope.description = item_fields_include.includes(vm.recsys.description_field) ? item[vm.recsys.description_field] : ''
           $scope.rating = 4
-          $scope.item_details = $scope.item_details_func(item, item_fields_include)
     
         }, function(resp){
           console.log(resp)
         })
     }
 
+    /*
     $scope.hoveringOver = function(value) {
       $scope.overStar = value;
     };
-
+    */
 
     $scope.paused = function() {
         if (vm.recsys.status != undefined) {
@@ -386,8 +333,9 @@
     }
 
     // TODO: fetch first item in item list
-    $scope.item_details_func = function(item, item_fields_include) {
-        var itemDetails = item_fields_include
+    $scope.item_details = function() {
+        var item = $scope.first_item
+        var itemDetails = $scope.models.lists.roles.filter(function(item){return $scope.rolesChecked[item.label] == true}).map(function(item){ return item.label})
         var field;
         var item_template = "<fieldset>"
         for (i in itemDetails) {
@@ -410,11 +358,11 @@
          <span class="fa fa-star-o" data-rating="5"></span>\
          <input type="hidden" name="whatever" class="rating-value" value="3">\
        </div>\
-        <div class="input-group"><span>5 Stars</span><meter id="meter-5-star" value=".75"></meter><span>70%</span></div> \
-        <div><span>4 Stars</span><meter id="meter-4-star" value=".25"></meter><span>20%</span></div> \
-        <div><span>3 Stars</span><meter id="meter-3-star" value=".25"></meter><span>20%</span></div> \
-        <div><span>2 Stars</span><meter id="meter-2-star" value="1"></meter><span>100%</span></div> \
-        <div><span>1 Stars</span><meter id="meter-1-star" value=".5"></meter><span>50%</span></div>';
+        <div class="input-group"><span>5 Stars</span><meter id="meter-5-star" value=".70"></meter><span>70%</span></div> \
+        <div><span>4 Stars</span><meter id="meter-4-star" value=".15"></meter><span>15%</span></div> \
+        <div><span>3 Stars</span><meter id="meter-3-star" value=".10"></meter><span>10%</span></div> \
+        <div><span>2 Stars</span><meter id="meter-2-star" value=".025"></meter><span>2.5%</span></div> \
+        <div><span>1 Stars</span><meter id="meter-1-star" value=".025"></meter><span>2.5%</span></div>';
 
     function onSubmit() {
         tableService.updateRecsys(vm.recsys, vm.recsys_id).then(function(result){
@@ -442,7 +390,7 @@
         template['rating_icon_color'] = vm.recsys.rating_icon_color
         template['highlighted_rating_icon_color'] = vm.recsys.highlighted_rating_icon_color
         template['rating_icon_fontsize'] = vm.recsys.rating_icon_fontsize
-        template['rating_states'] = $scope.ratingStates
+        template['rating_states'] = formatRatingStates($scope.ratingStates)
 
         template['template_number'] = $scope.slickCurrentIndex
         template['item_fields_include'] = $scope.models.lists.roles.filter(function(item){return $scope.rolesChecked[item.label] == true}).map(function(item){ return item.label})
@@ -454,7 +402,7 @@
 
         vm.recsys.template = JSON.stringify(template)
         console.log(vm.recsys.template)
-
+        
         onSubmit()
     }
 
@@ -493,7 +441,7 @@
     vm.deleteRecsys = function() {
         // start delete button animation
         $('#deleteButton').prop("disabled",true)
-        $('#deleteButtonText').text(' Deleting')
+        $('#deleteButtonText').text(' Deleting...')
         $('#deleteButtonLoading').addClass('fa fa-spinner spinning') 
         tableService.deleteRecsys(vm.recsys_id).then(function(result){
             console.log(result)
@@ -562,6 +510,85 @@
         }
     }
 
+    $scope.hasHeaders = false
+    vm.headers = {}
+    vm.csvHeadersFields = [
+        {
+            key: 'title',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Title',
+                placeholder: 'Select the title field',
+                required: false,
+                options: [],
+            }
+        },
+        {
+            key: 'description',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Description',
+                placeholder: 'Select the description field',
+                required: false,
+                options: [],
+            }
+        },
+                {
+            key: 'image',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Image',
+                placeholder: 'Select the image link field',
+                required: false,
+                options: [],
+            }
+        },
+        {
+            key: 'univ_code',
+            type: 'select',
+            templateOptions: {
+                type: 'text',
+                label: 'Universal Code',
+                placeholder: 'Select the universal code field',
+                required: false,
+                options: [],
+            }
+        },
+
+    ];
+
+    function headerListToOptions(headerList) {
+        var options = []
+        var option;
+        for (var i in headerList) {
+            option = {'name':headerList[i], 'value':parseInt(i)}
+            options.push(option)
+        }
+        return options
+    }
+
+    function enableUploadButton() {
+      $('#uploadButton').prop('disabled',false)
+      $('#uploadButtonText').text('Upload')
+      $('#uploadButtonLoading').removeClass('fa fa-spinner spinning')
+    }
+
+    function disableUploadButton() {
+      $('#uploadButton').prop('disabled',true)
+      $('#uploadButtonText').text(' Uploading...')
+      $('#uploadButtonLoading').addClass('fa fa-spinner spinning')
+    }
+
+    $scope.errorMessage = {'status':'', 'message':''}
+
+    function setErrorMessage(status, message) {
+      $scope.errorMessage.status = status
+      $scope.errorMessage.message = message
+    }
+
     var fileHeaders;
     var reader;
     function setReader() {
@@ -580,13 +607,12 @@
     setReader();  
   
     $scope.readHeaders = function() {
-	if (checkBasicParams() == false) {
-	  return
-        } else {
-          setErrorMessage('','')
-        }
-
+        setErrorMessage('','')
         var myfile = $('#csvFile')[0].files[0]
+        if (myfile == undefined) {
+            return
+        }
+        //console.log(myfile)
         setReader()
         reader.readAsText(myfile)
         $timeout(function() {
@@ -594,40 +620,60 @@
         }, 100)
     }
 
-    $scope.uploadCSV = function() {
-        if (checkBasicParams() == false) {
-          return
-        }
+    $scope.upload = function() {
+        $scope.uploadCSV()
+        $scope.hasHeaders = false
+    }
 
+    $scope.uploadCSV = function() {
         var file = $('#csvFile')[0].files[0]
         if (Object.keys(vm.headers).length == 0) { // TODO: determine which headers are required
           setErrorMessage("missing_header", "Missing CSV headers")
           return
         }
 
+        disableUploadButton()
+
         $timeout(function() {
           if (reader.readyState == 2) {
-            $scope.$parent.itemDeferred = $q.defer()
-            $scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
+            //$scope.$parent.itemDeferred = $q.defer()
+            //$scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
 
             Upload.upload({
-                url: config.server_url+'/csv/',
+                url: config.server_url+'/re-csv/',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'X-CSRFToken': $cookies.get('csrftoken'),
                 },
-                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'required_headers':JSON.stringify(vm.headers)},
+                data: {'file': file, 'username': $cookies.get('k_username'), 'headers':JSON.stringify(vm.headers), 'recsys_id': vm.recsys_id},
             }).then(function (response) {
                 console.log('Success ' + response.config.data.file.name + ' uploaded. Response: ' + response.data);
                 setErrorMessage('','')
                 $scope.showFieldSelection = true
+                enableUploadButton()
                 $scope.$parent.loadRecsysList()
                 $('#myModal').modal('toggle');
+                $mdToast.show(
+                    $mdToast.simple()
+                      .textContent("Update Successful")
+                      .position('bottom right')
+                      .theme('success-toast')
+                      .hideDelay(3000)
+                )
+
             }, function (response) {
                 console.log('Error status: ' + response.status);
-                $scope.$parent.itemDeferred.resolve('resolved')
+                //$scope.$parent.itemDeferred.resolve('resolved')
                 setErrorMessage(response.data.status, response.data.message)
+                enableUploadButton()
+                $mdToast.show(
+                   $mdToast.simple()
+                     .textContent("Update Error")
+                     .position('bottom right')
+                     .theme('error-toast')
+                     .hideDelay(6000)
+                 )
             }, function (evt) {
                 var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
                 console.log('progress: ' + progressPercentage + '% ' + evt.config.data.file.name);

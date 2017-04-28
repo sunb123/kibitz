@@ -37,6 +37,13 @@ angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
     $cookiesProvider.defaults.path = '/';
     
     $httpProvider.defaults.withCredentials = true; // NOTE: adds cookies
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+    $httpProvider.defaults.headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    }
 
     $stateProvider
       .state('home', {

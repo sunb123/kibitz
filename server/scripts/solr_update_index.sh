@@ -26,6 +26,6 @@ while getopts c:f: FLAG; do
     esac
 done
 
-sudo -u ubuntu curl http://localhost:8983/solr/${CORE_NAME}/update?commit=true -d '<delete><query>*:*</query></delete>'
+sudo curl http://localhost:8983/solr/${CORE_NAME}/update?commit=true -d '<delete><query>*:*</query></delete>'
 
 sudo -u ubuntu /var/www/html/kibitz/server/solr-6.5.0/bin/post -c $CORE_NAME $CSV_FILE_PATH  #index a csv file

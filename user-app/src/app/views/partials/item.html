@@ -17,15 +17,15 @@
         <tr>
           <td style="width: 205px">
 		<span ng-if="myrating != undefined">
-		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five. It was amazing!']" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, myrating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOnStyle()"></span>
+		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, myrating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOnStyle()"></span>
                  <!-- {{ showingRated || focus == true ? null : myrating}} -->
                 </span>  
-<!--
-		<span ng-if="myrating == undefined">
-		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five. It was amazing!']" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, rating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+		
+                <span ng-if="myrating == undefined">
+		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, rating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
 		  <!-- {{ showingRated || focus == true ? null : rating}} -->
 		</span>
--->
+
           </td>
           <td>
 	      <md-menu>
@@ -35,8 +35,8 @@
 		  <md-menu-content width="3">
 	<!--               <md-menu-item><md-button ng-click="$mdMenu.close()">Save</md-button></md-menu-item> -->
 	                  <md-menu-item>
-                              <md-button ng-show="tabNumber != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
-	                      <md-button ng-show="tabNumber == 2" ng-click="$mdMenu.close();sendRating(itemd, itemid, 'unrate', recsysid, univcode)">Unrate</md-button>
+                              <md-button ng-if="tabNumber() != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
+	                      <md-button ng-if="tabNumber() == 2" ng-click="$mdMenu.close();sendRating(itemd, itemid, 'unrate', recsysid, univcode)">Unrate</md-button>
                           </md-menu-item>
                   </md-menu-content>
 	      </md-menu>
@@ -78,12 +78,12 @@
         <tr>
           <td style="width: 205px">
 		<span ng-if="myrating != undefined">
-		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five. It was amazing!']" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, myrating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOnStyle()"></span>
+		  <span uib-rating ng-model="myrating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true" on-leave="focus = null" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, myrating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOnStyle()"></span>
 		 <!-- {{ showingRated || focus == true ? null : myrating}} -->
 		</span>
 
 		<span ng-if="myrating == undefined">
-		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five. It was amazing!']" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, rating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
+		  <span uib-rating ng-model="rating" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(itemd, itemid, rating, recsysid, univcode)" ng-class="{coloredRatings: showingRated || focus == true}" rating-states="mytemplate.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
 		  <!-- {{ showingRated || focus == true ? null : rating}} -->
 		</span>
 
@@ -97,8 +97,8 @@
 		  <md-menu-content width="3">
 	<!--               <md-menu-item><md-button ng-click="$mdMenu.close()">Save</md-button></md-menu-item> -->
 	                  <md-menu-item>
-                              <md-button ng-show="tabNumber != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
-	                      <md-button ng-show="tabNumber == 2" ng-click="$mdMenu.close();sendRating(itemd, itemid, 'unrate', recsysid, univcode)">Unrate</md-button>
+                              <md-button ng-if="tabNumber() != 2" ng-click="$mdMenu.close();sendNotInterested(itemid, recsysid)">Not Interested</md-button>
+	                      <md-button ng-if="tabNumber() == 2" ng-click="$mdMenu.close();sendRating(itemd, itemid, 'unrate', recsysid, univcode)">Unrate</md-button>
                           </md-menu-item>
                   </md-menu-content>
 	      </md-menu>

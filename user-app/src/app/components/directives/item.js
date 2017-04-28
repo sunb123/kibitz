@@ -13,10 +13,11 @@ angular.module('app')
         controller: ['$scope', 'itemService', function Controller($scope, itemService) {
                     $scope.sendRating = itemService.sendRating
                     $scope.sendNotInterested = itemService.sendNotInterested
-                    $scope.tabNumber = $scope.$parent.$parent.tabNumber
+                    $scope.tabNumber = function() { return $scope.$parent.$parent.tabNumber }
                     $scope.focus = null
 
                     var mytemplate = $scope.$parent.template
+                    $scope.titles = ['Rate it a one', 'Rate it a two', 'Rate it a three', 'Rate it a four', 'Rate it a five']
 
                     $scope.hoveringOver = function(value) {
                       $scope.overStar = value;
