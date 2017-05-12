@@ -135,6 +135,7 @@
         vm.initializingHomeTab = true
         console.log("initilize home table called")
         vm.current_page = 0;
+        vm.atEndOfList = false
         vm.tableData = []
         function fnCheck() {
             vm.pagingFunction()
@@ -147,6 +148,10 @@
         var interval = setInterval(fnCheck, 350)
     }
     
+    $scope.$on('reload-home-tab', function(event, args){
+        vm.doInitializeHomeTable() 
+    })
+
     vm.loadTableRows = function(filter_params) {
       if (vm.item_paging_loading) {
           return
@@ -156,6 +161,8 @@
       console.log("increament and call", vm.current_page)
 
       var params = {
+          sorted_by: filter_params.sorted_by,
+          filter_by: filter_params.filter_by,
           recsys_id: $scope.recsys_id,
           current_page: vm.current_page,
           rows_per_page: vm.rows_per_page,

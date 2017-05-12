@@ -395,6 +395,15 @@
                       .hideDelay(3000)
                   )
             //}
+        }, function(result) {
+            console.log(result)
+                 $mdToast.show(
+                   $mdToast.simple()
+                     .textContent("Update Error")
+                     .position('bottom right')
+                     .theme('error-toast')
+                     .hideDelay(6000)
+                 )
         })
     }
 

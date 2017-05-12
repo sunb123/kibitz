@@ -308,18 +308,22 @@ class ItemPagingView(views.APIView): # TODO: allow non-logged in users to get it
                 query += "where "
             else:
                 query += "and "
+            num_field_queries = []
             for field, values in filter_by_list.items():
-                if type(values) == dict:
+                if type(values) == list and len(values) != 0:
+                    query += whereLikeOrClause(field, values)
+                    query += "and "
+                elif type(values) == dict:
                     low = values.get('low')
                     high = values.get('high')
-                    query += whereNumRangeClause(field, low, high)
-                elif type(values) == list:
-                    query += whereLikeOrClause(field, values)
-                query += "and "
+                    num_field_queries.append(whereNumRangeClause(field, low, high))
+                    num_field_queries.append("and ")
+            query += ''.join(num_field_queries) # NOTE: DH RLS issue. Where Like clauses need to be at the front of query.
             query = query[:-4]        
+
         print query
 
-        if sorted_by != None:
+        if sorted_by != None and sorted_by != 'None' and sorted_by != '':
             query += "order by cast({} as float) {};".format(sorted_by, sorted_order)
         else:
             query += "order by cast({} as int) asc;".format(primary_key_field)

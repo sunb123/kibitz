@@ -17,6 +17,74 @@ from recsys.serializers import RecsysSerializer
 from recsys.models import Recsys
 from recsys.methods import checkRecsysUrlUnique, checkUrlFormat, formatUrl, formatTableName
 
+
+def isValidNumber(value):
+    try:
+        value = float(value)
+    except:
+        value = None
+
+    if type(value) == float:
+        return True
+    else:
+        return False
+ 
+def getFilterFieldValues(filter_fields, repo_base, repo_name, item_table_name, owner_id):
+    '''
+        return dict: 
+           {
+             field1: {type: ..., values:[...]}
+             ...
+           }  
+
+        makes an API to DH for each qualitative field
+        gets top 12 most frequent field values
+
+        for numerical field, get the min and max field values
+    '''
+    api_url = '/api/v1/query/{}/{}'.format(repo_base, repo_name)
+    query = "select " 
+    for field in filter_fields:
+        query += "min({}), max({}), ".format(field, field)
+    query = query[:-2]
+    query += " from {}.{};".format(repo_name, item_table_name)
+    r = makeRequest('POST', api_url, owner_id, query=query)
+    if r.status_code == 200:
+        filter_field_values = {} # field : {type: x, values: []}
+        min_max_dict = r.json()['rows'][0]
+        for i in xrange(len(filter_fields)):
+            field = filter_fields[i]
+            if i == 0:
+                minimum, maximum = min_max_dict.get('min'), min_max_dict.get('max')
+            else:
+                minimum, maximum = min_max_dict.get('min_'+str(i)), min_max_dict.get('max_'+str(i))
+
+            if isValidNumber(minimum) and isValidNumber(maximum): # NOTE: can batch all numerical min/max calls
+                query = "select min(cast({} as float)), max(cast({} as float)) from {}.{} ;".format(field, field, repo_name, item_table_name)
+                r = makeRequest('POST', api_url, owner_id, query=query)
+                if r.status_code == 200:
+                    value_obj = r.json()['rows'][0]
+                    minimum, maximum = value_obj.get('min'), value_obj.get('max')
+                    filter_field_values[field] = {'type':'numerical', 'values':[minimum, maximum]}
+                else:
+                    filter_field_values[field] = {}
+            else:
+                query = "select count(*), {} from {}.{} group by {} order by count(*) desc limit 12;".format(field, repo_name, item_table_name, field)
+                r = makeRequest('POST', api_url, owner_id, query=query)
+                if r.status_code == 200:
+                    rows = r.json()['rows']
+                    values = map(lambda x: x.get(field), rows) 
+                    filter_field_values[field] = {'type':'qualitative', 'values':values}
+                else:
+                    filter_field_values[field] = {}
+
+        return filter_field_values
+    else:
+        print query
+        print r.content
+        return []
+         
+
 def addIdField(repo_base, repo_name, item_table_name, owner_id):
     api_url = '/api/v1/repos/{}/{}/tables/{}'.format(repo_base, repo_name, item_table_name)
     resp = makeGetRequest(api_url, owner_id)
@@ -158,6 +226,9 @@ class RecsysViewSet(viewsets.ViewSet):
         recsys = Recsys.objects.get(id=pk)
         recsys_owner_id = recsys.owner_id
         # current_url = recsys.url_name
+        recsys_template_dict = json.loads(recsys.template)
+        recsys_filter_fields = recsys_template_dict.get('filter_fields')
+        item_table_name = recsys.item_table_name
 
         if user_id != recsys_owner_id:
             return Response({
@@ -166,21 +237,31 @@ class RecsysViewSet(viewsets.ViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST)
         else:
             params = request.data.get('params')
+            if params == None:
+                return HttpResponse("no recsys update")
             # TODO: 
             # if change repo or table, 
             #     try to create a new solr core for recsys and reindex.
-            if params != None:
-                for param_type, param in params.iteritems():
-                    if param_type != 'url_name':
-                        if param_type == 'owner':
-                            setattr(recsys, 'owner_id', param)
-                        elif param != None:
-                            setattr(recsys, param_type, param)
-                        else:
-                            setattr(recsys, param_type, '')
-
-                recsys.save()
-                return HttpResponse("recsys updated")
+            for param_type, param in params.iteritems():
+                if param_type == 'template':
+                    template_dict = json.loads(param)
+                    filter_fields = template_dict.get('filter_fields')
+                    print filter_fields, recsys_filter_fields, "TEST"
+                    if filter_fields != recsys_filter_fields:
+                        filter_field_values = getFilterFieldValues(filter_fields, recsys.repo_base, recsys.repo_name, item_table_name, recsys_owner_id)
+                        template_dict['filter_field_values'] = filter_field_values
+                        template = json.dumps(template_dict)
+                        print template
+                        setattr(recsys, 'template', template)
+                elif param_type != 'url_name':
+                    if param_type == 'owner':
+                        setattr(recsys, 'owner_id', param)
+                    elif param != None:
+                        setattr(recsys, param_type, param)
+                    else:
+                        setattr(recsys, param_type, '')
+            recsys.save()
+            return HttpResponse("recsys updated")
 
         return HttpResponse("no recsys update")
 
@@ -217,4 +298,4 @@ class RecsysViewSet(viewsets.ViewSet):
             return Response({
                         'status': 'Bad request',
                         'message': 'Not the owner of recsys'
-                    }, status=status.HTTP_400_BAD_REQUEST) 
+                   }, status=status.HTTP_400_BAD_REQUEST)

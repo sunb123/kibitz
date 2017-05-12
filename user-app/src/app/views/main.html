@@ -3,9 +3,13 @@
     <md-toolbar class="" layout="row" layout-align="start center" style="background-color: #558C89">
 
       <section id="logo"> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
+        <div class="navbar-header">
         <h3 class="logo">
-          <a class="clearhref" ui-sref="home.items" ui-sref-opts="{reload:true}">{{vm.recsysTitle}}</a>
+          <a class="clearhref" ui-sref="home.items" ui-sref-opts="{reload:true}">
+              {{vm.recsysTitle}}
+          </a>
         </h3>
+        </div>
       </section>
 
       <section id="search-bar-main" style="width:100%">
@@ -172,7 +176,7 @@
     </md-tabs>
   </div>
 
-  <div layout="row" layout-align="center center" class="md-padding" >
+  <div ng-if="loggedIn()" layout="row" layout-align="center center" class="md-padding" >
 
     <div layout="column">
         <button class="btn btn-default" style="float:left;height:37.5px" ng-click="vm.toggleFilterNav()">

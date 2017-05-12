@@ -29,17 +29,18 @@
                 <h3 class="panel-title">Select Item Fields For Users to Filter/Sort On</h3>
               </div>
 
-                    <ul dnd-list="filterModel">
+                    <ul dnd-list="filterModel.values">
                         <span ng-repeat="item in filterModel.values">
                         <li style="cursor:pointer"
                             dnd-draggable="item"
-                            dnd-disable-if="true"
+                            dnd-moved="filterModel.values.splice($index, 1)"
                             dnd-effect-allowed="move"
                             dnd-selected="filterModel.selected = item;filterCheck(item.label)"
                             ng-style="getFilterStyle(item.label)"
                             >
                                {{item.label}} 
                         </li>
+                           <!--dnd-disable-if="true"-->
                            <!-- Is this a numerical or qualitative field?
                             <label><input type="checkbox" value="">Numerical</label> 
                             <label><input type="checkbox" value="">Qualitative</label> 

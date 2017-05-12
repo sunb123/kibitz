@@ -37,6 +37,37 @@
         $scope.filterArray.push(i)
     }
 
+    function convertToFilterObject(field, filterValue) {
+        if (filterValue.type == 'numerical') {
+            return {
+                    type: 'numerical',
+                    field: field,
+                    numerical_type: 'slider',
+                    numerical_range: filterValue.values,
+            }
+        } else if (filterValue.type == 'qualitative') {
+             return {
+                     type: 'qualitative',
+                     field: field,
+                     qualitative_type: 'grid',
+                     qualitative_values: filterValue.values, 
+             }
+        }
+    }
+
+    function convertAllFields(filterFields, filterFieldValues) {
+        var filterObjects = []
+        var obj, field;
+        for (var i in filterFields) {
+            field = filterFields[i]
+            obj = convertToFilterObject(field, filterFieldValues[field])
+            console.log(obj)
+            filterObjects.push(obj)
+        }
+        return filterObjects
+    }
+
+
     $http({
       method: 'GET',
       url: config.server_url+'/recsys-params/'+'?recsys_url='+vm.recsys_url,
@@ -49,6 +80,33 @@
 
       $scope.template = JSON.parse(vm.recsys.template)
       console.log($scope.template)
+
+      var filter_fields = $scope.template.filter_fields
+      var filter_field_values = $scope.template.filter_field_values
+      var numerical_fields = filter_fields.filter(function(field){ return filter_field_values[field].type == 'numerical'})
+      //var qualitative_fields = filter_field_values.filter(function(field){ return field.type == 'qualitative'})
+
+      $scope.filter_template = { // TODO: get fitler template from recsys obj
+          numerical_fields: numerical_fields,
+          default_sort_param: 'None', //numerical_fields[0],
+          filter_objects: convertAllFields(filter_fields, filter_field_values),
+      }
+  
+      $scope.sorted_param = $scope.filter_template.default_sort_param
+      $scope.changeSortedParam = function(value) {
+          $scope.sorted_param = value
+      }
+      $scope.isSortedParam = function(value) {
+          return value == $scope.sorted_param
+      }
+      var template = $scope.filter_template
+      vm.numerical_fields = template.numerical_fields
+      vm.numerical_fields.splice(0, 0, 'None')
+      vm.options = {}
+      $scope.filterModel = itemService.getFilterModel(template)
+      vm.filterFields = itemService.getFilterFields(template)
+
+      console.log("test", $scope.filterModel, vm.filterFields)
 
       $scope.recsysDeferred.resolve(vm.recsys)
 	    $http({
@@ -71,6 +129,7 @@
     vm.username = function() {
       return $cookies.get('k_username')
     }
+
 
     $scope.isGridView = true
     $scope.showingFilterNav = false
@@ -181,42 +240,11 @@
     vm.applyFilter = function() {
         // TODO: reset to home page with new filter settings
         // close filter on recommend, rating, or searching
+        $scope.$broadcast('reload-home-tab')
     }
 
-    $scope.filter_template = { // TODO: get fitler template from recsys obj
-        numerical_fields: ['Publication Year', 'Age','Grade Level'],
-        default_sort_param: 'Age',
-        filter_objects: [{
-            type: 'numerical',
-            field: 'other_id',
-            numerical_type: 'slider',
-            numerical_range: [1,100],
-        },{
-            type: 'qualitative',
-            field: 'category',
-            qualitative_type: 'grid',
-            qualitative_values: ['Mystery','Science Fiction', 'Romance', 'Historical', 'Period Drama','War', 'Economics', 'Architecture', 'Natural Science', 'Politics']
-        }]
-    }
- 
 
-    //TODO: sorted_param in filter model
-    $scope.sorted_param = $scope.filter_template.default_sort_param
-    $scope.changeSortedParam = function(value) {
-        $scope.sorted_param = value
-    }
-    $scope.isSortedParam = function(value) {
-        return value == $scope.sorted_param
-    }
-    var template = $scope.filter_template
-    vm.numerical_fields = template.numerical_fields
-    vm.options = {}
-    $scope.filterModel = itemService.getFilterModel(template)
-    vm.filterFields = itemService.getFilterFields(template)
-
-    console.log("test", $scope.filterModel, vm.filterFields)
-
-
+/*
     $scope.show = function(modal) {
       var result = $uibModal.open({
         templateUrl: 'modal.html',
@@ -229,6 +257,7 @@
         console.log(model)
       });
     }
+*/
 
    $scope.getFilterParams = function() {
        var params = {
