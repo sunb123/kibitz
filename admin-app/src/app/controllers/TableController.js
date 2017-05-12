@@ -3,12 +3,12 @@
   angular
     .module('app')
     .controller('TableController', [ 'config', '$timeout',
-      'tableService', 'loginService', '$mdSidenav', '$mdToast', '$scope', '$http', '$state', 'Upload', '$cookies', '$q',
+      'tableService', 'loginService', '$mdSidenav', '$mdToast', '$scope', '$http', '$state', 'Upload', '$cookies', '$q', '$uibModal',
       TableController
     ])
 
 
-  function TableController(config, $timeout, tableService, loginService, $mdSidenav, $mdToast, $scope, $http, $state, Upload, $cookies, $q) {
+  function TableController(config, $timeout, tableService, loginService, $mdSidenav, $mdToast, $scope, $http, $state, Upload, $cookies, $q, $uibModal) {
     var vm = this;
 
     if (!loginService.loggedIn()) {
@@ -23,18 +23,6 @@
       return $cookies.get('authenticated')
     }
 
-    $scope.errorMessage = {'status':'', 'message':''}
-
-    function setErrorMessage(status, message) {
-      $scope.errorMessage.status = status
-      $scope.errorMessage.message = message
-    }
-
-    vm.whichTab = 0
-    vm.changeTab = function(tabNum) {
-      vm.whichTab = tabNum
-    }
-
     vm.showSimpleToast = showSimpleToast;
 
     function showSimpleToast(title) {
@@ -47,8 +35,99 @@
     }
 
     $scope.tableData = [];
+    // get recsys list
+    $scope.$parent.itemDeferred.promise.then(function(val) {
+      $scope.tableData = [].concat($scope.$parent.recsysList)
+      if ($scope.tableData.length != 0) {
+          vm.hasRecommenders = true;
+      }
+      //console.log($scope.tableData)
+    })
+
+    $scope.$watch('$parent.recsysList', function(newVal, oldVal) {
+      $scope.tableData = [].concat($scope.$parent.recsysList)
+      if ($scope.tableData.length != 0) {
+          vm.hasRecommenders = true;
+      }      
+      //console.log($scope.tableData)
+    })
+
+    $scope.auth = function () {
+      var params = {
+          'response_type': 'code',
+          'scope': 'read write',
+          'client_id': 'sphQrMCcfdIjker5ghseFx7vRfV2bcwBfqJVRKAe',
+          'redirect_uri': config.home_url,
+      };
+
+      var authorization_url = config.buildURL('/oauth2/authorize/', params);
+      var server_url = config.server_url
+      var popup = window.open(authorization_url,'newwindow', myconfig='height=600,width=600,' +
+      'toolbar=no, menubar=no, scrollbars=no, resizable=no,' + 'location=no, directories=no, status=no')
+
+      var fnCheckLocation = function(){
+          console.log(popup.location)
+          if (popup.location === null || popup.location == undefined || popup.location.href == null || popup.location.href == undefined) {
+              clearInterval(interval);
+          }
+
+          if (popup.location.href != "about:blank" && popup.location.href.indexOf("code=") != -1) {
+            var code = popup.location.search.substring(popup.location.search.indexOf('code=')+5)
+            $http({
+              url: server_url+'/code-to-token/',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+              },
+              method: 'POST',
+              data: {
+                'code': code,
+                'username': sessionStorage.getItem('k_username'),
+              },
+            }).then(function successCallback(response) {
+                console.log(response)
+                $cookies.put('authenticated', true)
+
+                popup.close();
+                clearInterval(interval);
+                $scope.$parent.loadRepos()
+
+            }, function errorCallback(response) {
+                console.log("failed", response)
+            });
+          }
+      }
+
+      var interval = setInterval(fnCheckLocation, 500);
+    }
+
+    $scope.show = function(modal) {
+      $scope.modalInstance = $uibModal.open({
+        templateUrl: 'createModal.html',
+        controller: 'ModalInstanceCtrl',
+        controllerAs: 'vm',
+        scope: $scope,
+      });
+
+      var result = $scope.modalInstance.result
+
+      result.then(function(model) {
+        console.log(model)
+      });
+    }
+
+
+
+  }
+
+angular.module('app').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, config, $timeout, tableService, loginService, $mdSidenav, $mdToast, $http, $state, Upload, $cookies, $q) {
+    var vm = this;
+
     $scope.tables = []
     $scope.columns = []
+    
+    $scope.recommenderName = ''
+    $scope.urlName = ''
 
     $scope.selectedRepo = ''
     $scope.selectedTable = ''
@@ -58,21 +137,23 @@
     $scope.selectedImageLink = ''
     $scope.selectedUnivCode = ''
 
-    // get recsys list
-    $scope.$parent.itemDeferred.promise.then(function(val) {
-      $scope.tableData = [].concat($scope.$parent.recsysList)
-      //console.log($scope.tableData)
-    })
+    $scope.errorMessage = {'status':'', 'message':''}
 
-    $scope.$watch('$parent.recsysList', function(newVal, oldVal) {
-      $scope.tableData = [].concat($scope.$parent.recsysList)
-      //console.log($scope.tableData)
-    })
+    function setErrorMessage(status, message) {
+      $scope.errorMessage.status = status
+      $scope.errorMessage.message = message
+    }
+
+    $scope.whichTab = 0
+    $scope.changeTab = function(tabNum) {
+      $scope.whichTab = tabNum
+    }
 
     function checkBasicParams() {
         if ($scope.recommenderName == '' || $scope.recommenderName == null || $scope.recommenderName == undefined ||
             $scope.urlName == '' || $scope.urlName == null || $scope.urlName == undefined) {
           setErrorMessage("missing_field", "Missing recommender name or url")
+          //console.log($scope.recommenderName, $scope.urlName)
           return false
         } 
         return true
@@ -91,8 +172,8 @@
     }
 
 
-    vm.headers = {}
-    vm.csvHeadersFields = [
+    $scope.headers = {}
+    $scope.csvHeadersFields = [
         {
             key: 'title',
             type: 'select',
@@ -144,7 +225,7 @@
         var options = []
         var option;
         for (var i in headerList) {
-            option = {'name':headerList[i], 'value':parseInt(i)}
+            option = {'name':headerList[i], 'value':headerList[i]}
             options.push(option)
         }
         return options
@@ -158,10 +239,10 @@
             var lines = this.result.split('\n');
             fileHeaders = lines[0].toLocaleLowerCase().split(',').map(function(v){return v.trim()});
             var headerOptions = headerListToOptions(fileHeaders)
-            vm.csvHeadersFields[0].templateOptions.options = headerOptions
-            vm.csvHeadersFields[1].templateOptions.options = headerOptions
-            vm.csvHeadersFields[2].templateOptions.options = headerOptions
-            vm.csvHeadersFields[3].templateOptions.options = headerOptions
+            $scope.csvHeadersFields[0].templateOptions.options = headerOptions
+            $scope.csvHeadersFields[1].templateOptions.options = headerOptions
+            $scope.csvHeadersFields[2].templateOptions.options = headerOptions
+            $scope.csvHeadersFields[3].templateOptions.options = headerOptions
             $scope.hasHeaders = true
         };
     }
@@ -198,9 +279,9 @@
     }
 
     $scope.createRecommender = function() { 
-      if (vm.whichTab == 1) {
+      if ($scope.whichTab == 1) {
         vm.createRecsysFromParams()
-      } else if (vm.whichTab == 0) {
+      } else if ($scope.whichTab == 0) {
         $scope.uploadCSV()
         $scope.hasHeaders = false
       }
@@ -212,7 +293,7 @@
         }
 
         var file = $('#csvFile')[0].files[0]
-        if (Object.keys(vm.headers).length == 0) { // TODO: determine which headers are required
+        if (Object.keys($scope.headers).length == 0) { // TODO: determine which headers are required
           setErrorMessage("missing_header", "Missing CSV headers")
           return
         }
@@ -231,14 +312,15 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': $cookies.get('csrftoken'),
                 },
-                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'headers':JSON.stringify(vm.headers)},
+                data: {'file': file, 'username': $cookies.get('k_username'), 'name': $scope.recommenderName, 'url_name': $scope.urlName, 'headers':JSON.stringify($scope.headers)},
+
             }).then(function (response) {
                 console.log('Success ' + response.config.data.file.name + ' uploaded. Response: ' + response.data);
                 setErrorMessage('','')
                 $scope.showFieldSelection = true
-                $scope.$parent.loadRecsysList()
+                $scope.$emit('reload-resources')
                 enableCreateRecommenderButton()
-                $('#myModal').modal('toggle');
+                $scope.modalInstance.close()
             }, function (response) {
                 console.log('Error status: ' + response.status);
                 //$scope.$parent.itemDeferred.resolve('resolved')
@@ -256,7 +338,6 @@
 
     }
 
-    vm.hasRecommenders = true;
     $scope.disabled = 'true';
 
     $scope.$watch('selectedRepo', function(newVal, oldVal){
@@ -272,14 +353,16 @@
         }
     })
 
+  /*
     $('#myModal').on('hidden.bs.modal', function () {
         $scope.urlErrorMessage = false
         $scope.$digest()
         console.log("hidden")
     })
+*/
 
     // Called when creating recsys through Datahub
-    vm.createRecsysFromParams = function() {
+    vm.createRecsysFromParams = function(model) {
         if (checkBasicParams() == false || checkRecsysParams() == false) {
           return
         }
@@ -303,8 +386,8 @@
 
         console.log(recsys_params)
 
-        $scope.$parent.itemDeferred = $q.defer()
-        $scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
+        //$scope.$parent.itemDeferred = $q.defer()
+        //$scope.$parent.itemPromise = $scope.$parent.itemDeferred.promise
 
         $http({
           url: config.server_url+'/recsys/',
@@ -318,10 +401,9 @@
         }).then(function successCallback(response) {
             console.log(response)
             setErrorMessage('','')
-            $scope.$parent.loadRecsysList()
+            $scope.$emit('reload-resources')
             enableCreateRecommenderButton()
-            $('#myModal').modal('toggle');
-
+            $scope.modalInstance.close()
         }, function errorCallback(response) {
             console.log(response)
             $scope.$parent.itemDeferred.resolve('resolved')
@@ -330,54 +412,27 @@
         });
     }
 
-    vm.auth = function () {
-      var params = {
-          'response_type': 'code',
-          'scope': 'read write',
-          'client_id': 'sphQrMCcfdIjker5ghseFx7vRfV2bcwBfqJVRKAe',
-          'redirect_uri': config.home_url,
-      };
-
-      var authorization_url = config.buildURL('/oauth2/authorize/', params);
-      var server_url = config.server_url
-      var popup = window.open(authorization_url,'newwindow', myconfig='height=600,width=600,' +
-      'toolbar=no, menubar=no, scrollbars=no, resizable=no,' + 'location=no, directories=no, status=no')
-
-      var fnCheckLocation = function(){
-          console.log(popup.location)
-          if (popup.location === null || popup.location == undefined || popup.location.href == null || popup.location.href == undefined) {
-              clearInterval(interval);
-          }
-
-          if (popup.location.href != "about:blank" && popup.location.href.indexOf("code=") != -1) {
-            var code = popup.location.search.substring(popup.location.search.indexOf('code=')+5)
-            $http({
-              url: server_url+'/code-to-token/',
-              headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
-              },
-              method: 'POST',
-              data: {
-                'code': code,
-                'username': sessionStorage.getItem('k_username'),
-              },
-            }).then(function successCallback(response) {
-                console.log(response)
-                $cookies.put('authenticated', true)
-
-                popup.close();
-                clearInterval(interval);
-                $scope.$parent.loadRepos()
-
-            }, function errorCallback(response) {
-                console.log("failed", response)
-            });
-          }
-      }
-
-      var interval = setInterval(fnCheckLocation, 500);
+    vm.applyFilter = function() {
+        $uibModalInstance.close()
     }
 
-  }
+    vm.ok = ok;
+    vm.cancel = cancel;
+
+    function ok() {
+      $uibModalInstance.close()//(vm.formData.model);
+    }
+
+    function cancel() {
+      //vm.formData.options.resetModel()
+      $uibModalInstance.close({
+          'recommenderName': $scope.recommenderName, 
+          'urlNAme': $scope.urlName
+      })
+      console.log($scope.recommenderName, $scope.urlName)
+      $uibModalInstance.dismiss('cancel');
+    };
+
+  });
+
 })();

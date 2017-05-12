@@ -74,7 +74,8 @@
         rating_icon_color: 'hsl(0, 0%, 0%)',
         highlighted_rating_icon_color: 'hsl(0, 100%, 50%)',
         rating_icon_fontsize: 14,
-        item_fields_include: []
+        item_fields_include: [],
+        filter_fields: [],
     }
 
     $scope.ratingStates = [{stateOn: 'fa fa-star', stateOff: 'fa fa-star-o'},
@@ -97,6 +98,7 @@
     //vm.recsysFields[1].templateOptions.getError = function() {return $scope.urlErrorMessage}
     vm.recsysFieldsAdv = recsysService.recsysFieldsAdv
     vm.recsysFieldsTemplate = recsysService.recsysFieldsTemplate
+
 
     function getTables(repo_name) {
         for (i in vm.repoList) {
@@ -193,6 +195,10 @@
         } else { // table has changed. use new table columns.
             $scope.models.lists.roles = roles 
         }
+        $scope.filterModel.values = roles
+        //setFilterTemplates(roles)
+
+        console.log("test",vm.recsysFields)
     }
  
     $scope.$watch('vm.recsys.repo_name', function(newVal, oldVal){ // records at value not option dict
@@ -286,6 +292,13 @@
         console.log($scope.rolesChecked)
         console.log(template)
 
+        var filter_fields = template.filter_fields != undefined ? template.filter_fields : vm.recsys.filter_fields 
+        var field
+        for (var i=0; i < filter_fields.length; i++) {
+            field = filter_fields[i]
+            $scope.filterChecked[field] = true
+        }
+
         // $http get first item in data set recsys_id. 
         $http({
           method: 'GET',
@@ -300,8 +313,8 @@
           $scope.first_item = item
           console.log(item_fields_include)
           console.log(vm.recsys)
-          $scope.myimage = item_fields_include.includes(vm.recsys.image_link_field) ? item[vm.recsys.image_link_field] : ''
-          $scope.mytitle = item_fields_include.includes(vm.recsys.title_field) ? item[vm.recsys.title_field] : ''
+          $scope.myimage = item[vm.recsys.image_link_field]
+          $scope.mytitle = item[vm.recsys.title_field]
           $scope.description = item_fields_include.includes(vm.recsys.description_field) ? item[vm.recsys.description_field] : ''
           $scope.rating = 4
     
@@ -328,8 +341,9 @@
         }
     }
 
-    function capitalize(word) {
-      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+    function formatField(word) {
+      var field = word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+      return field.split('_').join(' ')
     }
 
     // TODO: fetch first item in item list
@@ -342,12 +356,11 @@
             field = itemDetails[i]
             value = item[field]
             item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>{0}</div> \
-            <div class='col-xs-8 display-value item-field'>{1}</div></div>".format(capitalize(field), value)
+            <td><div class='col-xs-8 display-value word-wrap'>{1}</div></div>".format(formatField(field), value)
         }
         item_template += "</fieldset>"
         return item_template
     }
-
 
     $scope.ratings_template = '<fieldset> \
        <div class="star-rating"> Your Rating: \
@@ -400,9 +413,14 @@
         template['use_field_selection'] = true
         template['field_selection_column_name'] = ''
 
+        template['filter_fields'] = $scope.filterModel.values.filter(function(field){return $scope.filterChecked[field.label] == true}).map(function(field){ return field.label})
+        
+        console.log($scope.filterChecked, $scope.filterModel.values)
+        console.log(template['filter_fields'])
+
         vm.recsys.template = JSON.stringify(template)
         console.log(vm.recsys.template)
-        
+ 
         onSubmit()
     }
 
@@ -502,6 +520,91 @@
         console.log(value)
     }
 
+    
+/*
+    vm.filterFieldsNumerical = [
+        {
+            key: 'numerical_range',
+            type: 'range-slider',
+            templateOptions: {
+                type: 'text',
+                label: 'Numerical Range',
+                placeholder: '',
+                required: false,
+                sliderOptions:{
+                    "floor": 2,
+                    "ceil": 30
+                },
+            }
+        },
+    ];
+
+    vm.filterFieldsQualitative = [
+        {
+            key: 'qualitative_count',
+            type: 'slider',
+            templateOptions: {
+                type: 'text',
+                label: 'Number of Values To Include',
+                placeholder: '',
+                required: false,
+                sliderOptions:{
+                    "floor": 2,
+                    "ceil": 30
+                },
+            }
+        },
+    ];
+/*/
+
+
+    // TODO; set high low for range sliders in templates
+
+   /* vm.currentFilterTemplate = {}
+    $scope.filterTemplates = {}
+    
+    function setFilterTemplates(values) {
+        for (var i in values) {
+            $scope.filterTemplates[values[i].label] = {}
+        }
+    }
+*/
+    $scope.filterChecked = {}
+
+    $scope.filterModel = {
+        selected: '',
+        values: []
+    }
+/*
+    vm.changeToNumerical = function() {
+        vm.currentFilterTemplate.type = 'numerical'
+    }
+    
+    vm.changeToQualitative = function() {
+        vm.currentFilterTemplate.type = 'qualitative'
+    }
+
+    $scope.switchFilterTemplate = function(name) {
+        vm.currentFilterTemplate = $scope.filterTemplates[name]
+    }
+  */ 
+    $scope.filterCheck = function(value) {
+        if ($scope.filterChecked[value] != true) {
+            $scope.filterChecked[value] = true
+        } else {
+            delete $scope.filterChecked[value]
+        }
+        console.log(value)       
+    }
+ 
+    $scope.getFilterStyle = function(value) {
+        if ($scope.filterChecked[value] == true) {
+            return {'background-color':'#dff0d8'}
+        } else {
+            return {'background-color':'#fff'}
+        }
+    }
+
     $scope.getStyle = function(role) {
         if ($scope.rolesChecked[role] == true) {
             return {'background-color':'#dff0d8'}
@@ -564,7 +667,7 @@
         var options = []
         var option;
         for (var i in headerList) {
-            option = {'name':headerList[i], 'value':parseInt(i)}
+            option = {'name':headerList[i], 'value':headerList[i]}
             options.push(option)
         }
         return options

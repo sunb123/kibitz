@@ -31,3 +31,9 @@ def formatUrl(url):
 
 def formatTableName(url):
     return formatUrl(url) + KIBITZ_TABLE_MARKER
+
+def formatTableHeader(header):
+    '''
+        Datahub will strip ends, lower case, and replace each space with an underscore
+    '''
+    return header.strip().lower().replace(" ","_")

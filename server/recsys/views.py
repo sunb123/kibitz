@@ -1,4 +1,4 @@
-import requests, subprocess, sys, json
+import requests, subprocess, sys, json, StringIO, csv
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets, status
@@ -6,20 +6,16 @@ from rest_framework.response import Response
 from django.core import serializers
 # from django.contrib.auth.decorators import login_required
 
-from recsys.models import Recsys
-from recsys.serializers import RecsysSerializer
-
 from app.user_methods import is_logged_in, is_admin
 from app.user_methods import makeRequest, makeGetRequest, makeDeleteRequest
-from recsys.methods import checkRecsysUrlUnique
 from app.global_vars import default_recsys_template, SERVER_HOME
-from app.methods import getItemTableFormat, fetch_csv_from_datahub
+from app.methods import getItemTableFormat, datahub_table_to_solr_csv
 from app.system_methods import lock_decorator
 
 from authentication.models import Account
+from recsys.serializers import RecsysSerializer
 from recsys.models import Recsys
-from recsys.methods import formatUrl, formatTableName
-
+from recsys.methods import checkRecsysUrlUnique, checkUrlFormat, formatUrl, formatTableName
 
 def addIdField(repo_base, repo_name, item_table_name, owner_id):
     api_url = '/api/v1/repos/{}/{}/tables/{}'.format(repo_base, repo_name, item_table_name)
@@ -93,6 +89,7 @@ class RecsysViewSet(viewsets.ViewSet):
         repo_name = data.get('repo_name')
         item_table_name = data.get('item_table_name')
         primary_key_field = data.get('primary_key_field','')
+        solr_core_name = formatUrl(urlName)
 
         # create recsys object
         recsys = Recsys(name=recommenderName, url_name=urlName, repo_base=repo_base, repo_name=repo_name,
@@ -104,6 +101,7 @@ class RecsysViewSet(viewsets.ViewSet):
         recsys.universal_code_field = data.get('universal_code_field','')
         recsys.owner = user
         recsys.status = 'paused'
+        recsys.solr_core_name = solr_core_name
         recsys.template = json.dumps(default_recsys_template)
         recsys.save()
 
@@ -114,9 +112,8 @@ class RecsysViewSet(viewsets.ViewSet):
             if addId != 200:
                 return HttpResponse("failed to add id field")
 
-        # TODO:
-        # create CSV file from DH table, read that file into file_url_solr
-        solr_core_name = formatUrl(urlName)
+        # prepare solr csv file from DH table
+        file_url_solr = datahub_table_to_solr_csv(owner_id, repo_base, repo_name, item_table_name, primary_key_field)
 
         # setup solr core and index       
         output = subprocess.check_output(['/var/www/html/kibitz/server/scripts/solr_setup.sh', '-c', solr_core_name, '-f', '{}'.format(file_url_solr)]) 
@@ -171,8 +168,7 @@ class RecsysViewSet(viewsets.ViewSet):
             params = request.data.get('params')
             # TODO: 
             # if change repo or table, 
-            #     try to create a new solr core for recsys and reindex. create csv from table and read file into solr index
-            #     check that repo has id, if not, add it.
+            #     try to create a new solr core for recsys and reindex.
             if params != None:
                 for param_type, param in params.iteritems():
                     if param_type != 'url_name':

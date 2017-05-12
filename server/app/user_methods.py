@@ -126,8 +126,8 @@ def createAdminUser(username, email, password):
         'email': email,
         'password': password,
     }
-    resp = makeRequest('POST', api_url, 0, data=data, isMaster=True) # create DH account
-    print resp.content
+    resp = makeRequest('POST', api_url, None, data=data, isMaster=True) # create DH account
+    print resp.content, resp.status_code
     if resp.status_code != 200:
         return False
     else: # create new admin object, with tokens.
@@ -138,9 +138,11 @@ def checkUserUnique(username, email=None, recsys_id=None):
 
 @lock_decorator
 def createAdminUserObjectWithTokens(username, email=None, password=None):
+    admin_user = createAdminUserObject(username, email=email, password=password)
     access_token, refresh_token = getTokensFromPassword(username, password)
-    admin_user = createAdminUserObject(username, email=email, password=password, access_token=access_token,
-            refresh_token=refresh_token)
+    admin_user.access_token = access_token
+    admin_user.refresh_token = refresh_token
+    admin_user.save()
     return admin_user
 
 def createAdminUserObject(username, email=None, password=None, access_token=None, refresh_token=None):
@@ -285,6 +287,7 @@ def getTokensFromPassword(username, password):
         'password': password,
         })
     access_token, refresh_token = response.json().get('access_token'), response.json().get('refresh_token')
+    print response.json(), response.content, response.status_code
     if access_token != None and access_token != '' and refresh_token != None and refresh_token != '':
         return access_token, refresh_token
     else:
@@ -312,7 +315,7 @@ def callRefreshToken(refresh_token, user_id, isMaster=False): # returns new toke
             'refresh_token': refresh_token,
         })
 
-    print 'called refresh', response.content, user_id, "master", isMaster
+    print 'called refresh', response.json(), response.content, response.status_code, user_id, "master", isMaster
 
     if response.status_code == 200:
         return response.json().get('access_token'), response.json().get('refresh_token')

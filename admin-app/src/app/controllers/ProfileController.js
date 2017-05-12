@@ -11,7 +11,7 @@
 
     vm.user = {
       title: $cookies.get('k_username'),
-      email: '',
+      email: $cookies.get('k_email'),
       firstName: '',
       lastName: '' ,
     };

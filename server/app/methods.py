@@ -1,10 +1,13 @@
-import requests, os
+import requests, os, subprocess, sys, json, StringIO, csv
 from app.user_methods import makeRequest, makeGetRequest
 from app.user_methods import master_dh_query_url, master_repo, rating_table
 from recsys.models import Recsys
 from authentication.models import Account
 from app.models import Rating, NotInterested
 from app.global_vars import TMP_FILES
+from app.system_methods import is_isbn
+
+csv.field_size_limit(sys.maxsize)
 
 def getItemTableFormat(params):
     field_list = []
@@ -121,69 +124,72 @@ def removeNotInterested(username, item_id, recsys_id, universal_code=None):
 def importRatingsFromGoodreads():
     # TODO:
     pass
-
 def prepare_file_solr(f, file_url_dh): # NOTE: called after prepare_file_datahub
-    file_name_solr = str(f).split('.')[0]+'_solr32271.csv'
+    original_file_name = str(f).rsplit('.',1)[0].replace(" ","") # remove spaces from file name
+    file_name_solr = original_file_name + '_solr32271.csv'
     file_url_solr = os.path.join(TMP_FILES, '{}'.format(file_name_solr)) 
     f = open(file_url_dh, 'r')
-    raw_headers = f.readline().strip().split(',')
-    headers = [header+'_t' for header in raw_headers if header != 'id'] #NOTE:add _t type for solr
-    headers.insert(0,'id')
+    reader = csv.reader(f, delimiter=',')
+    headers = [header+'_t' if header != 'id' else header for header in reader.next()] #NOTE:add _t type for solr
     with open(file_url_solr, 'wb+') as destination:
-        destination.write(','.join(headers)+"\n")
-        destination.write(f.read())
+        writer = csv.writer(destination)
+        writer.writerow(headers)
+        writer.writerows(reader)
     return file_url_solr
 
 def prepare_file_datahub(f):
-    file_name_dh = str(f).split('.')[0]+'_datahub32271.csv'
+    original_file_name = str(f).rsplit('.',1)[0].replace(" ","") # remove spaces from file name
+    file_name_dh = original_file_name + '_datahub32271.csv'
     file_url = os.path.join(TMP_FILES, '{}'.format(file_name_dh))
-    raw_headers = f.readline().strip().split(',')
-    headers = [header.strip().lower() for header in raw_headers]
+    reader = csv.reader(f, delimiter=',')
+    headers = [header.strip().lower() for header in reader.next()]
     original_headers = headers[:]
     no_id = False
     if 'id' not in headers:
         no_id = True
         headers.insert(0,'id')
     with open(file_url, 'wb+') as destination:
-        destination.write(','.join(headers)+"\n")
+        writer = csv.writer(destination)
+        writer.writerow(headers)
         count = 1
-        for i, line in enumerate(f):
-            if i == 0: # skip original headers
-                continue
-            fields = [field.strip() for field in line.strip().split(',')]
+        for row in reader:
+            fields = [field.strip() for field in row]
             if no_id:
                 fields.insert(0,str(count)) # add index
-            destination.write(','.join(fields)+"\n")
+            writer.writerow(fields)
             count += 1
     return file_url, file_name_dh, original_headers
 
-def fetch_csv_from_datahub(owner_id, repo_base, repo_name, table_name, file_name):
-    # create file from table
-    api_url= '/api/v1/repos/{}/{}/files/'.format(repo_base, repo_name)
+def datahub_table_to_solr_csv(owner_id, repo_base, repo_name, table_name, pk_field, file_name=''):
+    api_url = '/api/v1/repos/{}/{}/files/'.format(repo_base, repo_name) # create csv file from DH table
     r = makeRequest('POST', api_url, owner_id, data={
+        #'file_name': '',
         'from_table': table_name,
     })
-    print r.text
- 
-    file_name = table_name 
-    # download file
-    api_url = '/api/v1/repos/{}/{}/files/{}'.format(repo_base, repo_name, file_name)
+
+    file_name_dh = table_name + '.CSV' 
+    file_name_local = table_name + '.csv'
+    api_url = '/api/v1/repos/{}/{}/files/{}'.format(repo_base, repo_name, file_name_dh)
     r = makeGetRequest(api_url, owner_id)
-    #js = r.json()
-    print r.text
-    file_url = os.path.join(TMP_FILES, '{}'.format(file_name))
-    with open(file_url, 'wb+') as destination:
-        pass
-        #destination.write(js)
-    # save file in solr format for indexing
+    scsv = r.json() # get csv file text
     
+    file_url = os.path.join(TMP_FILES, '{}'.format(file_name_local))
+    with open(file_url, 'wb+') as destination:
+        f = StringIO.StringIO(scsv)
+        reader = csv.reader(f, delimiter=',')
+        writer = csv.writer(destination)
+        raw_headers = [header.strip().lower() for header in reader.next()]
+        headers = [header+'_t' if header != pk_field else header for header in raw_headers] #NOTE:add _t type for solr
+        writer.writerow(headers)
+        writer.writerows(reader)
+    return file_url 
 
 def makeSolrRequest(port, core, searchText, rows, start):
     solr_url = "http://localhost:{}/solr/{}/query".format(port, core)
     payload = {'q':searchText, 'rows':rows, 'start':start}
     r = requests.post(solr_url, data=payload)
-    docs = r.json()['response']['docs']
     if r.status_code == 200:
+        docs = r.json()['response']['docs']
         return r.status_code, r.json()['response']
     else:
         print "search error", r.status_code, r.content

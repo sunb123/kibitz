@@ -1,0 +1,17 @@
+<div class="radio-group">
+ 
+  <table> 
+    <tr ng-repeat="(key, option) in to.options" class="checkbox">
+      <td ng-repeat="opt in option" class="checkbox">
+        <label>
+          <input type="checkbox"
+                 id="{{id + '_'+ $index}}"
+                 ng-model="multiCheckbox.checked[$index]"
+                 ng-change="multiCheckbox.change()">
+          {{opt[to.labelProp || 'name']}}
+        </label>
+      </td>
+    </tr>
+  </table>
+
+</div>

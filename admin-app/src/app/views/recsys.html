@@ -14,20 +14,67 @@
 	    </div>
 	</div>
 
-	<form ng-submit="vm.submit()" ng-show="vm.isTab('general')" novalidate>
+	<form ng-show="vm.isTab('general')" novalidate>
 
 	    <formly-form model="vm.recsys" fields="vm.recsysFields" form="vm.recsysForm">
-	        <button type="submit" class="btn btn-primary" style="font-size:20px" ng-disabled="vm.recsysForm.$invalid">Save</button>
 	    </formly-form>
 	</form>
+
+  <table ng-show="vm.isTab('general')">
+    <tr valign="top">
+      <td style="margin: 0px 10px 0px 10px">
+        <div class="simpleDemo row" style="padding: 0px 15px 0px 15px">
+          <div class="panel panel-info">
+              <div class="panel-heading">
+                <h3 class="panel-title">Select Item Fields For Users to Filter/Sort On</h3>
+              </div>
+
+                    <ul dnd-list="filterModel">
+                        <span ng-repeat="item in filterModel.values">
+                        <li style="cursor:pointer"
+                            dnd-draggable="item"
+                            dnd-disable-if="true"
+                            dnd-effect-allowed="move"
+                            dnd-selected="filterModel.selected = item;filterCheck(item.label)"
+                            ng-style="getFilterStyle(item.label)"
+                            >
+                               {{item.label}} 
+                        </li>
+                           <!-- Is this a numerical or qualitative field?
+                            <label><input type="checkbox" value="">Numerical</label> 
+                            <label><input type="checkbox" value="">Qualitative</label> 
+                           i-->
+                        </span>
+                    </ul>
+          </div>
+        </div>
+      </td>
+     <!--
+      <td ng-show="filterModel.values.length != 0" style="padding-left: 20px; padding-top: 30px;">
+          <div class="btn-group" role="group" aria-label="">
+            <button type="button" class="btn btn-primary" ng-click="vm.changeToNumerical()">Numerical</button>
+            <button type="button" class="btn btn-primary" ng-click="vm.changeToQualitative()">Qualitative</button>
+          </div>
+
+          <formly-form ng-if="vm.currentFilterTemplate.type == 'numerical'" model="vm.currentFilterTemplate" fields="vm.filterFieldsNumerical" form="vm.filterTemplateForm"></formly-form>
+          <formly-form ng-if="vm.currentFilterTemplate.type == 'qualitative'" model="vm.currentFilterTemplate" fields="vm.filterFieldsQualitative" form="vm.filterTemplateForm"></formly-form>
+      </td>
+     -->
+    </tr>
+  </table>
+
+<button ng-show="vm.isTab('general')" ng-click="saveTemplate()" class="btn btn-primary" style="font-size:20px" ng-disabled="vm.recsysForm.$invalid || vm.filterTemplateForm.$invalid">Save</button>
+
 
 
 <div ng-show="vm.isTab('widget')">
   <div id="item-card-demo"></div>
 </div>
 
-
-
+<!--
+<span uib-rating ng-model="rating" max="5" state-on="'icon-car'" state-off="'glyphicon-ok-sign'"></span>
+<i class="icon-car icon-white"></i>
+-->
 <!-- <span id="item-card-demo">
 <md-card style="height: 400px" ng-cloak>
 
@@ -167,12 +214,11 @@
         </div>
 
               <ul dnd-list="models.lists.roles">
-                  <li ng-repeat="item in models.lists.roles"
+                  <li ng-repeat="item in models.lists.roles" style="cursor:pointer"
                       dnd-draggable="item"
                       dnd-moved="models.lists.roles.splice($index, 1)"
                       dnd-effect-allowed="move"
                       dnd-selected="models.selected = item;check(item.label)"
-                      ng-class="{'selected': models.selected === item}"
                       ng-style="getStyle(item.label)"
                       >
                          {{item.label}} 
@@ -235,7 +281,7 @@
 
 		Image, video links -->
 
-	<form ng-submit="vm.submit()" ng-show="vm.isTab('advanced')" style="margin-bottom: 30px">  <!-- ng-submit="vm.cssUpload(1, vm.cssText)" -->
+	<form ng-submit="saveTemplate()" ng-show="vm.isTab('advanced')" style="margin-bottom: 30px">  <!-- ng-submit="vm.cssUpload(1, vm.cssText)" -->
 
             <formly-form model="vm.recsys" fields="vm.recsysFieldsAdv" form="vm.recsysFormAdv">
                 <button type="submit" class="btn btn-primary" style="font-size:20px" ng-disabled="vm.recsysFormAdv.$invalid">Save</button>
@@ -245,13 +291,13 @@
             <h6>Press if Datahub tables have been updated</h6>
             <button>Update</button>
               
+ -->
      <h4>CSS Edit</h4>
 		<textarea ng-model="vm.cssText" style="height:600px; width: 80%; display: block"></textarea>
     <h4>CSS Link</h4>
     <input ng-model="vm.cssLink" type="text" name="" style="width:80%">
 
     <button type="submit" class="btn btn-primary" style="display: block; margin: 10px 0px 10px 0px">Submit</button>
- -->
         </form>
 <!--
 	<form>
@@ -262,9 +308,6 @@
  -->
 
 
-
-
-
   <div ng-show="vm.isTab('general')">
     <hr style="border-top: 1px solid darkgray">
     <button ng-if="active()" type="button" class="btn btn-warning" data-toggle="modal" data-target="#pauseModal">Pause Recommender</button>
@@ -272,11 +315,9 @@
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Recommender</button>
   </div>
 
-
     <div ng-show="vm.isTab('data')">
           <h3>Update Your Items</h3>
                   <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
-                            <!-- <div style="color: red" ng-if="errorMessage.status == 'missing_fields'">Error: {{ errorMessage.message }}</div> -->
                             <div style="color: red" ng-if="errorMessage.status == 'missing_header'">Error: {{ errorMessage.message }}</div>
                             <h4 style="margin: 30px 0px 10px 0px">Upload a CSV of items. Suggested to include and select headers for Title, Description, Image Link, and Universal Code (e.g., ISBN or UPC)</h4>
                             <input id="csvFile" type="file" file="file" style="font-size: 20px;margin: 0px 0px 10px 0px" required />
@@ -299,7 +340,6 @@
                        
 
     </div>
-
 
 
 </div>

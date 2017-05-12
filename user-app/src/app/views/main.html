@@ -1,16 +1,16 @@
 <div layout="column" flex>
   <div class="mytoolbar">
-    <md-toolbar class="col-md-offset-1 col-md-10" layout="row" layout-align="start center" style="background-color: #558C89">
+    <md-toolbar class="" layout="row" layout-align="start center" style="background-color: #558C89">
 
-      <section class="hide-xs"> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
+      <section id="logo"> <!-- ui-sref="home.items({'isGridView':vm.isGridView})" -->
         <h3 class="logo">
           <a class="clearhref" ui-sref="home.items" ui-sref-opts="{reload:true}">{{vm.recsysTitle}}</a>
         </h3>
       </section>
 
-      <section>
+      <section id="search-bar-main" style="width:100%">
         <form class="search-group" style="width:auto">
-          <div class="input-group" style="width:300px">
+          <div class="input-group" id="search-bar" style="width:100%;max-width:800px">
 
             <span ng-show="loggedIn()" class="autocompletedemoCustomTemplate">
               <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()" md-clear-button="true">
@@ -19,31 +19,67 @@
                   </md-item-template>
               </md-autocomplete>
             </span>
-            <div ng-show="loggedIn()" id="myDropdown" class="input-group-btn">
-               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="modal" data-target="#filterModal" style="height:40px;width:100px;font-size:large;background-color:#e7e7e7;"> <!--  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" > -->
+
+<!--               
+               <md-menu-bar ng-show="loggedIn()" id="myDropdown" class="input-group-btn">
+               <md-menu>
+
+               <button type="button" class="btn btn-secondary dropdown-toggle" ng-click="$mdMenu.open()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px;width:100px;font-size:large;background-color:#e7e7e7;"> ng-click="show()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
                 <span id="search-type">Filter</span>
                 <span class="fa fa-caret-down"></span>
                </button>
 
-               <ul id="menu1" class="dropdown-menu" style="height: 400px;width: 350px" role="menu" aria-labelledby="drop4">
-                 <li role="presentation"><a role="menuitem" style="color:black; pointer-events: none; cursor: default;">Sorted by</a>
-                 </li>
-                 
-                 <li role="presentation"><a role="menuitem" style="color:gray; pointer-events: none; cursor: default;">Search by...</a></li>
-                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#" ng-click="changeSearchType('All')">All</a></li>
-                 <li ng-repeat="type in item_types" role="presentation">
-                   <a role="menuitem" tabindex="-1" href="#" ng-click="changeSearchType(type)">{{ type }}</a>
-                 </li>
+            <md-menu-content>
+              <md-menu-item>
 
-                 <li role="presentation" class="divider"></li>
+              <div class="panel-group">
+                <div class="panel panel-default">
+
+                  <div class="panel-heading" style="cursor: pointer" data-toggle="collapse" data-target="#collapse_sorted">
+                    <h4 class="panel-title">Sorted By<span class="fa fa-caret-down" style="float:right"></span></h4>
+                    
+                  </div>
+                      <div id="collapse_sorted" class="panel-collapse collapse">
+    
+                          <ul class="list-group">
+                            <li ng-repeat="(key, value) in vm.numerical_fields track by $index" class="list-group-item" ng-click="changeSortedParam(value)">
+                                <span ng-click="changeSortedParam(value)"> 
+                                    {{key}} {{value}} <span ng-show="isSortedParam(value)" style="float:right"><i class="material-icons">check_circle</i></span>
+                                </span>
+                            </li>
+                          </ul>
+                          
+                      </div>
+
+                  <div class="panel-heading" style="margin: 12px 0px 12px 0px">
+                      <h4 class="panel-title">Filter By</h4>
+                  </div>
+
+                  <form name="vm.filterForm" novalidate style="margin: 12px">
+                      <formly-form id="filterFormly" model="filterModel" fields="vm.filterFields" options="vm.options" form="vm.filterForm"></formly-form>
+                  </form>
+  
+                </div>
+              </div>
+
+                <li role="presentation" class="divider"></li>
                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Other</a></li>
-               </ul>
-            </div>
+             </md-menu-item>
+             </md-menu-content>
+
+              <md-menu-divider></md-menu-divider>
+
+              
+            </md-menu>
+            </md-menu-bar>
+-->
 
           </div>
         </form>
 
       </section>
+
+
 
 <!--       <section class="hide-xs" ng-if="loggedIn()">
             <button type="button" class="btn btn-secondary search-button">
@@ -60,7 +96,7 @@
       </section>
 -->
 
-      <section>
+      <section id="settings-user">
         <md-menu ng-if="loggedIn()">
             <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open()">
                 <span>{{vm.username()}}</span>
@@ -87,6 +123,45 @@
     </md-toolbar>
   </div>
 
+<!--
+      <section id="search-bar-device">
+        <form class="search-group" style="width:auto">
+          <div class="input-group" id="search-bar">
+
+            <span ng-show="loggedIn()" class="autocompletedemoCustomTemplate">
+              <md-autocomplete id="searchbox" ng-disabled="" md-no-cache="" md-selected-item="vm.selectedItem" md-search-text-change="" md-search-text="vm.searchText" md-selected-item-change="itemSearch(item)" md-items="item in vm.querySearch(vm.searchText)" md-item-text="item.display" md-min-length="0" placeholder="Search for items..." ng-enter="itemSearch()" md-clear-button="true">
+                  <md-item-template>
+                    <span md-highlight-text="vm.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                  </md-item-template>
+              </md-autocomplete>
+            </span>
+            <div ng-show="loggedIn()" id="myDropdown" class="input-group-btn">
+               <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height:40px;width:100px;font-size:large;background-color:#e7e7e7;">
+                <span id="search-type">Filter</span>
+                <span class="fa fa-caret-down"></span>
+               </button>
+
+               <ul id="menu1" class="dropdown-menu" style="min-height: 400px;width: 400px" role="menu" aria-labelledby="drop4">
+                 <li role="presentation"><a role="menuitem" style="color:black; pointer-events: none; cursor: default;">Sorted by</a>
+                 </li>
+                 
+                 <li role="presentation"><a role="menuitem" style="color:gray; pointer-events: none; cursor: default;">Search by...</a></li>
+                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#" ng-click="changeSearchType('All')">All</a></li>
+                 <li ng-repeat="type in item_types" role="presentation">
+                   <a role="menuitem" tabindex="-1" href="#" ng-click="changeSearchType(type)">{{ type }}</a>
+                 </li>
+
+                 <li role="presentation" class="divider"></li>
+                 <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Other</a></li>
+               </ul>
+            </div>
+
+          </div>
+        </form>
+
+      </section>
+-->
+
   <md-progress-linear md-mode="indeterminate" ng-show="showSearchProgress" style="width: 125%"></md-progress-linear>
 
   <div ng-if="addTabs()" layout="row" layout-align="center center">
@@ -97,47 +172,123 @@
     </md-tabs>
   </div>
 
-  <md-content flex id="maincontent" class="md-padding page-content" style="overflow-y:scroll;">
-      <div class="col-md-offset-1 col-md-10" ui-view></div>
-  </md-content>
+  <div layout="row" layout-align="center center" class="md-padding" >
 
-</div>
-
-
-
-
-
-<div class="modal fade" id="filterModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+    <div layout="column">
+        <button class="btn btn-default" style="float:left;height:37.5px" ng-click="vm.toggleFilterNav()">
+            <span id="search-type">☰ Filter</span>
         </button>
-        <h4 class="modal-title">Filter your items</h4>
-      </div>
+    </div>
 
-      <div class="modal-body">
-          <div class="panel-group">
-            <div class="panel panel-default">
-              <div class="panel-heading">
-                <h4 class="panel-title">
-                  <a data-toggle="collapse" href="#collapse1">Collapsible panel</a>
-                </h4>
-              </div>
-              <div id="collapse1" class="panel-collapse collapse">
-                <div class="panel-body">Panel Body</div>
-                <div class="panel-footer">Panel Footer</div>
-              </div>
-            </div>
-          </div>
-      </div>
+    <span flex></span>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" id="filterButton" class="btn btn-primary" ng-click="vm.applyFilter()"><span id="filterButtonLoading"></span><span id="filterButtonText">Apply</span></button>
+    <div layout="column">
+      <div class="btn-group" role="group"  style="float:right;;height:37.5px">
+          <button class="btn btn-default" ng-click="vm.changeToGridView()">
+              <i class="material-icons">grid_on</i>
+          </button>
+          <button class="btn btn-default" ng-click="vm.changeToListView()">
+              <i class="material-icons">list</i>
+          </button>
       </div>
     </div>
+
   </div>
+
+
+  <div layout="row" flex class="" style="overflow-y:hidden">
+    <div ng-if="showingFilterNav"  layout="column" class="md-padding" style="padding-right:0px;padding-bottom:0px">
+       <md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" style="height:100%">
+          <md-content layout-margin>
+              <div class="panel-heading" style="cursor: pointer;margin: 12px 0px 12px 0px"> <!-- data-toggle="collapse" data-target="#collapse_sorted">-->
+                <h4 class="panel-title">Sorted By<!--<span class="fa fa-caret-down" style="float:right">--></span></h4>
+              </div>
+
+                  <!--<div id="collapse_sorted" class="panel-collapse collapse">-->
+                      <ul class="list-group">
+                        <li ng-repeat="(key, value) in vm.numerical_fields track by $index" class="list-group-item" ng-click="changeSortedParam(value)">
+                           <span ng-click="changeSortedParam(value)">
+                                {{value}} <span ng-show="isSortedParam(value)" style="float:right"><i class="material-icons">check_circle</i></span>
+                            </span>
+                        </li>
+                      </ul>
+                  <!-- </div> -->
+    
+              <div class="panel-heading" style="margin: 12px 0px 12px 0px">
+                  <h4 class="panel-title">Filter By</h4>
+              </div>
+    
+              <form style="margin: 12px" novalidate>
+                  <formly-form id="filterFormly" model="filterModel" fields="vm.filterFields" options="vm.options" form="vm.filterForm"></formly-form>
+              </form>
+
+            <md-button class="btn btn-secondary" style="float:right;background-color:lightgray" ng-click="vm.applyFilter()" class="md-accent">
+               Apply         
+            </md-button>
+
+          </md-content>
+         </md-sidenav> 
+    </div>
+
+    <div layout="column" flex class="md-padding" style="padding-right:0px;padding-bottom:0px">
+       <md-content layout="column" id="scrollContent" flex class="md-padding page-content" style="padding: 0px" >
+           <div ui-view></div>
+       </md-content>
+    </div>
+  </div>
+
+
+
+
 </div>
 
+
+<!--
+<script type="text/ng-template" id="modal.html">
+
+          <div class="modal-header">
+            <button type="button" class="close" ng-click="vm.cancel()" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Filter Items</h4>
+          </div>
+    
+          <div class="modal-body">
+              <div class="panel-group">
+                <div class="panel panel-default">
+                  <div class="panel-heading" style="cursor: pointer" data-toggle="collapse" data-target="#collapse_sorted">
+                    <h4 class="panel-title">Sorted By<span class="fa fa-caret-down" style="float:right"></span></h4>
+                    
+                  </div>
+                      <div id="collapse_sorted" class="panel-collapse collapse">
+    
+                          <ul class="list-group">
+                            <li ng-repeat="(key, value) in vm.numerical_fields track by $index" class="list-group-item" ng-click="changeSortedParam(value)">
+                                <span ng-click="changeSortedParam(value)">
+                                    {{key}} {{value}} <span ng-show="isSortedParam(value)" style="float:right"><i class="material-icons">check_circle</i></span>
+                                </span>
+                            </li>
+                          </ul>
+                          
+                      </div>
+
+                  <div class="panel-heading" style="margin: 12px 0px 12px 0px">
+                      <h4 class="panel-title">Filter By</h4>
+                  </div>
+
+                  <v>Foo</div>
+          <div>Foo</div>
+          <div>Foo</div>form name="vm.filterForm" novalidate style="margin: 12px">
+                      <formly-form id="filterFormly" model="filterModel" fields="vm.filterFields" options="vm.options" form="vm.filterForm"></formly-form>
+                  </form>
+  
+                </div>
+              </div>
+          </div>
+    
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" ng-click="vm.cancel()">Cancel</button>
+            <button type="button" id="filterButton" class="btn btn-primary" ng-click="vm.applyFilter()" ng-disabled="vm.filterForm.$invalid"><span id="filterButtonLoading"></span><span id="filterButtonText">Apply</span></button>
+          </div>
+</script>
+-->

@@ -11,7 +11,36 @@ $widget-height: 310px;
 $font-weight-bold: 600;
 $font-size-large: 22px;
 
-.item-field {
+/*
+.modal-backdrop.in {
+  z-index: 1;
+}
+
+.modal.in {
+  z-index: 2;
+}
+*/
+
+.modal-open {
+    color: #333;
+}
+
+
+.clickable {
+    cursor: pointer;
+}
+
+.icon-car {
+    display: inline-block;
+    background-size: 24px 24px;
+    background-image: url("http://www.iconsdb.com/icons/preview/black/car-xxl.png");
+    background-position: center center;
+    height: 24px;
+    line-height: 24px;
+    width: 24px;
+}
+
+.word-wrap {
     word-wrap: break-word;
 }
 

@@ -23,6 +23,10 @@ angular.module('userapp', ['ngAnimate', 'ngCookies', 'ngTouch',
     })
   })
 
+  .config(function ($qProvider) {
+      $qProvider.errorOnUnhandledRejections(false);
+  })
+
   .config(function($mdThemingProvider) {
     //themes are still defined in config, but the css is not generated
     $mdThemingProvider.theme('success-toast');

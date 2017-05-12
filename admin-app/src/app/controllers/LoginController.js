@@ -53,6 +53,7 @@
                   console.log(response)
                   sessionStorage.removeItem('dh_username')
                   $cookies.put("k_username", response.data['username'])
+                  $cookies.put("k_email", response.data['email'])
                   window.location.href = home_url // NOTE: why does $state.go fail to load abstract ctrl?
 
                   popup.close();
@@ -86,6 +87,7 @@
       }).then(function successCallback(response) {
           console.log(response)
           $cookies.put("k_username", response.data['username'])
+          $cookies.put("k_email", response.data['email'])
           $cookies.put("authenticated", true)
           window.location.href = config.home_url // NOTE: why does $state.go fail to load abstract ctrl?
       }, function errorCallback(response) {

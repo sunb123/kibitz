@@ -2,8 +2,8 @@
   angular
       .module('app')
       .controller('MainController', [
-         'navService', 'loginService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout', '$http', '$cookies',
-         'config',
+         'navService', 'loginService', 'itemService', '$mdSidenav', '$mdBottomSheet', '$log', '$q', '$state', '$mdToast', '$scope', '$timeout', '$http', '$cookies',
+         'config', 'ModalService', '$uibModal',
          MainController
       ])
       .directive('ngEnter', function() {
@@ -22,7 +22,7 @@
         };
       });
 
-  function MainController(navService, loginService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout, $http, $cookies, config) {
+  function MainController(navService, loginService, itemService, $mdSidenav, $mdBottomSheet, $log, $q, $state, $mdToast, $scope, $timeout, $http, $cookies, config, ModalService, $uibModal) {
     var vm = this;
     $scope.$state = $state
 
@@ -31,6 +31,11 @@
     console.log(vm.recsys_url)
 
     $scope.recsysDeferred = $q.defer();
+
+    $scope.filterArray = []
+    for (var i=0; i < 500; i++) {
+        $scope.filterArray.push(i)
+    }
 
     $http({
       method: 'GET',
@@ -67,7 +72,8 @@
       return $cookies.get('k_username')
     }
 
-    vm.isGridView = true
+    $scope.isGridView = true
+    $scope.showingFilterNav = false
     vm.home_location = window.location.href;
     vm.searchText = "";
 
@@ -150,6 +156,15 @@
       };
     }
 
+    vm.changeToGridView = function () {
+      $scope.isGridView = true;
+    }
+
+    vm.changeToListView = function () {
+      $scope.isGridView = false;
+    }
+
+
     $scope.tabSwitch = function(tabIndex) {
       console.log($state.current.name)
       $scope.tabNumber = tabIndex
@@ -159,13 +174,84 @@
       }
     }
 
+    vm.toggleFilterNav = function() {
+        $scope.showingFilterNav = !$scope.showingFilterNav
+    }
 
-    // drop down to filter on different categories
-    // $scope.changeSearchType = function(type) {
-    //   vm.searchType = type
-    //   $('#search-type').text(type)
-    // }
-    // $scope.item_types = ['Title', 'Author', 'Genre', 'Period']
+    vm.applyFilter = function() {
+        // TODO: reset to home page with new filter settings
+        // close filter on recommend, rating, or searching
+    }
+
+    $scope.filter_template = { // TODO: get fitler template from recsys obj
+        numerical_fields: ['Publication Year', 'Age','Grade Level'],
+        default_sort_param: 'Age',
+        filter_objects: [{
+            type: 'numerical',
+            field: 'other_id',
+            numerical_type: 'slider',
+            numerical_range: [1,100],
+        },{
+            type: 'qualitative',
+            field: 'category',
+            qualitative_type: 'grid',
+            qualitative_values: ['Mystery','Science Fiction', 'Romance', 'Historical', 'Period Drama','War', 'Economics', 'Architecture', 'Natural Science', 'Politics']
+        }]
+    }
+ 
+
+    //TODO: sorted_param in filter model
+    $scope.sorted_param = $scope.filter_template.default_sort_param
+    $scope.changeSortedParam = function(value) {
+        $scope.sorted_param = value
+    }
+    $scope.isSortedParam = function(value) {
+        return value == $scope.sorted_param
+    }
+    var template = $scope.filter_template
+    vm.numerical_fields = template.numerical_fields
+    vm.options = {}
+    $scope.filterModel = itemService.getFilterModel(template)
+    vm.filterFields = itemService.getFilterFields(template)
+
+    console.log("test", $scope.filterModel, vm.filterFields)
+
+
+    $scope.show = function(modal) {
+      var result = $uibModal.open({
+        templateUrl: 'modal.html',
+        controller: 'ModalInstanceCtrl',
+        controllerAs: 'vm',
+        scope: $scope,
+      }).result;
+      
+      result.then(function(model) {
+        console.log(model)
+      });
+    }
+
+   $scope.getFilterParams = function() {
+       var params = {
+           sorted_by: $scope.sorted_param,
+           filter_by: $scope.filterModel,
+       }
+       return params
+   }
+
+/*
+    $scope.show = function() {
+        ModalService.showModal({
+            templateUrl: 'modal.html',
+            controller: "ModalInstanceCtrl",
+            controllerAs: 'vm'
+        }).then(function(modal) {
+            modal.element.modal();
+            modal.close.then(function(result) {
+                alert('yes')
+            });
+        });
+    };
+*/
 
     vm.logout = function() {
       $http({
@@ -351,5 +437,43 @@
 
 
   }
+/*
+angular.module('app').controller('ModalInstanceCtrl', function ($scope, $uibModalInstance, itemService) {
+    var vm = this;
+
+    $scope.changeSortedParam = function(value) {
+        $scope.sorted_param = value
+    }
+
+    $scope.isSortedParam = function(value) {
+        return value == $scope.sorted_param
+    }
+    var template = $scope.filter_template
+
+    vm.numerical_fields = template.numerical_fields
+    vm.options = {}
+
+    vm.filterFields = itemService.getFilterFields(template)
+
+    console.log(vm.filterFields)
+
+    vm.applyFilter = function() {
+        $uibModalInstance.close($scope.filterModel)
+    }
+
+    vm.ok = ok;
+    vm.cancel = cancel;
+
+    function ok() {
+      $uibModalInstance.close()//(vm.formData.model);
+    }
+
+    function cancel() {
+      //vm.formData.options.resetModel()
+      $uibModalInstance.dismiss('cancel');
+    };
+
+  });
+*/
 
 })();

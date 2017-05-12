@@ -24,7 +24,7 @@ default_recsys_template = {"rating_icon_color": "#000000", "rating_icon_font_siz
                         {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}, \
                         {'stateOn': 'fa fa-star', 'stateOff': 'fa fa-star-o'}], \
             "use_field_selection":"false", "field_selection_column_name":"", \
-            "template_number":1, "item_width":'280px', "item_fields_include":[], "item_fields_order":[]}
+            "template_number":1, "item_width":'280px', "item_fields_include":[], "item_fields_order":[], "filter_fields":[]}
 
 
 

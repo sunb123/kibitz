@@ -64,11 +64,26 @@
         })
     }
 
-    $scope.loadRecsysList()
-    $timeout(function(){
-        $scope.loadRepos()
-    },1000)
+    function reloadListandRepos() {
+        $scope.loadRecsysList()
+        $timeout(function(){
+            $scope.loadRepos()
+        },1000)
+    }
 
+    reloadListandRepos()
+
+    $scope.$on('reload-resources', function(event, args) {
+        reloadListandRepos()
+        console.log("reload resources called")
+    })
+ 
+    $scope.$on('reload-recsys-list', function(event, args) {
+        $scope.loadRecsysList()
+        console.log("reload resources called")
+    })
+
+    
     vm.logout = function() {
       $state.go('home.login');
 
@@ -88,6 +103,7 @@
         if (response.data != 'error') {
           $cookies.remove('authenticated')
           $cookies.remove('k_username')
+          $cookies.remove('k_email')
           $cookies.remove('csrftoken')
         }
       }, function errorCallback(response) {

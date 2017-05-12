@@ -3,7 +3,7 @@
   angular
     .module('app')
     .controller('ItemsController', [
-      '$q', 'itemService', 'loginService', '$mdSidenav', '$scope', '$timeout', '$http', 'config', '$state', '$cookies',
+      '$q', 'itemService', 'loginService', '$mdSidenav', '$scope', '$timeout', '$http', 'config', '$state', '$cookies', 
       ItemsController
     ])
 
@@ -15,7 +15,6 @@
       return
     }
 
-    vm.isGridView = true;
     vm.tableData = []; // display list
     
     vm.ratedTabData = [];
@@ -45,10 +44,26 @@
     $scope.sendNotInterested = itemService.sendNotInterested
     $scope.titles = ['Rate it a one','Rate it a two','Rate it a three','Rate it a four','Rate it a five']
 
+    vm.tmpNotInterestedItemIds = []
+
     var HOME_TAB = 0    
     var RECOMMEND_TAB = 1
     var RATINGS_TAB = 2
 
+
+    vm.toggleFilter = function() {
+        $mdSidenav('left').toggle(); 
+    }
+
+    vm.getFilterParams = $scope.$parent.getFilterParams
+    vm.filter_params = {
+        sorted_by: '',
+        filters: [{
+            filter_by: '',
+            filter_values: [''],
+        }]
+    }
+ 
     vm.pagingFunction = function () { // NOTE: pagingFunction called sequentially off stack. 
         if ($scope.recsys_id == undefined) {
             return
@@ -92,9 +107,8 @@
                  vm.ratingCount++;
              }
           }
-        } else if (!vm.item_paging_loading) { // get items from backend
-            var params = {} // TODO: add sorting/filter params
-            vm.loadTableRows(params)  // async call
+        } else if (!vm.item_paging_loading && !vm.atEndOfList) { // get items from backend
+            vm.loadTableRows(vm.getFilterParams())  // async call
         }
     }
     
@@ -124,7 +138,7 @@
         vm.tableData = []
         function fnCheck() {
             vm.pagingFunction()
-            if (vm.tableData.length >= 4 || !isHomeTab()) {
+            if (vm.tableData.length >= 4 || !isHomeTab() || vm.atEndOfList) {
                 vm.initializingHomeTab = false
                 console.log("done initializing home table")
                 clearInterval(interval)
@@ -133,7 +147,7 @@
         var interval = setInterval(fnCheck, 350)
     }
     
-    vm.loadTableRows = function(params) {
+    vm.loadTableRows = function(filter_params) {
       if (vm.item_paging_loading) {
           return
       }
@@ -141,17 +155,21 @@
       vm.current_page += 1
       console.log("increament and call", vm.current_page)
 
-      var search_params = {
+      var params = {
           recsys_id: $scope.recsys_id,
           current_page: vm.current_page,
           rows_per_page: vm.rows_per_page,
       }
-      for (var attrname in search_params) { params[attrname] = search_params[attrname]; }
+      //for (var attrname in filter_params) { params[attrname] = filter_params[attrname]; }
       
       $http({
-        method: 'GET',
+        method: 'POST',
+        headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json' 
+        },
         url: config.server_url+'/item-paging/',
-        params: params,
+        data: params,
       }).then(function(resp){
         console.log(resp.data)
         if (resp.data.done == true) {
@@ -208,12 +226,33 @@
       $scope.overStar = value;
     };
 
-    vm.changeToGridView = function () {
-      vm.isGridView = true;
+    function getId(item) {
+        return item[vm.pk_field]
     }
 
-    vm.changeToListView = function () {
-      vm.isGridView = false;
+    function tmpNotInterested(item_id) {
+        for (var i in vm.tmpNotInterestedItemIds) {
+            if (vm.tmpNotInterestedItemIds[i] == item_id) {
+                return true
+            }
+        }
+        return false
+    }
+
+    function addToRatingTable(items) {
+        for (var i in items) {
+           if (!hasRating(getId(items[i]))) {
+               vm.ratedTabData.push(items[i])
+           } 
+        }
+    }
+
+    function loadRecs(items) {
+        for (var i in items) {
+            if (!tmpNotInterested(getId(items[i]))) {
+                vm.wholeRecommendedList.push(items[i])
+            }
+        }
     }
 
     // customized template fields
@@ -253,11 +292,13 @@
         deferred.resolve('')
         console.log(resp.data)
         if (resp.data.rated_items != null) {
-          vm.ratedTabData = [].concat(resp.data.rated_items);
+          addToRatingTable(resp.data.rated_items);
           vm.ratings_loaded = true;
         }
         if (resp.data.recommended_items != null) {
-          vm.wholeRecommendedList = [].concat(resp.data.recommended_items);
+          console.log(vm.wholeRecommendedList, vm.wholeRecommendedList.length)
+          loadRecs(resp.data.recommended_items)
+          console.log(vm.wholeRecommendedList, vm.wholeRecommendedList.length)
           vm.recs_loaded = true;
         } 
         if (vm.tabState != 0) {
@@ -284,14 +325,15 @@
       for (i in itemDetails) {
         field = itemDetails[i]
         value = item[field]
-        item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div><div class='col-xs-8 display-value item-field'>%s</div></div>".format(capitalize(field), value)
+        item_template += "<div class='row control-group'><div class='col-xs-4 display-label'>%s</div><div class='col-xs-8 display-value word-wrap'>%s</div></div>".format(formatField(field), value)
       }
       item_template += "</fieldset>"
       return item_template
     }
 
-    function capitalize(word) {
-      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+    function formatField(word) {
+      var field = word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+      return field.split('_').join(' ')
     }
 
     function getStr(percent) {
@@ -336,14 +378,13 @@
       vm.itemNotInterested(args)
     })
 
-
     function tablesLoaded() { // rating and recs loaded
         return vm.ratedTabData.legnth != 0 && vm.wholeRecommendedList.length != 0
     }
-
+    
     function removeFromTableData(item_id) {
         for (i in vm.tableData) { // remove item from main list
-          if (vm.tableData[i].id == item_id) {
+          if (getId(vm.tableData[i]) == item_id) {
             vm.tableData.splice(i, 1)
           }
         }
@@ -351,7 +392,7 @@
 
     function removeFromRatedTabData(item_id) {
         for (i in vm.ratedTabData) { // remove rated item from rated list
-          if (vm.ratedTabData[i].id == item_id) {
+          if (getId(vm.ratedTabData[i]) == item_id) {
             var item = vm.ratedTabData.splice(i, 1)
             console.log('removed',item)
           }
@@ -359,10 +400,9 @@
         console.log(vm.ratedTabData)
     }
 
-
     function removeFromRecommended(item_id) {
         for (i in vm.wholeRecommendedList) { 
-          if (vm.wholeRecommendedList[i].id == item_id) {
+          if (getId(vm.wholeRecommendedList[i]) == item_id) {
             vm.wholeRecommendedList.splice(i, 1)
           }
         }
@@ -370,6 +410,7 @@
 
     vm.itemNotInterested = function(args) {
       var item_id = args.item_id
+      vm.tmpNotInterestedItemIds.push(item_id) 
       removeFromTableData(item_id) 
       removeFromRatedTabData(item_id)        
       removeFromRecommended(item_id)

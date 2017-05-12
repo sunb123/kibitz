@@ -34,6 +34,7 @@ class LoginView(views.APIView):
         adminLogin = request.data.get('is_admin_login')
         try:
             if adminLogin:
+                print "got admin login"
                 user = Account.objects.filter(username=username, is_admin=True).first()
                 if not user:
                     user = Account.objects.get(email=username, is_admin=True) # admin can use email as username
@@ -50,7 +51,9 @@ class LoginView(views.APIView):
                 'status': 'Unauthorized',
                 'message': 'Login with Datahub only.'
             }, status=status.HTTP_401_UNAUTHORIZED)
-
+        
+        username = user.username
+        print username
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -60,7 +63,7 @@ class LoginView(views.APIView):
                 'message': 'Username or Password incorrect.'
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        return JsonResponse({'message':'logged in', 'username':username})
+        return JsonResponse({'message':'logged in', 'username':username, 'email': user.email})
 
 class LogoutView(views.APIView):
 
@@ -104,7 +107,7 @@ class ProfileCodeLoginView(views.APIView): # login method only for admin users.
                     user.save()
                 u = authenticate(username=username)
                 login(request, u)
-                return JsonResponse({'message':'logged in', 'username':username})
+                return JsonResponse({'message':'logged in', 'username':username, 'email': user.email})
             else:
                 return Response({
                     'status': 'Bad request',

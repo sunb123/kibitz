@@ -3,10 +3,10 @@
 <h3 style="padding: 15px 15px 15px 15px">Not Interested Items</h3>
 <h5 style="padding: 15px 15px 15px 15px">These items will not be displayed to you. Remove an item from this list to display it again.</h5>
 
-<table id="table" class="table table-hover table-bordered">
+<table id="table" class="table table-hover table-bordered" ng-cloak>
 	<tbody>
 	     <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
-		<tr ng-repeat="data in items track by $index" ui-sref-active="md-warn">
+		<tr ng-repeat="data in vm.items track by $index" ui-sref-active="md-warn" ng-cloak>
 		    <td>
                             <md-button class="toolbar-button" aria-label="Settings" ng-click="$mdMenu.open()">
 				<i class="material-icons" ng-click="vm.removeNotInterested($index)">clear</i>
@@ -15,7 +15,7 @@
                     <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:40}}</span></td>
 		    <td data-title="Description">{{data[vm.description_field] | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
 		</tr>
-	    </div>
+	     </div>
 	</tbody>
 </table>
 <div layout="row" layout-align="center center" ng-show="vm.checkEndOfList(true)">

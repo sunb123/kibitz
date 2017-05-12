@@ -10,25 +10,20 @@
     }
 </style>
 
-<div class="btn-group" role="group" style="float:right">
-    <button class="btn btn-default" ng-click="vm.changeToGridView()">
-        <i class="material-icons">grid_on</i>
-    </button>
-    <button class="btn btn-default" ng-click="vm.changeToListView()">
-        <i class="material-icons">list</i>
-    </button>
-</div>
+<!--
 
+-->
 <!-- add back loggedIn() && check -->
 
-<div ng-if="vm.isGridView" style="margin-top:50px; background-color:white" ng-cloak> <!-- WITH IMAGES -->
-    <div infinite-scroll='vm.pagingFunction()' infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
+
+<div ng-if="$parent.isGridView" style="background-color:white" ng-cloak> <!-- WITH IMAGES -->
+    <div infinite-scroll='vm.pagingFunction()' infinite-scroll-distance='1' infinite-scroll-container="'#scrollContent'">
         <div class="table-responsive-vertical">
 
-            <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
-            <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
+            <h3 style="padding: 15px 15px 15px 15px;margin-top:0px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
+            <h3 style="padding: 15px 15px 15px 15px;margin-top:0px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
             <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
-                <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data['overall_rating']" myrating="data['my_rating']" myimage="{{data[vm.image_link_field]}}" itemd="data" itemid="data[vm.pk_field]" itemdata="setItemDetails(data)" ratingdata="setRatingsTemplate(data)" gridview="true" recsysid="recsys_id" univcode="data[vm.univ_code_field]" mytemplate="template" ng-repeat="data in vm.tableData track by $index"></item>
+                <item mytitle="{{data[vm.title_field]}}" description="{{data[vm.description_field]}}" rating="data['overall_rating']" myrating="data['my_rating']" myimage="{{data[vm.image_link_field]}}" itemd="data" itemid="data[vm.pk_field]" itemdata="setItemDetails(data)" ratingdata="setRatingsTemplate(data)" gridview="true" recsysid="recsys_id" univcode="data[vm.univ_code_field]" mytemplate="template" suggestedrating="data['suggested_rating']"  ng-repeat="data in vm.tableData track by $index"></item>
             </div>
             
             <span ng-if="vm.tabState != 0" cg-busy="{promise:itemPromise, message:'Loading'}"></span>
@@ -42,18 +37,18 @@
     </div>
 </div>
 
-<div ng-if="!vm.isGridView" style="margin-top:50px; background-color:white;" ng-cloak> <!-- NO IMAGES, ONLY TEXT -->
-    <div infinite-scroll="vm.pagingFunction()" infinite-scroll-distance='1' infinite-scroll-container="'#maincontent'">
+<div ng-if="!$parent.isGridView" style="background-color:white;" ng-cloak> <!-- NO IMAGES, ONLY TEXT -->
+    <div infinite-scroll="vm.pagingFunction()" infinite-scroll-distance='1' infinite-scroll-container="'#scrollContent'">
 
         <div class="table-responsive-vertical md-whiteframe-z1">
 
             <table ng-if="vm.tabState == 0" id="table" class="table table-hover table-bordered">
                 <tbody>
-                     <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
+                     <h3 style="padding: 15px 15px 15px 15px;margin-top:0px" ng-if="vm.tabState == 0 && !vm.displayingSearched">All Items</h3>
                      <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
                         <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn">
-                            <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:40}}</span></td>
-                            <td data-title="Rating" style="width:150px">
+                            <td data-title="Title" style="width:350px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:140}}</span></td>
+                            <td data-title="Rating" style="width:200px">
 
                             <span ng-if="data['my_rating'] != undefined">
                                 <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
@@ -63,7 +58,7 @@
                             </span>
 
                             </td>
-                            <td data-title="Description">{{data[vm.description_field] | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
+                            <td data-title="Description">{{data[vm.description_field] | cut:true:300:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
                         </tr>
                     </div>
                 </tbody>
@@ -73,11 +68,11 @@
                 <tbody>
 
                   <span ng-if="vm.tabState != 0" cg-busy="{promise:itemPromise, message:'Loading'}">
-                     <h3 style="padding: 15px 15px 15px 15px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
-                     <div class='md-padding' layout="row" layout-align="center center" layout-wrap>
+                     <h3 style="padding: 15px 15px 15px 15px;padding-top:0px;margin-top:0px" ng-if="vm.tabState == 1 && !vm.displayingSearched">Recommended For You</h3>
+                     <div class='md-padding' style="padding-top:0px"  layout="row" layout-align="center center" layout-wrap>
                         <tr ng-repeat="data in vm.tableData track by $index" ui-sref-active="md-warn">
-                            <td data-title="Title" style="width:280px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:40}}</span></td>
-                            <td data-title="Rating" style="width:150px">
+                            <td data-title="Title" style="width:350px"><span data-toggle="tooltip" data-placement="top">{{data[vm.title_field] | limitTo:140}}</span></td>
+                            <td data-title="Rating" style="width:200px">
 
                             <span ng-if="data['my_rating'] != undefined">
                                 <span uib-rating ng-model="data['my_rating']" max="5" read-only="false" on-hover="hoveringOver(value); focus = true;myStyle=getOnStyle()" on-leave="focus = null;myStyle=getOffStyle()" titles="titles" aria-labelledby="default-rating" ng-click="sendRating(data, data[vm.pk_field], data['my_rating'], recsys_id, data[vm.univ_code_field])" rating-states="template.rating_states" ng-style="myStyle" ng-init="myStyle=getOffStyle()"></span>
@@ -87,7 +82,7 @@
                             </span>
 
                             </td>
-                            <td data-title="Description">{{data[vm.description_field] | cut:true:140:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
+                            <td data-title="Description">{{data[vm.description_field] | cut:true:300:' ...'}}</td> <!-- TODO: set char limit or wrap text-->
                         </tr>
                     </div>
                   </span>

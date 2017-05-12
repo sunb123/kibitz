@@ -2,6 +2,6 @@
   'use strict';
 
   angular.module('app', [ 'ngMaterial', 'ngMdIcons','formly', 'formlyBootstrap', 'rzModule', 'ncy-angular-breadcrumb',
-   'ui.bootstrap', 'infinite-scroll' , 'cgBusy'])
+   'ui.bootstrap', 'infinite-scroll' , 'cgBusy', 'angularModalService'])
 
 })();

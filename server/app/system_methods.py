@@ -102,8 +102,57 @@ def properStringForQuery(string):
 def is_isbn_or_upc(string):
     pass
 
+
+def is_isbn(num):
+    num = num.replace('-','')
+    nums = list(str(num))
+    if len(nums) == 10 and nums[0] == '0':
+        total = 0
+        for i in xrange(len(nums)-1, -1, -1):
+            total += int(nums[len(nums) - i - 1]) * (i+1)
+        if total % 11 == 0:
+            return True
+        else:
+            return False
+    elif len(nums) == 13 and num[0:3] == '978':
+        total = 0
+        for i in xrange(len(nums)):
+            if (i+1) % 2 == 0:
+                total += int(nums[i]) * 3
+            else:
+                total += int(nums[i])
+        if total % 10 == 0:
+            return True
+        else:
+            return False
+
+def attachWhere():
+    return "where "
+
+def whereLikeOrClause(field, values):
+    '''
+       does a '%XYZ%' SQL match with field lower cased
+    '''
+    template = "lower({}) like '%{}%'".format(field, {})
+    query = ""
+    if len(values) == 0:
+        return ""
+    elif len(values) == 1:
+        query += template.format(values[0].lower()) + ' '
+    else:
+        for val in values:
+            query += template.format(val.lower())
+            query += ' and '
+        query = query[:-4]
+
+    return query
+
+def whereNumRangeClause(field, low, high):
+    query = "cast({} as float) between {} and {} ".format(field, low, high)
+    return query
+
 # NOTE: assumes item ids are string type in DH
-def whereInClauseQuery(field, values, notIn, *args): 
+def whereInClause(field, values, notIn, *args): 
     '''
         args: is another set of field, values, notIn
         used for AND clause

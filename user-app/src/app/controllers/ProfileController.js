@@ -9,12 +9,13 @@
 
   function ProfileController($scope, $http, config, $cookies) {
     var vm = this;
-    var items = [];
     var count = 0;
 
+    vm.items = [];
 
     $scope.$parent.recsysDeferred.promise.then(function(recsys){
       vm.recsys = recsys
+      vm.pk_field = recsys.primary_key_field
       vm.title_field = recsys.title_field
       vm.description_field = recsys.description_field
 
@@ -22,7 +23,7 @@
         method: 'GET',
         url: config.server_url+'/not-interested-items/'+'?recsys_id='+recsys.id,
       }).then(function(resp){
-        $scope.items = resp.data.items
+        vm.items = resp.data.items
         console.log(items)
         console.log(resp)
       }, function(resp){
@@ -34,7 +35,7 @@
     })
 
     vm.removeNotInterested = function(index) {
-	var item_id = $scope.items[index].id
+	var item_id = vm.items[index][vm.pk_field]
 	var params = {
 	    'recsys_id': vm.recsys.id,
 	    'item_id': item_id,
@@ -59,9 +60,9 @@
     }
    
     function removeFromList(item_id) {
-        for (var i=0; i < $scope.items.length; i++) {
-            if ($scope.items[i].id == item_id) {
-                $scope.items.splice(i, 1)
+        for (var i=0; i < vm.items.length; i++) {
+            if (vm.items[i][vm.pk_field] == item_id) {
+                vm.items.splice(i, 1)
                 return true
             }
         }

@@ -15,13 +15,13 @@ from app.user_methods import masterAccessToken, master_username, master_password
 auth_client_id, auth_client_secret, base_url, redirect_uri, master_dh_query_url, master_repo, rating_table, recsys_table
 from app.user_methods import createAdminUser, updateAdminUserWithNewTokens, createEndUser, makeRequest, makeGetRequest, makeDeleteRequest
 from app.global_vars import required_recsys_params, default_recsys_template, recsys_param_format, SPARK_HOME, SERVER_HOME, SOLR_SETTINGS, KIBITZ_TABLE_MARKER
-from app.methods import getItemTableFormat, makeOrUpdateRating, removeRating, makeNotInterested, removeNotInterested, makeSolrRequest, prepare_file_solr, prepare_file_datahub, fetch_csv_from_datahub
-from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery, whereInClauseQuery
+from app.methods import getItemTableFormat, makeOrUpdateRating, removeRating, makeNotInterested, removeNotInterested, makeSolrRequest, prepare_file_solr, prepare_file_datahub
+from app.system_methods import createSessionForUser, getUniqueDictList, lock_decorator, properStringForQuery, whereInClause, whereLikeOrClause, whereNumRangeClause
 from app.models import Rating, NotInterested
 
 from authentication.models import Account
 from recsys.models import Recsys
-from recsys.methods import checkRecsysUrlUnique, checkUrlFormat, formatUrl, formatTableName
+from recsys.methods import checkRecsysUrlUnique, checkUrlFormat, formatUrl, formatTableName, formatTableHeader
 
 class AuthCodeToAccessTokenView(views.APIView): # set access and refresh tokens to DH admin user
 
@@ -100,7 +100,7 @@ class CSVUploadView(views.APIView): # Create recsys by CSV upload
         for param in param_dict.keys():
             param_val = selected_csv_headers.get(param,'')
             if param_val != '':
-                setattr(recsys, param_dict.get(param), headers[int(param_val)])
+                setattr(recsys, param_dict.get(param), formatTableHeader(param_val))
             else:
                 setattr(recsys, param_dict.get(param), '')
               
@@ -145,7 +145,9 @@ class CSVReuploadView(views.APIView):
         file_url_dh, file_name, headers = prepare_file_datahub(file)
         api_url = '/api/v1/repos/{}/{}/files'.format(repo_base, repo_name)
         r = makeRequest('POST', api_url, owner_id, files={'file': open(file_url_dh,'rb')})
-
+    
+        print r.content  
+   
         # create table from DH CSV file
         api_url = '/api/v1/repos/{}/{}/tables'.format(repo_base, repo_name)
         r = makeRequest('POST', api_url, owner_id, data={
@@ -155,6 +157,8 @@ class CSVReuploadView(views.APIView):
             'quote_character': '\"',
             'has_header': 'true'
         })
+
+        print r.content
 
         if r.status_code == 400:
             api_url = '/api/v1/repos/{}/{}/tables/{}/'.format(repo_base, repo_name, item_table_name)
@@ -172,7 +176,8 @@ class CSVReuploadView(views.APIView):
         file_url_solr = prepare_file_solr(file, file_url_dh)
         
         # resetup solr index       
-        output = subprocess.check_output(['/var/www/html/kibitz/server/scripts/solr_update_index.sh', '-c', solr_core_name, '-f', '{}'.format(file_url_solr)]) 
+        output = subprocess.Popen(['/var/www/html/kibitz/server/scripts/solr_update_index.sh', '-c', solr_core_name, '-f', '{}'.format(file_url_solr)], stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+        print output.stdout.read()
 
         recsys = Recsys.objects.get(id=recsys_id) 
         recsys.primary_key_field = 'id'
@@ -183,7 +188,7 @@ class CSVReuploadView(views.APIView):
         for param in param_dict.keys():
             param_val = selected_csv_headers.get(param,'')
             if param_val != '':
-                setattr(recsys, param_dict.get(param), headers[int(param_val)])
+                setattr(recsys, param_dict.get(param), formatTableHeader(param_val))
             else:
                 setattr(recsys, param_dict.get(param), '')
 
@@ -209,25 +214,21 @@ class RepoTableView(views.APIView):
         data = {}
         api_url = '/api/v1/repos' #'/{}'.format(username)
         resp = makeGetRequest(api_url, user_id)
-        print "got repos"
-
-        repos = resp.json()['repos'] # owner, href, repo_name
+        repos = resp.json().get('repos') # owner, href, repo_name
         data['repos'] = repos
+        print "got repos", repos
 
         for repo in repos:
-            api_url = '/api/v1/repos/{}/{}/tables'.format(username, repo['repo_name'])
+            api_url = repo.get('href').split('https://datahub.csail.mit.edu')[1]+'/tables' #'/api/v1/repos/{}/{}/tables'.format(username, repo['repo_name'])
             resp = makeGetRequest(api_url, user_id)
-            print "got a table"
-            tables = resp.json()['tables'] # href, table_name
+            tables = resp.json().get('tables') # href, table_name
             repo['tables'] = tables
 
             for table in tables:
-                api_url = '/api/v1/repos/{}/{}/tables/{}'.format(username, repo['repo_name'], table['table_name'])
+                api_url = table.get('href').split('https://datahub.csail.mit.edu')[1] #'/api/v1/repos/{}/{}/tables/{}'.format(username, repo['repo_name'], table['table_name'])
                 resp = makeGetRequest(api_url, user_id)
-                columns = resp.json()['columns']
+                columns = resp.json().get('columns')
                 table['columns'] = columns
-
-        print repos
 
         return JsonResponse(data)
 
@@ -255,7 +256,7 @@ class NotInterestedItemsView(views.APIView):
         if len(item_ids) != 0:
             api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
             query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-            query += whereInClauseQuery(primary_key_field, item_ids, False)
+            query += whereInClause(primary_key_field, item_ids, False)
             query += "order by cast({} as int) asc;".format(primary_key_field)
     
             r = makeRequest('POST', api_url, owner_id, query=query)
@@ -271,29 +272,53 @@ class NotInterestedItemsView(views.APIView):
 class ItemPagingView(views.APIView): # TODO: allow non-logged in users to get items (give most popular items)
     
     @is_logged_in
-    def get(self, request, pk=None, format=None): # list get
+    def post(self, request, pk=None, format=None):
         username = request.user.username
         user_id = request.user.id
-        recsys_id = request.query_params.get('recsys_id')
+        recsys_id = request.data.get('recsys_id')
         recsys = Recsys.objects.get(id=recsys_id)
         owner_id = recsys.owner_id
         repo_base = recsys.repo_base
         universal_code_field = recsys.universal_code_field
         primary_key_field = recsys.primary_key_field
-        current_page = request.query_params.get('current_page')        
-        rows_per_page = request.query_params.get('rows_per_page')        
-        sorted_by = request.query_params.get('sorted_by')
-        sorted_order = request.query_params.get('sorted_order')
-        filter_by = request.query_params.get('filter_by') # TODO: convert to a list of items
+        current_page = request.data.get('current_page')        
+        rows_per_page = request.data.get('rows_per_page')        
+
+        sorted_by = request.data.get('sorted_by')
+        sorted_order = 'asc' #request.query_params.get('sorted_order')
+        filter_by_list = request.data.get('filter_by')
 
         # exclude not interested items
         item_metas = NotInterested.objects.filter(user_id=user_id) # get not interested items across all recsys
-        item_ids = [str(meta.item_id) for meta in item_metas if str(meta.recsys_id) == recsys_id] # filter not interested items for current recsys
+        item_ids = [str(meta.item_id) for meta in item_metas if int(meta.recsys_id) == int(recsys_id)] # filter not interested items for current recsys
         univ_codes = [str(meta.universal_code) for meta in item_metas if meta.universal_code != None]
 
+        #print item_ids, univ_codes
+        addedWhere = False 
         api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
         query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-        query += whereInClauseQuery(primary_key_field, item_ids, True, universal_code_field, univ_codes, True)
+        if len(item_ids) != 0 or len(univ_codes) != 0:
+            addedWhere = True
+            query += whereInClause(primary_key_field, item_ids, True, universal_code_field, univ_codes, True)
+
+        print filter_by_list
+
+        if filter_by_list != None:
+            if not addedWhere:
+                query += "where "
+            else:
+                query += "and "
+            for field, values in filter_by_list.items():
+                if type(values) == dict:
+                    low = values.get('low')
+                    high = values.get('high')
+                    query += whereNumRangeClause(field, low, high)
+                elif type(values) == list:
+                    query += whereLikeOrClause(field, values)
+                query += "and "
+            query = query[:-4]        
+        print query
+
         if sorted_by != None:
             query += "order by cast({} as float) {};".format(sorted_by, sorted_order)
         else:
@@ -317,7 +342,7 @@ class ItemPagingView(views.APIView): # TODO: allow non-logged in users to get it
             else :
                 return JsonResponse({'response':r.json(), 'message':'No more rows', 'done':True})
         else:
-            #print r.json(), r.content, r.status_code
+            print r.content, r.status_code
             return HttpResponse("failed to get items")    
    
  
@@ -359,7 +384,7 @@ def attachRatingDist(items, recsys_id, universal_code_field, primary_key_field):
     return items
 
 
-class ItemView(views.APIView): 
+class ItemView(views.APIView):
 
     @is_logged_in
     def get(self, request, pk=None, format=None): # list and individual get
@@ -378,7 +403,10 @@ class ItemView(views.APIView):
             query = "select * from {}.{} limit 1".format(recsys.repo_name, recsys.item_table_name)
             r = makeRequest('POST', api_url, owner_id, query=query)
             if r.status_code == 200:
-                return JsonResponse({'item':r.json()['rows'][0]})
+                if len(r.json()['rows']) != 0:
+                    return JsonResponse({'item':r.json()['rows'][0]})
+                else:
+                    return HttpResponse("failed to get item")
             else:
                 return HttpResponse("failed to get item")
  
@@ -409,7 +437,7 @@ class ItemView(views.APIView):
             if len(recsys_rated_item_ids) != 0:
                 api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
                 query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-                query += whereInClauseQuery(primary_key_field, recsys_rated_item_ids, False)
+                query += whereInClause(primary_key_field, recsys_rated_item_ids, False)
                 r = makeRequest('POST', api_url, owner_id, query=query)
                 print r.content
                 if r.status_code == 200:
@@ -420,7 +448,7 @@ class ItemView(views.APIView):
             if len(all_rated_item_codes) != 0:
                  api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
                  query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-                 query += whereInClauseQuery(universal_code_field, all_rated_item_codes, False)
+                 query += whereInClause(universal_code_field, all_rated_item_codes, False)
                  r = makeRequest('POST', api_url, owner_id, query=query)
                  print r.content
                  if r.status_code == 200:
@@ -457,7 +485,8 @@ class ItemView(views.APIView):
 			recommended_item_ids = tuple([str(rating.get('item_id')) for rating in rec_ratings])
 	                api_url = '/api/v1/query/{}/{}'.format(repo_base, recsys.repo_name)
                         query = "select * from {}.{} ".format(recsys.repo_name, recsys.item_table_name)
-                        query += whereInClauseQuery(primary_key_field, recommended_item_ids, False, \
+
+                        query += whereInClause(primary_key_field, recommended_item_ids, False, \
                                 primary_key_field, item_ids, True, universal_code_field, univ_codes, True)
                         r = makeRequest('POST', api_url, owner_id, query=query)
                         if r.status_code == 200:
@@ -466,7 +495,7 @@ class ItemView(views.APIView):
                         for item in recommended_items:
 			    item['suggested_rating'] = str(rec_rating_dict.get(int(item['id'])))
 			recommended_items = sorted(recommended_items, key=lambda x: float(x.get('suggested_rating')), reverse=True) # get top 100 recommendations
-                        recommended_items = filter(lambda x: float(x.get('suggested_rating')) >= 1, recommended_items) # NOTE: filter out negative and zero ratings
+                        recommended_items = filter(lambda x: float(x.get('suggested_rating')) != 0, recommended_items) # NOTE: filter out negative and zero ratings
                 else:
 			recommended_items = []
 		return_dict['recommended_items'] = attachRatingDist(recommended_items, recsys_id, universal_code_field, primary_key_field)
@@ -603,6 +632,17 @@ class WidgetTestView(views.APIView):
     def post(self, request, pk=None, format=None):
         return JsonResponse({"message":"success. got post"})
 
+
+def convertSolrHeaders(docs):
+    skip_attrs = ['id', '_version_', 'overall_rating', 'total_rating_count','distribution_count','distribution_percentage'] 
+    for doc in docs:
+      for attr in doc.keys():
+        if attr not in skip_attrs:
+          tmp = doc.pop(attr)[0] # remove array wrap on field
+          attr = attr[:-2]
+          doc[attr] = tmp
+    return docs
+
 class TextSearchView(views.APIView):
 
     def get(self, request, pk=None, format=None):
@@ -622,7 +662,11 @@ class TextSearchView(views.APIView):
         start = request.query_params.get('start')
         resp = makeSolrRequest(port, core_instance_name, searchText, rows, start)
         if resp[0] == 200:     
-            return JsonResponse(resp[1]) 
+            items = resp[1].get('docs')
+            items = convertSolrHeaders(items)
+            items = attachRatingDist(items, recsys_id, recsys.universal_code_field, recsys.primary_key_field)
+            print "FINAL", items
+            return JsonResponse({'docs':items})
         else:
            print resp
            return Response({

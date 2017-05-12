@@ -38,9 +38,9 @@ if rows.count() > 0:
 	def convertToTuples(rows):
 	    mylist = []
 	    for r in rows:
-		rating_tuple = (r.user_id,r.item_id,r.rating)
+		rating_tuple = (r.user_id,r.item_id,r.rating*2.43)
 		mylist.append(rating_tuple)
-	    return mylist
+            return mylist
 
 	#print convertToTuples(rows)
 	dataset = sc.parallelize(convertToTuples(rows))

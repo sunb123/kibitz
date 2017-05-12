@@ -64,32 +64,32 @@ No recommenders
 <!-- <button ng-click="vm.listrepos()">GET REPOS</button>
  -->
 
-<button type="button" class="create-recsys-btn btn btn-success btn-lg" data-toggle="modal" data-target="#myModal"><i class="material-icons">add_box</i>Create New Recommender</button>
+<button type="button" class="create-recsys-btn btn btn-success btn-lg" ng-click="show()"><i class="material-icons">add_box</i>Create New Recommender</button>
 
 
 <!-- <div ng-include="'app/views/partials/recsysCreationTemplate.html'">
  -->
 
 
- <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
+<script type="text/ng-template" id="createModal.html">
+
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" ng-click="vm.cancel()" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title" id="myModalLabel">Create New Recommender</h4>
       </div>
+
       <div class="modal-body" style="height: auto">
 
         <div class="tabbable"> <!-- Only required for left/right tabs -->
               <ul class="nav nav-tabs" style="cursor:pointer">
-              <li class="active"><a ng-click="vm.changeTab(0)" data-toggle="tab">Upload CSV</a></li>
-<!--               <li><a ng-click="vm.changeTab(2)" data-toggle="tab">Vendhq</a></li>
- -->              <li><a ng-click="vm.changeTab(1)" data-toggle="tab">Datahub</a></li>
+              <li class="active"><a ng-click="changeTab(0)" data-toggle="tab">Upload CSV</a></li>
+<!--               <li><a ng-click="changeTab(2)" data-toggle="tab">Vendhq</a></li>
+ -->              <li><a ng-click="changeTab(1)" data-toggle="tab">Datahub</a></li>
               </ul>
 
-                <div ng-show="vm.whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
+                <div ng-show="whichTab == 0" class="tab-pane active" id="tab1" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
                         <div style="color: red" ng-if="errorMessage.status == 'missing_field'">Error: {{ errorMessage.message }}</div>
@@ -109,7 +109,7 @@ No recommenders
 
                         <div>
                           <form ng-show="hasHeaders" style="margin-bottom: 30px;width:300px">
-                              <formly-form model="vm.headers" fields="vm.csvHeadersFields" form="vm.csvHeadersForm"></formly-form>
+                              <formly-form model="headers" fields="csvHeadersFields" form="csvHeadersForm"></formly-form>
 <!--                               <div>
                                     <label>Repository:</label><select ng-model="selectedRepo" ng-options="repo.name for repo in repos track by repo.name"></select>
                               </div>
@@ -128,7 +128,7 @@ No recommenders
                 </div>
 
               <div class="tab-content">
-  <!--               <div ng-show="vm.whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
+  <!--               <div ng-show="whichTab == 2" class="tab-pane active" id="tab3" style="padding: 20px 10px 20px 10px">
                     <div id="uploadCSV" style="margin: 10px 10px 10px 10px">
                         <form>
                         <div style="color: red" ng-if="errorMessage.status == 'missing_field'">Error: {{ errorMessage.message }}</div>
@@ -144,9 +144,9 @@ No recommenders
                     </div>
                 </div> -->
 
-                <div ng-show="vm.whichTab == 1" class="tab-pane active" id="tab2">
+                <div ng-show="whichTab == 1" class="tab-pane active" id="tab2">
 
-                    <button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="!isAuthenticated()" ng-click="vm.auth()" style="margin:15px auto 15px auto">Import Data From Datahub</button>
+                    <button type="button" class="create-recsys-btn btn btn-primary btn-lg" ng-show="!isAuthenticated()" ng-click="auth()" style="margin:15px auto 15px auto">Import Data From Datahub</button>
 
                   <div ng-show="isAuthenticated()" cg-busy="{promise: $parent.reposPromise, message:'Loading Datahub repos', backdrop:false}">
                     <div class="item-select" style="padding: 10px 10px 10px 0px">
@@ -190,12 +190,10 @@ No recommenders
               </div>
         </div>
 
-
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary" ng-click="vm.cancel()">Cancel</button>
         <button type="button" class="btn btn-primary" id="createRecommenderButton" ng-click="createRecommender()"><span id="createRecommenderButtonLoading"></span><span id="createRecommenderButtonText">Create</span></button>
       </div>
-    </div>
-  </div>
-</div>
+
+</script>
